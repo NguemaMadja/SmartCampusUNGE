@@ -21,7 +21,7 @@ exports.register = async (req, res) => {
     res.json({ success: true, message: 'Usuario registrado correctamente' });
   } catch (err) {
     console.error('Error en registro:', err.message);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -32,13 +32,13 @@ exports.login = async (req, res) => {
     // Buscar usuario por correo
     const user = await Usuario.findOne({ where: { correo } });
     if (!user) {
-      return res.status(400).json({ success: false, error: 'Usuario no encontrado' });
+      return res.status(400).json({ success: false, message: 'Usuario no encontrado' });
     }
 
     // Comparar contraseña ingresada con el hash almacenado
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(400).json({ success: false, error: 'Contraseña incorrecta' });
+      return res.status(400).json({ success: false, message: 'Contraseña incorrecta' });
     }
 
     // Generar token JWT
@@ -61,6 +61,6 @@ exports.login = async (req, res) => {
     });
   } catch (err) {
     console.error('Error en login:', err.message);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, message: 'Error interno en login' });
   }
 };
