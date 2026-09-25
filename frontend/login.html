@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - SmartCampusUNGE</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      background: rgba(0, 64, 128, 0.85) url("image/IMGE-UNGE2.jpg") no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .login-card {
+      max-width: 420px;
+      margin: 80px auto;
+      background: rgba(255,255,255,0.95);
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.35);
+    }
+    .login-card h4 {
+      font-weight: bold;
+      color: #004080;
+    }
+    footer {
+      background-color: #004080;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      margin-top: auto;
+    }
+    .social-buttons .btn {
+      margin: 5px;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-login {
+      background-color: #004080;
+      color: white;
+      border: none;
+    }
+    .btn-login:hover {
+      background-color: #003366;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cabecera con logo en esquina -->
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark container">
+      <a class="navbar-brand d-flex align-items-center" href="index.html">
+        <img src="logo/LOGO-UNGE-1.png" alt="Logo UNGE" class="img-fluid me-2" style="max-height:60px;">
+        <span>SmartCampusUNGE</span>
+      </a>
+      <div class="ms-auto">
+        <a href="login.html" class="btn btn-login me-2">Login</a>
+        <a href="radio.html" class="btn btn-success">
+          <i class="bi bi-broadcast"></i> Radio UNGE
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Tarjeta de login -->
+  <div class="login-card">
+    <h4 class="text-center mb-4">Acceso al Campus</h4>
+    <form id="formLogin">
+      <div class="mb-3">
+        <label for="correo" class="form-label">Correo</label>
+        <input type="email" class="form-control" id="correo" placeholder="usuario@ejemplo.com" required>
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Contraseña</label>
+        <input type="password" class="form-control" id="password" placeholder="********" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-100 mb-2">Ingresar</button>
+      <a href="index.html" class="btn btn-secondary w-100">Regresar al Inicio</a>
+    </form>
+  </div>
+
+  <!-- Pie de página -->
+  <footer>
+    <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
+    <div class="social-buttons">
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-twitter"></i></a>
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-facebook"></i></a>
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-instagram"></i></a>
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-youtube"></i></a>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("formLogin").addEventListener("submit", async function(e){
+      e.preventDefault();
+      const correo = document.getElementById("correo").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const res = await fetch("http://10.70.200.112:4000/usuarios/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ correo, password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("rol", data.usuario.rol);
+          alert("Login exitoso: " + data.usuario.rol);
+
+          switch (data.usuario.rol) {
+            case "superadmin": window.location.href = "panel_superadmin.html"; break;
+            case "admin": window.location.href = "panel_admin.html"; break;
+            case "profesor": window.location.href = "panel_profesor.html"; break;
+            case "estudiante": window.location.href = "panel_estudiante.html"; break;
+            case "radio": window.location.href = "panel_radio.html"; break;
+            default: alert("Rol desconocido");
+          }
+        } else {
+          alert("Credenciales inválidas: " + data.message);
+        }
+      } catch (err) {
+        console.error("Error en login:", err);
+        alert("Error de conexión con el servidor");
+      } finally {
+        // limpiar campos siempre
+        document.getElementById("correo").value = "";
+        document.getElementById("password").value = "";
+      }
+    });
+  </script>
+
+</body>
+</html>

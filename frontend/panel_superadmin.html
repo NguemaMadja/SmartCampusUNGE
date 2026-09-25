@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel Superadmin - SmartCampusUNGE</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #003366, #004080);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    /* Sidebar */
+    #sidebar {
+      width: 250px;
+      background-color: #004d26;
+      color: white;
+      position: fixed;
+      top: 0;
+      left: -250px;
+      height: 100%;
+      transition: left 0.3s;
+      padding-top: 60px;
+    }
+    #sidebar.active { left: 0; }
+    #sidebar a {
+      display: block;
+      padding: 12px 20px;
+      color: white;
+      text-decoration: none;
+      background-color: #008000;
+      margin: 5px;
+      border-radius: 6px;
+    }
+    #sidebar a:hover { background-color: #006400; }
+    /* Content */
+    #content {
+      flex: 1;
+      margin-left: 0;
+      transition: margin-left 0.3s;
+      padding: 20px;
+      color: white;
+    }
+    #sidebar.active ~ #content { margin-left: 250px; }
+    /* Navbar */
+    .navbar { background-color: #004080; position: relative; height: 60px; display: flex; align-items: center; }
+    .dropdown-menu { min-width: 200px; }
+    footer { background-color: #004080; color: white; padding: 15px; text-align: center; margin-top: auto; }
+    .carousel-item img { width: 100%; height: auto; }
+    .scroll-msg { background-color: #008000; color: #fff; font-weight: bold; padding: 5px; flex: 1; margin: 0 60px; }
+    .scroll-msg marquee { font-size: 1.1em; }
+    #menuToggle { font-size: 24px; color: white; cursor: pointer; margin-left: 10px; }
+    .superadmin-container { margin-right: 10px; }
+    .social-buttons .btn {
+      margin: 5px; border-radius: 50%; width: 40px; height: 40px;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <a href="usuarios.html">Gestión de Usuarios</a>
+    <a href="profesores.html">Gestión de Profesores</a>
+    <a href="estudiantes.html">Gestión de Estudiantes</a>
+    <a href="radio.html">Módulo Radio (CRUD)</a>
+    <a href="escuchar_radio.html">Radio UNGE (Escuchar)</a>
+    <a href="transporte.html">Transporte Escolar</a>
+    <a href="mapa.html">Mapa del Campus</a>
+    <a href="configuracion.html">Configuración del Sistema</a>
+  </div>
+
+  <!-- Content -->
+  <div id="content">
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark">
+      <span id="menuToggle">&#9776;</span>
+      <a class="navbar-brand d-flex align-items-center ms-3" href="index.html">
+        <img src="logo/LOGO-UNGE-1.png" alt="Logo UNGE" class="img-fluid me-2" style="max-height:50px;">
+        <span>SmartCampusUNGE</span>
+      </a>
+      <div class="scroll-msg text-center">
+        <marquee behavior="scroll" direction="left" scrollamount="6">
+          Selecciona un módulo en el menú lateral para gestionar usuarios, profesores, estudiantes, radio, transporte, mapa o configuración
+        </marquee>
+      </div>
+      <div class="dropdown superadmin-container">
+        <button class="btn btn-danger dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+          Superadmin
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+          <li><span class="dropdown-item-text" id="userId">ID: --</span></li>
+          <li><span class="dropdown-item-text" id="userRole">Rol: --</span></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" href="#" id="logoutBtn">Cerrar sesión</a></li>
+        </ul>
+      </div>
+    </nav>
+    <!-- Cabecera -->
+    <header class="text-center mt-3">
+      <h2>UNGE - Panel Superadmin</h2>
+      <p>Administración completa de módulos y analítica</p>
+    </header>
+
+    <!-- Carrusel -->
+    <div id="carouselFotos" class="carousel slide mt-4" data-bs-ride="carousel">
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <img src="image/IMGE-UNGE2.jpg" class="d-block w-100" alt="Foto UNGE 1">
+        </div>
+        <div class="carousel-item">
+          <img src="image/imge-unge5.jpg" class="d-block w-100" alt="Foto UNGE 2">
+        </div>
+        <div class="carousel-item">
+          <img src="image/rectorIMG-20190720-WA0005-750x375.jpg" class="d-block w-100" alt="Foto UNGE 3">
+        </div>
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#carouselFotos" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carouselFotos" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+      </button>
+    </div>
+  </div>
+  <!-- Pie de página -->
+  <footer>
+    <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
+    <div class="social-buttons">
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-twitter"></i></a>
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-facebook"></i></a>
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-instagram"></i></a>
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-youtube"></i></a>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Toggle sidebar
+    document.getElementById("menuToggle").addEventListener("click", () => {
+      document.getElementById("sidebar").classList.toggle("active");
+    });
+
+    // Cargar perfil
+    async function cargarPerfil() {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("No hay sesión activa, vuelve a login");
+        window.location.href = "login.html";
+        return;
+      }
+      try {
+        const res = await fetch("http://10.70.200.112:4000/usuarios/perfil", {
+          method: "GET",
+          headers: { "Authorization": "Bearer " + token }
+        });
+        const data = await res.json();
+        if (data.usuario) {
+          document.getElementById("userId").textContent = "ID: " + data.usuario.id;
+          document.getElementById("userRole").textContent = "Rol: " + data.usuario.rol;
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        alert("Error de conexión con el servidor");
+      }
+    }
+
+    // Logout
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("rol");
+      alert("Sesión cerrada");
+      window.location.href = "login.html";
+    });
+
+    cargarPerfil();
+  </script>
+</body>
+</html>

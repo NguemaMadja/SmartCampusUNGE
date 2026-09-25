@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Transporte Escolar - SmartCampusUNGE</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background: rgba(0, 64, 128, 0.85);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container-main {
+      flex: 1;
+      padding: 20px;
+    }
+    .card {
+      margin-bottom: 20px;
+    }
+    footer {
+      background-color: #004080;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      margin-top: auto;
+    }
+    .btn-login {
+      background-color: #004080;
+      color: white;
+      border: none;
+    }
+    .btn-login:hover {
+      background-color: #003366;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cabecera -->
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark container">
+      <a class="navbar-brand" href="index.html">UNGE - TODOS LOS CAMPUS</a>
+      <div class="ms-auto">
+        <a href="login.html" class="btn btn-login me-2">Login</a>
+        <a href="radio.html" class="btn btn-success">Radio UNGE</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Contenido principal -->
+  <div class="container-main container">
+    <h2 class="text-center text-white mb-4">Transporte Escolar</h2>
+
+    <!-- Botones de acciones -->
+    <div class="d-flex justify-content-center mb-4 flex-wrap">
+      <a href="buses.html" class="btn btn-primary m-2">Gestión de Buses</a>
+      <a href="rutas.html" class="btn btn-info m-2">Gestión de Rutas</a>
+      <a href="paradas.html" class="btn btn-warning m-2">Paradas</a>
+      <a href="posiciones.html" class="btn btn-success m-2">Posiciones en Tiempo Real</a>
+      <a href="pasajeros.html" class="btn btn-secondary m-2">Pasajeros</a>
+      <a href="alertas.html" class="btn btn-danger m-2">Alertas</a>
+    </div>
+
+    <!-- Tabla de vehículos -->
+    <div class="card">
+      <div class="card-header bg-primary text-white">Listado de Vehículos</div>
+      <div class="card-body">
+        <table class="table table-striped table-hover">
+          <thead class="table-dark">
+            <tr>
+              <th>ID Vehículo</th>
+              <th>Placa</th>
+              <th>Conductor</th>
+              <th>Ruta</th>
+              <th>Capacidad</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>001</td>
+              <td>GE-1234</td>
+              <td>Juan Pérez</td>
+              <td>Campus Central</td>
+              <td>40</td>
+              <td>Activo</td>
+            </tr>
+            <tr>
+              <td>002</td>
+              <td>GE-5678</td>
+              <td>María Gómez</td>
+              <td>Campus Sur</td>
+              <td>35</td>
+              <td>En Ruta</td>
+            </tr>
+            <!-- Aquí se llenará dinámicamente con datos reales -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Gráficas -->
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header bg-info text-white">Capacidad vs Ocupación</div>
+          <div class="card-body">
+            <canvas id="graficoCapacidad"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header bg-success text-white">Estado de Vehículos</div>
+          <div class="card-body">
+            <canvas id="graficoEstado"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pie de página -->
+  <footer>
+    <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
+  </footer>
+
+  <script>
+    // Gráfico de capacidad vs ocupación
+    const ctx1 = document.getElementById('graficoCapacidad').getContext('2d');
+    new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: ['Bus 001', 'Bus 002'],
+        datasets: [
+          {
+            label: 'Capacidad',
+            data: [40, 35],
+            backgroundColor: 'rgba(54, 162, 235, 0.7)'
+          },
+          {
+            label: 'Ocupación',
+            data: [30, 28],
+            backgroundColor: 'rgba(255, 99, 132, 0.7)'
+          }
+        ]
+      },
+      options: { responsive: true }
+    });
+
+    // Gráfico de estado de vehículos
+    const ctx2 = document.getElementById('graficoEstado').getContext('2d');
+    new Chart(ctx2, {
+      type: 'pie',
+      data: {
+        labels: ['Activo', 'En Ruta', 'Mantenimiento'],
+        datasets: [{
+          data: [1, 1, 0],
+          backgroundColor: ['rgba(75, 192, 192, 0.7)', 'rgba(255, 206, 86, 0.7)', 'rgba(255, 99, 132, 0.7)']
+        }]
+      },
+      options: { responsive: true }
+    });
+  </script>
+
+</body>
+</html>

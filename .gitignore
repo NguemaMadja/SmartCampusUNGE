@@ -1,0 +1,33 @@
+# Ignorar configuración local de radio y transmisión
+radio/
+liquidsoap/
+*.liq
+*.sh
+
+# Ignorar archivos de audio y multimedia pesados
+*.wav
+*.mp3
+*.ogg
+*.m3u
+
+# Ignorar archivos de salida o logs
+nohup.out
+*.log
+
+# Ignorar dependencias de Node.js
+backend/node_modules/
+frontend/node_modules/
+
+# Ignorar configuraciones locales
+.env
+
+# Ignorar compilaciones y builds
+frontend/build/
+backend/dist/
+
+# Ignorar archivos temporales del sistema
+*.swp
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
