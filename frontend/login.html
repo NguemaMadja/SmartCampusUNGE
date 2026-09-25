@@ -107,7 +107,7 @@
       const password = document.getElementById("password").value;
 
       try {
-        const res = await fetch("http://10.70.200.112:4000/usuarios/login", {
+        const res = await fetch("https://smartcampusunge.onrender.com/usuarios/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ correo, password })
