@@ -52,7 +52,6 @@
   </style>
 </head>
 <body>
-
   <!-- Sidebar -->
   <div id="sidebar">
     <a href="usuarios.html">Gestión de Usuarios</a>
@@ -90,7 +89,8 @@
         </ul>
       </div>
     </nav>
-        <!-- Cabecera -->
+
+    <!-- Cabecera -->
     <header class="text-center mt-3">
       <h2>Gestión de Usuarios</h2>
       <p>Administración completa de cuentas y roles</p>
@@ -122,7 +122,6 @@
         <button type="submit" class="btn btn-success">Crear Usuario</button>
       </form>
     </div>
-
     <!-- Tabla -->
     <div class="card p-3 mb-4">
       <h5>Lista de usuarios</h5>
@@ -139,6 +138,7 @@
         <tbody></tbody>
       </table>
     </div>
+
     <!-- Gráfica -->
     <div class="card p-3 mb-4">
       <h5>Distribución de roles</h5>
@@ -159,7 +159,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Toggle sidebar
     document.getElementById("menuToggle").addEventListener("click", () => {
       document.getElementById("sidebar").classList.toggle("active");
     });
@@ -167,7 +166,7 @@
     // Cargar usuarios
     async function cargarUsuarios() {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:4000/usuarios", {
+      const res = await fetch("http://localhost:4000/api/usuarios", {
         headers: { "Authorization": "Bearer " + token }
       });
       const data = await res.json();
@@ -203,7 +202,6 @@
         }
       });
     }
-
     // Registrar usuario
     document.getElementById("formUsuario").addEventListener("submit", async e => {
       e.preventDefault();
@@ -213,7 +211,7 @@
       const rol = document.getElementById("rol").value;
 
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:4000/usuarios/register", {
+      const res = await fetch("http://localhost:4000/api/usuarios/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -229,7 +227,7 @@
     // Eliminar usuario
     async function eliminarUsuario(id) {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:4000/usuarios/${id}`, {
+      const res = await fetch(`http://localhost:4000/api/usuarios/${id}`, {
         method: "DELETE",
         headers: { "Authorization": "Bearer " + token }
       });
@@ -249,4 +247,3 @@
   </script>
 </body>
 </html>
-
