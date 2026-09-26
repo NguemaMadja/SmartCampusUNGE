@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Usuarios - SmartCampusUNGE</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #003366, #004080);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      color: white;
+    }
+    #sidebar {
+      width: 250px;
+      background-color: #004d26;
+      color: white;
+      position: fixed;
+      top: 0;
+      left: -250px;
+      height: 100%;
+      transition: left 0.3s;
+      padding-top: 60px;
+    }
+    #sidebar.active { left: 0; }
+    #sidebar a {
+      display: block;
+      padding: 12px 20px;
+      color: white;
+      text-decoration: none;
+      background-color: #008000;
+      margin: 5px;
+      border-radius: 6px;
+    }
+    #sidebar a:hover { background-color: #006400; }
+    #content { flex: 1; margin-left: 0; transition: margin-left 0.3s; padding: 20px; }
+    #sidebar.active ~ #content { margin-left: 250px; }
+    .navbar { background-color: #004080; height: 60px; display: flex; align-items: center; }
+    .scroll-msg { background-color: #008000; color: #fff; font-weight: bold; padding: 5px; flex: 1; margin: 0 60px; }
+    .scroll-msg marquee { font-size: 1.1em; }
+    #menuToggle { font-size: 24px; color: white; cursor: pointer; margin-left: 10px; }
+    footer { background-color: #004080; color: white; padding: 15px; text-align: center; margin-top: auto; }
+    .social-buttons .btn { margin: 5px; border-radius: 50%; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; }
+    .table { background-color: #fff; color: #000; border-radius: 8px; overflow: hidden; }
+    .table thead { background-color: #004080; color: #fff; }
+    .card { background-color: #f8f9fa; color: #000; border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <a href="usuarios.html">Gestión de Usuarios</a>
+    <a href="profesores.html">Gestión de Profesores</a>
+    <a href="estudiantes.html">Gestión de Estudiantes</a>
+    <a href="radio.html">Módulo Radio</a>
+    <a href="transporte.html">Transporte Escolar</a>
+    <a href="mapa.html">Mapa del Campus</a>
+    <a href="configuracion.html">Configuración del Sistema</a>
+  </div>
+
+  <!-- Content -->
+  <div id="content">
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark">
+      <span id="menuToggle">&#9776;</span>
+      <a class="navbar-brand d-flex align-items-center ms-3" href="index.html">
+        <img src="logo/LOGO-UNGE-1.png" alt="Logo UNGE" class="img-fluid me-2" style="max-height:50px;">
+        <span>SmartCampusUNGE</span>
+      </a>
+      <div class="scroll-msg text-center">
+        <marquee behavior="scroll" direction="left" scrollamount="6">
+          Gestión de usuarios: crear, listar, editar y estadísticas
+        </marquee>
+      </div>
+      <div class="dropdown superadmin-container">
+        <button class="btn btn-danger dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+          Superadmin
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+          <li><span class="dropdown-item-text" id="userId">ID: --</span></li>
+          <li><span class="dropdown-item-text" id="userRole">Rol: --</span></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" href="#" id="logoutBtn">Cerrar sesión</a></li>
+        </ul>
+      </div>
+    </nav>
+        <!-- Cabecera -->
+    <header class="text-center mt-3">
+      <h2>Gestión de Usuarios</h2>
+      <p>Administración completa de cuentas y roles</p>
+    </header>
+
+    <!-- Formulario -->
+    <div class="card p-3 mb-4">
+      <h5>Registrar nuevo usuario</h5>
+      <form id="formUsuario">
+        <div class="row">
+          <div class="col-md-3">
+            <input type="text" id="nombre" placeholder="Nombre" class="form-control mb-2" required>
+          </div>
+          <div class="col-md-3">
+            <input type="email" id="correo" placeholder="Correo" class="form-control mb-2" required>
+          </div>
+          <div class="col-md-3">
+            <input type="password" id="password" placeholder="Contraseña" class="form-control mb-2" required>
+          </div>
+          <div class="col-md-3">
+            <select id="rol" class="form-select mb-2">
+              <option value="superadmin">Superadmin</option>
+              <option value="profesor">Profesor</option>
+              <option value="estudiante">Estudiante</option>
+              <option value="radio">Radio</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-success">Crear Usuario</button>
+      </form>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card p-3 mb-4">
+      <h5>Lista de usuarios</h5>
+      <table class="table table-striped" id="tablaUsuarios">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <!-- Gráfica -->
+    <div class="card p-3 mb-4">
+      <h5>Distribución de roles</h5>
+      <canvas id="graficaRoles"></canvas>
+    </div>
+  </div>
+
+  <!-- Pie de página -->
+  <footer>
+    <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
+    <div class="social-buttons">
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-twitter"></i></a>
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-facebook"></i></a>
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-instagram"></i></a>
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-youtube"></i></a>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Toggle sidebar
+    document.getElementById("menuToggle").addEventListener("click", () => {
+      document.getElementById("sidebar").classList.toggle("active");
+    });
+
+    // Cargar usuarios
+    async function cargarUsuarios() {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:4000/usuarios", {
+        headers: { "Authorization": "Bearer " + token }
+      });
+      const data = await res.json();
+      const tbody = document.querySelector("#tablaUsuarios tbody");
+      tbody.innerHTML = "";
+      let rolesCount = { superadmin:0, profesor:0, estudiante:0, radio:0 };
+
+      data.data.forEach(u => {
+        rolesCount[u.rol]++;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${u.id_usuario}</td>
+          <td>${u.nombre}</td>
+          <td>${u.correo}</td>
+          <td>${u.rol}</td>
+          <td>
+            <button class="btn btn-danger btn-sm" onclick="eliminarUsuario(${u.id_usuario})">Eliminar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Actualizar gráfica
+      const ctx = document.getElementById("graficaRoles").getContext("2d");
+      new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: ['Superadmin', 'Profesor', 'Estudiante', 'Radio'],
+          datasets: [{
+            data: [rolesCount.superadmin, rolesCount.profesor, rolesCount.estudiante, rolesCount.radio],
+            backgroundColor: ['#dc3545','#007bff','#28a745','#ffc107']
+          }]
+        }
+      });
+    }
+
+    // Registrar usuario
+    document.getElementById("formUsuario").addEventListener("submit", async e => {
+      e.preventDefault();
+      const nombre = document.getElementById("nombre").value;
+      const correo = document.getElementById("correo").value;
+      const password = document.getElementById("password").value;
+      const rol = document.getElementById("rol").value;
+
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:4000/usuarios/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({ nombre, correo, password, rol })
+      });
+      const data = await res.json();
+      alert(data.message);
+      cargarUsuarios();
+    });
+
+    // Eliminar usuario
+    async function eliminarUsuario(id) {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:4000/usuarios/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": "Bearer " + token }
+      });
+      const data = await res.json();
+      alert(data.message);
+      cargarUsuarios();
+    }
+
+    // Logout
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("token");
+      window.location.href = "login.html";
+    });
+
+    // Inicializar
+    cargarUsuarios();
+  </script>
+</body>
+</html>
+
