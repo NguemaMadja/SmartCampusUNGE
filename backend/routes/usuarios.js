@@ -1,3 +1,4 @@
+// backend/routes/usuarios.js
 const { verificarToken, autorizarRoles } = require('../middleware/auth');
 const express = require('express');
 const router = express.Router();
@@ -18,16 +19,28 @@ router.get('/', verificarToken, autorizarRoles('superadmin'), async (req, res) =
       'SELECT id_usuario, nombre, correo, rol FROM usuarios',
       { type: QueryTypes.SELECT }
     );
-    res.json(result);
+    res.json({
+      success: true,
+      message: 'Usuarios listados correctamente',
+      data: result
+    });
   } catch (err) {
     console.error('Error en listar usuarios:', err.message);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      success: false,
+      message: 'Error al listar usuarios',
+      error: err.message
+    });
   }
 });
 
 // Perfil (cualquier usuario autenticado)
 router.get('/perfil', verificarToken, (req, res) => {
-  res.json({ message: `Bienvenido ${req.user.rol}`, usuario: req.user });
+  res.json({
+    success: true,
+    message: `Bienvenido ${req.user.rol}`,
+    usuario: req.user
+  });
 });
 
 module.exports = router;
