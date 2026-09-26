@@ -7,21 +7,32 @@ const jwt = require('jsonwebtoken');
 exports.register = async (req, res) => {
   const { nombre, correo, password, rol } = req.body;
   try {
-    // Generar hash seguro de la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crear usuario en la BD
-    await Usuario.create({
+    const nuevoUsuario = await Usuario.create({
       nombre,
       correo,
       password: hashedPassword,
       rol
     });
 
-    res.json({ success: true, message: 'Usuario registrado correctamente' });
+    res.json({
+      success: true,
+      message: 'Usuario registrado correctamente',
+      data: {
+        id_usuario: nuevoUsuario.id_usuario,
+        nombre: nuevoUsuario.nombre,
+        correo: nuevoUsuario.correo,
+        rol: nuevoUsuario.rol
+      }
+    });
   } catch (err) {
     console.error('Error en registro:', err.message);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({
+      success: false,
+      message: 'Error al registrar usuario',
+      error: err.message
+    });
   }
 };
 
@@ -29,19 +40,22 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   const { correo, password } = req.body;
   try {
-    // Buscar usuario por correo
     const user = await Usuario.findOne({ where: { correo } });
     if (!user) {
-      return res.status(400).json({ success: false, message: 'Usuario no encontrado' });
+      return res.status(400).json({
+        success: false,
+        message: 'Usuario no encontrado'
+      });
     }
 
-    // Comparar contraseña ingresada con el hash almacenado
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(400).json({ success: false, message: 'Contraseña incorrecta' });
+      return res.status(400).json({
+        success: false,
+        message: 'Contraseña incorrecta'
+      });
     }
 
-    // Generar token JWT
     const token = jwt.sign(
       { id: user.id_usuario, rol: user.rol },
       process.env.JWT_SECRET || 'clave_secreta',
@@ -51,16 +65,43 @@ exports.login = async (req, res) => {
     res.json({
       success: true,
       message: 'Login exitoso',
-      token,
-      usuario: {
-        id_usuario: user.id_usuario,
-        nombre: user.nombre,
-        correo: user.correo,
-        rol: user.rol
+      data: {
+        token,
+        usuario: {
+          id_usuario: user.id_usuario,
+          nombre: user.nombre,
+          correo: user.correo,
+          rol: user.rol
+        }
       }
     });
   } catch (err) {
     console.error('Error en login:', err.message);
-    res.status(500).json({ success: false, message: 'Error interno en login' });
+    res.status(500).json({
+      success: false,
+      message: 'Error interno en login',
+      error: err.message
+    });
+  }
+};
+
+// Listar usuarios (solo superadmin)
+exports.listarUsuarios = async () => {
+  try {
+    const usuarios = await Usuario.findAll({
+      attributes: ['id_usuario', 'nombre', 'correo', 'rol']
+    });
+    return {
+      success: true,
+      message: 'Usuarios listados correctamente',
+      data: usuarios
+    };
+  } catch (err) {
+    console.error('Error en listar usuarios:', err.message);
+    return {
+      success: false,
+      message: 'Error al listar usuarios',
+      error: err.message
+    };
   }
 };
