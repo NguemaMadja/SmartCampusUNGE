@@ -107,7 +107,8 @@
       const password = document.getElementById("password").value;
 
       try {
-        const res = await fetch("https://smartcampusunge.onrender.com/usuarios/login", {
+        const baseURL = window.location.origin;
+        const res = await fetch(`${baseURL}/api/usuarios/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ correo, password })
@@ -115,13 +116,12 @@
         const data = await res.json();
 
         if (data.success) {
-          localStorage.setItem("token", data.token);
-          localStorage.setItem("rol", data.usuario.rol);
-          alert("Login exitoso: " + data.usuario.rol);
+          localStorage.setItem("token", data.data.token);
+          localStorage.setItem("rol", data.data.usuario.rol);
+          alert("Login exitoso: " + data.data.usuario.rol);
 
-          switch (data.usuario.rol) {
+          switch (data.data.usuario.rol) {
             case "superadmin": window.location.href = "panel_superadmin.html"; break;
-            case "admin": window.location.href = "panel_admin.html"; break;
             case "profesor": window.location.href = "panel_profesor.html"; break;
             case "estudiante": window.location.href = "panel_estudiante.html"; break;
             case "radio": window.location.href = "panel_radio.html"; break;
