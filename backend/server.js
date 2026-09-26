@@ -14,17 +14,13 @@ sequelize.authenticate()
   .then(() => console.log('Conexión a BD establecida'))
   .catch(err => console.error('Error de conexión:', err));
 
-// 🔹 Rutas principales
-app.use('/usuarios', require('./routes/usuarios'));
-app.use('/sensores', require('./routes/sensores'));       // métricas IoT
-app.use('/asistencia', require('./routes/asistencia'));   // asistencia académica
-app.use('/qr', require('./routes/qr'));                   // módulo QR
-app.use('/configuracion', require('./routes/configuracion'));
-
-
-// 🔹 Nueva ruta de transporte
-const transporteRoutes = require('./routes/transporte');
-app.use('/api/transporte', transporteRoutes);
+// 🔹 Rutas API (prefijo /api para evitar conflicto con frontend)
+app.use('/api/usuarios', require('./routes/usuarios'));
+app.use('/api/sensores', require('./routes/sensores'));       // métricas IoT
+app.use('/api/asistencia', require('./routes/asistencia'));   // asistencia académica
+app.use('/api/qr', require('./routes/qr'));                   // módulo QR
+app.use('/api/configuracion', require('./routes/configuracion'));
+app.use('/api/transporte', require('./routes/transporte'));   // transporte escolar
 
 // 🔹 Servir frontend estático
 app.use(express.static(path.join(__dirname, '../frontend')));
