@@ -45,6 +45,12 @@ router.post('/', async (req, res) => {
     res.json({ success: true, data: result.rows[0] });
   } catch (err) {
     console.error("Error al crear vehículo:", err);
+
+    // Manejo específico de error por duplicado de placa
+    if (err.code === '23505') {
+      return res.status(400).json({ success: false, error: 'La placa ya está registrada en otro vehículo' });
+    }
+
     res.status(500).json({ success: false, error: 'Error al crear el vehículo' });
   }
 });
@@ -67,6 +73,12 @@ router.put('/:id', async (req, res) => {
     res.json({ success: true, data: result.rows[0] });
   } catch (err) {
     console.error("Error al actualizar vehículo:", err);
+
+    // Manejo específico de error por duplicado de placa
+    if (err.code === '23505') {
+      return res.status(400).json({ success: false, error: 'La placa ya está registrada con otro vehículo' });
+    }
+
     res.status(500).json({ success: false, error: 'Error al actualizar el vehículo' });
   }
 });
