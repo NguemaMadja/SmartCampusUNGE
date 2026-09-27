@@ -71,7 +71,6 @@
         </ul>
       </div>
     </nav>
-
     <!-- Cabecera -->
     <header class="text-center mt-3">
       <h2>Gestión de Usuarios</h2>
@@ -96,8 +95,11 @@
           </div>
         </div>
         <button type="submit" class="btn btn-success">Crear Usuario</button>
-        <button type="button" class="btn btn-primary ms-2" onclick="window.location.href='index.html'">Menú Principal</button>
-        <button type="button" class="btn btn-warning ms-2" onclick="window.location.href='profesores.html'">Siguiente</button>
+        <button type="button" class="btn btn-primary ms-2" onclick="window.location.href='https://smartcampusunge.onrender.com/panel_superadmin.html'">Menú Principal</button>
+        <button type="button" class="btn btn-secondary ms-2" onclick="window.history.back()">Atrás</button>
+        <button type="button" class="btn btn-info ms-2" onclick="imprimirUsuarios()">Imprimir</button>
+        <button type="button" class="btn btn-success ms-2" onclick="descargarPDF()">Descargar PDF</button>
+        <button type="button" class="btn btn-warning ms-2" onclick="descargarExcel()">Descargar Excel</button>
       </form>
     </div>
     <!-- Buscador/Filtro -->
@@ -129,7 +131,6 @@
       <canvas id="graficaRoles"></canvas>
     </div>
   </div>
-
   <!-- Pie de página -->
   <footer>
     <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
@@ -168,6 +169,7 @@
           <td>${u.correo}</td>
           <td>${u.rol}</td>
           <td>
+            <button class="btn btn-primary btn-sm" onclick="editarUsuario(${u.id_usuario})">Editar</button>
             <button class="btn btn-danger btn-sm" onclick="eliminarUsuario(${u.id_usuario})">Eliminar</button>
           </td>
         `;
@@ -187,7 +189,6 @@
         }
       });
     }
-
     // Registrar usuario
     document.getElementById("formUsuario").addEventListener("submit", async e => {
       e.preventDefault();
@@ -208,12 +209,16 @@
       const data = await res.json();
       alert(data.message);
 
-      // Limpieza automática
       document.getElementById("formUsuario").reset();
-
-      // Refrescar tabla y gráfica
       cargarUsuarios();
     });
+
+    // Editar usuario
+    function editarUsuario(id) {
+      alert("Función editar usuario con ID: " + id);
+      // Aquí puedes abrir un modal o redirigir a una página de edición
+    }
+
     // Eliminar usuario
     async function eliminarUsuario(id) {
       const token = localStorage.getItem("token");
@@ -224,6 +229,43 @@
       const data = await res.json();
       alert(data.message);
       cargarUsuarios();
+    }
+
+    // Imprimir usuarios
+    function imprimirUsuarios() {
+      window.print();
+    }
+
+    // Descargar PDF
+    function descargarPDF() {
+      const tabla = document.getElementById("tablaUsuarios").outerHTML;
+      const ventana = window.open("", "", "width=800,height=600");
+      ventana.document.write("<html><head><title>Usuarios PDF</title></head><body>");
+      ventana.document.write(tabla);
+      ventana.document.write("</body></html>");
+      ventana.document.close();
+      ventana.print();
+    }
+
+    // Descargar Excel
+    function descargarExcel() {
+      const tabla = document.getElementById("tablaUsuarios");
+      let csv = [];
+      for (let row of tabla.rows) {
+        let cols = [];
+        for (let cell of row.cells) {
+          cols.push(cell.innerText);
+        }
+        csv.push(cols.join(","));
+      }
+      const csvString = csv.join("\n");
+      const blob = new Blob([csvString], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "usuarios.csv";
+      a.click();
+      window.URL.revokeObjectURL(url);
     }
 
     // Logout
@@ -241,6 +283,7 @@
         fila.style.display = texto.includes(filtro) ? "" : "none";
       });
     });
+
     // Inicializar
     cargarUsuarios();
   </script>
