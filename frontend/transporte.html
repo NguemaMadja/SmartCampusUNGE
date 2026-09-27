@@ -86,8 +86,8 @@
               <td>40</td>
               <td>Activo</td>
               <td>
-                <button class="btn btn-sm btn-primary">Editar</button>
-                <button class="btn btn-sm btn-danger">Eliminar</button>
+                <button class="btn btn-sm btn-primary" onclick="editarVehiculo(1)">Editar</button>
+                <button class="btn btn-sm btn-danger" onclick="eliminarVehiculo(1)">Eliminar</button>
               </td>
             </tr>
             <tr>
@@ -98,8 +98,8 @@
               <td>35</td>
               <td>En Ruta</td>
               <td>
-                <button class="btn btn-sm btn-primary">Editar</button>
-                <button class="btn btn-sm btn-danger">Eliminar</button>
+                <button class="btn btn-sm btn-primary" onclick="editarVehiculo(2)">Editar</button>
+                <button class="btn btn-sm btn-danger" onclick="eliminarVehiculo(2)">Eliminar</button>
               </td>
             </tr>
           </tbody>
@@ -111,17 +111,29 @@
       <div class="modal-dialog">
         <form id="formBus" class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Nuevo Bus</h5>
+            <h5 class="modal-title">Registrar/Editar Bus</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
             <input type="hidden" id="busId">
-            <div class="mb-3"><label class="form-label">Placa</label><input type="text" id="placa" class="form-control" required></div>
-            <div class="mb-3"><label class="form-label">Conductor</label><input type="text" id="conductor" class="form-control" required></div>
-            <div class="mb-3"><label class="form-label">Ruta</label><input type="text" id="ruta" class="form-control" required></div>
-            <div class="mb-3"><label class="form-label">Capacidad</label><input type="number" id="capacidad" class="form-control" required></div>
             <div class="mb-3">
-              <label class="form-label">Estado</label>
+              <label class="form-label">Placa del vehículo</label>
+              <input type="text" id="placa" class="form-control" placeholder="Ej: GE-1234" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nombre del conductor</label>
+              <input type="text" id="conductor" class="form-control" placeholder="Ej: Juan Pérez" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Ruta asignada</label>
+              <input type="text" id="ruta" class="form-control" placeholder="Ej: Campus Central" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Capacidad de pasajeros</label>
+              <input type="number" id="capacidad" class="form-control" placeholder="Ej: 40" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Estado del vehículo</label>
               <select id="estado" class="form-select" required>
                 <option value="Activo">Activo</option>
                 <option value="En Ruta">En Ruta</option>
@@ -129,7 +141,9 @@
               </select>
             </div>
           </div>
-          <div class="modal-footer"><button type="submit" class="btn btn-primary">Guardar</button></div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+          </div>
         </form>
       </div>
     </div>
@@ -174,26 +188,40 @@
       options: { responsive: true }
     });
 
-    // Ejemplo de acciones en la tabla
+    // Acciones de la tabla
     function editarVehiculo(id) {
-      // Aquí puedes cargar datos en el modal para editar
-      alert("Editar vehículo con ID: " + id);
+      // Aquí se cargarían los datos en el modal para editar
+      document.getElementById("busId").value = id;
+      document.getElementById("placa").value = "GE-1234"; // ejemplo, se debe traer de BD
+      document.getElementById("conductor").value = "Juan Pérez";
+      document.getElementById("ruta").value = "Campus Central";
+      document.getElementById("capacidad").value = 40;
+      document.getElementById("estado").value = "Activo";
+      const modal = new bootstrap.Modal(document.getElementById("modalBus"));
+      modal.show();
     }
 
     function eliminarVehiculo(id) {
-      // Aquí puedes llamar al backend para eliminar
       alert("Eliminar vehículo con ID: " + id);
+      // Aquí se llamaría al backend para eliminar el registro
     }
 
     // Manejo del formulario del modal
     document.getElementById("formBus").addEventListener("submit", e => {
       e.preventDefault();
+      const busId = document.getElementById("busId").value;
       const placa = document.getElementById("placa").value;
       const conductor = document.getElementById("conductor").value;
       const ruta = document.getElementById("ruta").value;
       const capacidad = document.getElementById("capacidad").value;
       const estado = document.getElementById("estado").value;
-      alert(`Bus guardado:\nPlaca: ${placa}\nConductor: ${conductor}\nRuta: ${ruta}\nCapacidad: ${capacidad}\nEstado: ${estado}`);
+
+      if (busId) {
+        alert(`Bus actualizado:\nID: ${busId}\nPlaca: ${placa}\nConductor: ${conductor}\nRuta: ${ruta}\nCapacidad: ${capacidad}\nEstado: ${estado}`);
+      } else {
+        alert(`Bus registrado:\nPlaca: ${placa}\nConductor: ${conductor}\nRuta: ${ruta}\nCapacidad: ${capacidad}\nEstado: ${estado}`);
+      }
+
       document.getElementById("formBus").reset();
       const modal = bootstrap.Modal.getInstance(document.getElementById("modalBus"));
       modal.hide();
