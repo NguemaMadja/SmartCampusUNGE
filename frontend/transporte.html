@@ -23,6 +23,8 @@
     .card { margin-bottom: 20px; }
     footer { background-color: #004080; color: white; padding: 15px; text-align: center; margin-top: auto; }
     .social-buttons .btn { margin: 5px; border-radius: 50%; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; }
+    .btn-nav { background-color: #006400; color: #fff; border-radius: 8px; padding: 8px 20px; margin: 5px; transition: 0.3s; }
+    .btn-nav:hover { background-color: #004d26; transform: scale(1.05); }
   </style>
 </head>
 <body>
@@ -55,6 +57,11 @@
       <a href="alertas.html" class="btn btn-danger m-2">Alertas</a>
     </div>
 
+    <!-- Botones de navegación -->
+    <div class="text-center mb-4">
+      <button class="btn-nav" onclick="window.history.back()"><i class="bi bi-arrow-left-circle"></i> Atrás</button>
+      <button class="btn-nav" onclick="window.history.forward()"><i class="bi bi-arrow-right-circle"></i> Adelante</button>
+    </div>
     <!-- Tabla de vehículos -->
     <div class="card">
       <div class="card-header bg-primary text-white">Listado de Vehículos</div>
@@ -87,11 +94,11 @@
               <td>35</td>
               <td>En Ruta</td>
             </tr>
-            <!-- Aquí se llenará dinámicamente con datos reales -->
           </tbody>
         </table>
       </div>
     </div>
+
     <!-- Gráficas -->
     <div class="row">
       <div class="col-md-6">
@@ -112,7 +119,6 @@
       </div>
     </div>
   </div>
-
   <!-- Pie de página -->
   <footer>
     <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
@@ -123,6 +129,7 @@
       <a href="#" class="btn btn-outline-light"><i class="bi bi-youtube"></i></a>
     </div>
   </footer>
+
   <script>
     // Gráfico de capacidad vs ocupación
     const ctx1 = document.getElementById('graficoCapacidad').getContext('2d');
@@ -131,16 +138,8 @@
       data: {
         labels: ['Bus 001', 'Bus 002'],
         datasets: [
-          {
-            label: 'Capacidad',
-            data: [40, 35],
-            backgroundColor: 'rgba(54, 162, 235, 0.7)'
-          },
-          {
-            label: 'Ocupación',
-            data: [30, 28],
-            backgroundColor: 'rgba(255, 99, 132, 0.7)'
-          }
+          { label: 'Capacidad', data: [40, 35], backgroundColor: 'rgba(54, 162, 235, 0.7)' },
+          { label: 'Ocupación', data: [30, 28], backgroundColor: 'rgba(255, 99, 132, 0.7)' }
         ]
       },
       options: { responsive: true }
