@@ -162,24 +162,25 @@
         <div class="modal-body">
           <input type="hidden" id="busId">
           <div class="mb-3">
-            <label class="form-label">Placa</label>
-            <input type="text" id="placa" class="form-control" required>
+            <label for="placa" class="form-label">Número de Placa</label>
+            <input type="text" id="placa" class="form-control" placeholder="Ej: GE-1234" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Conductor</label>
-            <input type="text" id="conductor" class="form-control" required>
+            <label for="conductor" class="form-label">Nombre del Conductor</label>
+            <input type="text" id="conductor" class="form-control" placeholder="Ej: Juan Pérez" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Ruta</label>
-            <input type="text" id="ruta" class="form-control" required>
+            <label for="ruta" class="form-label">Ruta / Línea</label>
+            <input type="text" id="ruta" class="form-control" placeholder="Ej: Campus Central" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Capacidad</label>
-            <input type="number" id="capacidad" class="form-control" required>
+            <label for="capacidad" class="form-label">Capacidad de Pasajeros</label>
+            <input type="number" id="capacidad" class="form-control" placeholder="Ej: 40" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Estado</label>
+            <label for="estado" class="form-label">Estado del Bus</label>
             <select id="estado" class="form-select" required>
+              <option value="">Selecciona...</option>
               <option value="Activo">Activo</option>
               <option value="En Ruta">En Ruta</option>
               <option value="Mantenimiento">Mantenimiento</option>
@@ -192,7 +193,6 @@
       </form>
     </div>
   </div>
-
   <!-- Pie de página -->
   <footer>
     <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
@@ -217,7 +217,7 @@
           <td>${bus.id_vehiculo}</td>
           <td>${bus.placa}</td>
           <td>${bus.conductor}</td>
-          <td>${bus.id_linea || ''}</td>
+          <td>${bus.ruta || ''}</td>
           <td>${bus.capacidad}</td>
           <td>${bus.estado}</td>
           <td>
@@ -235,9 +235,9 @@
       const bus = {
         placa: document.getElementById('placa').value,
         conductor: document.getElementById('conductor').value,
+        ruta: document.getElementById('ruta').value,
         capacidad: document.getElementById('capacidad').value,
-        estado: document.getElementById('estado').value,
-        id_linea: document.getElementById('ruta').value
+        estado: document.getElementById('estado').value
       };
       const url = id ? `/api/vehiculos/${id}` : '/api/vehiculos';
       const method = id ? 'PUT' : 'POST';
@@ -256,7 +256,7 @@
       document.getElementById('busId').value = bus.id_vehiculo;
       document.getElementById('placa').value = bus.placa;
       document.getElementById('conductor').value = bus.conductor;
-      document.getElementById('ruta').value = bus.id_linea || '';
+      document.getElementById('ruta').value = bus.ruta || '';
       document.getElementById('capacidad').value = bus.capacidad;
       document.getElementById('estado').value = bus.estado;
       new bootstrap.Modal(document.getElementById('modalBus')).show();
