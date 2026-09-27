@@ -31,16 +31,16 @@ router.get('/:id', async (req, res) => {
 // 🔹 Crear nuevo vehículo
 router.post('/', async (req, res) => {
   try {
-    const { placa, conductor, capacidad, estado, id_linea } = req.body;
+    const { placa, conductor, capacidad, estado, ruta } = req.body;
 
-    if (!placa || !conductor || !capacidad || !estado) {
+    if (!placa || !conductor || !capacidad || !estado || !ruta) {
       return res.status(400).json({ success: false, error: 'Todos los campos son obligatorios' });
     }
 
     const result = await pool.query(
-      `INSERT INTO vehiculos (placa, conductor, capacidad, estado, id_linea)
+      `INSERT INTO vehiculos (placa, conductor, capacidad, estado, ruta)
        VALUES ($1,$2,$3,$4,$5) RETURNING *`,
-      [placa, conductor, capacidad, estado, id_linea || null]
+      [placa, conductor, capacidad, estado, ruta]
     );
     res.json({ success: true, data: result.rows[0] });
   } catch (err) {
@@ -53,13 +53,13 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { placa, conductor, capacidad, estado, id_linea } = req.body;
+    const { placa, conductor, capacidad, estado, ruta } = req.body;
 
     const result = await pool.query(
       `UPDATE vehiculos 
-       SET placa=$1, conductor=$2, capacidad=$3, estado=$4, id_linea=$5
+       SET placa=$1, conductor=$2, capacidad=$3, estado=$4, ruta=$5
        WHERE id_vehiculo=$6 RETURNING *`,
-      [placa, conductor, capacidad, estado, id_linea || null, id]
+      [placa, conductor, capacidad, estado, ruta, id]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, error: 'Vehículo no encontrado' });
