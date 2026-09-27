@@ -20,7 +20,8 @@ app.use('/api/sensores', require('./routes/sensores'));       // métricas IoT
 app.use('/api/asistencia', require('./routes/asistencia'));   // asistencia académica
 app.use('/api/qr', require('./routes/qr'));                   // módulo QR
 app.use('/api/configuracion', require('./routes/configuracion'));
-app.use('/api/transporte', require('./routes/transporte'));   // transporte escolar
+app.use('/api/transporte', require('./routes/transporte'));   // transporte escolar (líneas)
+app.use('/api/vehiculos', require('./routes/vehiculos'));     // gestión de buses
 
 // 🔹 Servir frontend estático
 app.use(express.static(path.join(__dirname, '../frontend')));
