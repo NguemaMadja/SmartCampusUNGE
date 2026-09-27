@@ -43,4 +43,70 @@ router.get('/perfil', verificarToken, (req, res) => {
   });
 });
 
+// 🔹 Editar usuario (PUT)
+router.put('/:id', verificarToken, autorizarRoles('superadmin'), async (req, res) => {
+  const { id } = req.params;
+  const { nombre, correo, password, rol } = req.body;
+
+  try {
+    const [result] = await sequelize.query(
+      'UPDATE usuarios SET nombre=$1, correo=$2, password=$3, rol=$4 WHERE id_usuario=$5 RETURNING id_usuario, nombre, correo, rol',
+      {
+        bind: [nombre, correo, password, rol, id],
+        type: QueryTypes.UPDATE
+      }
+    );
+
+    if (!result || result.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Usuario actualizado correctamente',
+      data: result[0]
+    });
+  } catch (err) {
+    console.error('Error al actualizar usuario:', err.message);
+    res.status(500).json({
+      success: false,
+      message: 'Error al actualizar usuario',
+      error: err.message
+    });
+  }
+});
+
+// 🔹 Eliminar usuario
+router.delete('/:id', verificarToken, autorizarRoles('superadmin'), async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await sequelize.query(
+      'DELETE FROM usuarios WHERE id_usuario=$1 RETURNING id_usuario',
+      { bind: [id], type: QueryTypes.DELETE }
+    );
+
+    if (!result || result.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Usuario eliminado correctamente'
+    });
+  } catch (err) {
+    console.error('Error al eliminar usuario:', err.message);
+    res.status(500).json({
+      success: false,
+      message: 'Error al eliminar usuario',
+      error: err.message
+    });
+  }
+});
+
 module.exports = router;
