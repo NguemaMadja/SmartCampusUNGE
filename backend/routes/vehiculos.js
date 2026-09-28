@@ -1,12 +1,13 @@
+// backend/routes/vehiculos.js
 const express = require('express');
 const router = express.Router();
-const pool = require('../db'); // conexión a PostgreSQL
+const sequelize = require('../db'); // conexión Sequelize
 
 // 🔹 Obtener todos los vehículos
 router.get('/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM vehiculos ORDER BY id_vehiculo');
-    res.json({ success: true, data: result.rows });
+    const [rows] = await sequelize.query('SELECT * FROM vehiculos ORDER BY id_vehiculo');
+    res.json({ success: true, data: rows });
   } catch (err) {
     console.error("Error al obtener vehículos:", err);
     res.status(500).json({ success: false, error: 'Error al obtener los vehículos' });
@@ -17,11 +18,14 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await pool.query('SELECT * FROM vehiculos WHERE id_vehiculo = $1', [id]);
-    if (result.rows.length === 0) {
+    const [rows] = await sequelize.query(
+      'SELECT * FROM vehiculos WHERE id_vehiculo = $1',
+      { bind: [id] }
+    );
+    if (rows.length === 0) {
       return res.status(404).json({ success: false, error: 'Vehículo no encontrado' });
     }
-    res.json({ success: true, data: result.rows[0] });
+    res.json({ success: true, data: rows[0] });
   } catch (err) {
     console.error("Error al obtener vehículo:", err);
     res.status(500).json({ success: false, error: 'Error al obtener el vehículo' });
@@ -37,20 +41,17 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Todos los campos son obligatorios' });
     }
 
-    const result = await pool.query(
+    const [rows] = await sequelize.query(
       `INSERT INTO vehiculos (placa, conductor, capacidad, estado, ruta)
        VALUES ($1,$2,$3,$4,$5) RETURNING *`,
-      [placa, conductor, capacidad, estado, ruta]
+      { bind: [placa, conductor, capacidad, estado, ruta] }
     );
-    res.json({ success: true, data: result.rows[0] });
+    res.json({ success: true, data: rows[0] });
   } catch (err) {
     console.error("Error al crear vehículo:", err);
-
-    // Manejo específico de error por duplicado de placa
-    if (err.code === '23505') {
+    if (err.original?.code === '23505') {
       return res.status(400).json({ success: false, error: 'La placa ya está registrada en otro vehículo' });
     }
-
     res.status(500).json({ success: false, error: 'Error al crear el vehículo' });
   }
 });
@@ -61,24 +62,21 @@ router.put('/:id', async (req, res) => {
     const { id } = req.params;
     const { placa, conductor, capacidad, estado, ruta } = req.body;
 
-    const result = await pool.query(
+    const [rows] = await sequelize.query(
       `UPDATE vehiculos 
        SET placa=$1, conductor=$2, capacidad=$3, estado=$4, ruta=$5
        WHERE id_vehiculo=$6 RETURNING *`,
-      [placa, conductor, capacidad, estado, ruta, id]
+      { bind: [placa, conductor, capacidad, estado, ruta, id] }
     );
-    if (result.rows.length === 0) {
+    if (rows.length === 0) {
       return res.status(404).json({ success: false, error: 'Vehículo no encontrado' });
     }
-    res.json({ success: true, data: result.rows[0] });
+    res.json({ success: true, data: rows[0] });
   } catch (err) {
     console.error("Error al actualizar vehículo:", err);
-
-    // Manejo específico de error por duplicado de placa
-    if (err.code === '23505') {
+    if (err.original?.code === '23505') {
       return res.status(400).json({ success: false, error: 'La placa ya está registrada con otro vehículo' });
     }
-
     res.status(500).json({ success: false, error: 'Error al actualizar el vehículo' });
   }
 });
@@ -87,8 +85,11 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await pool.query('DELETE FROM vehiculos WHERE id_vehiculo=$1 RETURNING *', [id]);
-    if (result.rows.length === 0) {
+    const [rows] = await sequelize.query(
+      'DELETE FROM vehiculos WHERE id_vehiculo=$1 RETURNING *',
+      { bind: [id] }
+    );
+    if (rows.length === 0) {
       return res.status(404).json({ success: false, error: 'Vehículo no encontrado' });
     }
     res.json({ success: true, message: 'Vehículo eliminado correctamente' });
