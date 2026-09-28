@@ -1,59 +1,77 @@
 // backend/routes/paradas.js
 const express = require('express');
 const router = express.Router();
-const { Parada } = require('../models'); // Modelo Sequelize de Parada
+const sequelize = require('../db'); // conexión Sequelize
 
 // 🔹 Obtener todas las paradas
 router.get('/', async (req, res) => {
   try {
-    const paradas = await Parada.findAll({ order: [['id_parada', 'ASC']] });
-    res.json(paradas);
+    const [rows] = await sequelize.query('SELECT * FROM paradas ORDER BY id_parada');
+    res.json({ success: true, data: rows });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error al obtener paradas' });
+    console.error("Error al obtener paradas:", err);
+    res.status(500).json({ success: false, error: 'Error al obtener las paradas' });
   }
 });
 
-// 🔹 Obtener paradas de una ruta específica
-router.get('/ruta/:id_ruta', async (req, res) => {
+// 🔹 Obtener una parada específica por ID
+router.get('/:id', async (req, res) => {
   try {
-    const { id_ruta } = req.params;
-    const paradas = await Parada.findAll({
-      where: { id_ruta },
-      order: [['orden', 'ASC']]
-    });
-    res.json(paradas);
+    const { id } = req.params;
+    const [rows] = await sequelize.query(
+      'SELECT * FROM paradas WHERE id_parada = $1',
+      { bind: [id] }
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Parada no encontrada' });
+    }
+    res.json({ success: true, data: rows[0] });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error al obtener paradas de la ruta' });
+    console.error("Error al obtener parada:", err);
+    res.status(500).json({ success: false, error: 'Error al obtener la parada' });
   }
 });
 
-// 🔹 Crear una nueva parada
+// 🔹 Crear nueva parada
 router.post('/', async (req, res) => {
   try {
     const { id_ruta, nombre, latitud, longitud, orden } = req.body;
-    const nuevaParada = await Parada.create({ id_ruta, nombre, latitud, longitud, orden });
-    res.json(nuevaParada);
+
+    if (!id_ruta || !nombre || !latitud || !longitud) {
+      return res.status(400).json({ success: false, error: 'Todos los campos obligatorios deben completarse' });
+    }
+
+    const [rows] = await sequelize.query(
+      `INSERT INTO paradas (id_ruta, nombre, latitud, longitud, orden)
+       VALUES ($1,$2,$3,$4,$5) RETURNING *`,
+      { bind: [id_ruta, nombre, latitud, longitud, orden] }
+    );
+    res.json({ success: true, data: rows[0] });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error al crear parada' });
+    console.error("Error al crear parada:", err);
+    res.status(500).json({ success: false, error: 'Error al crear la parada' });
   }
 });
 
-// 🔹 Actualizar una parada
+// 🔹 Actualizar una parada existente
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { id_ruta, nombre, latitud, longitud, orden } = req.body;
-    const parada = await Parada.findByPk(id);
-    if (!parada) return res.status(404).json({ error: 'Parada no encontrada' });
 
-    await parada.update({ id_ruta, nombre, latitud, longitud, orden });
-    res.json(parada);
+    const [rows] = await sequelize.query(
+      `UPDATE paradas 
+       SET id_ruta=$1, nombre=$2, latitud=$3, longitud=$4, orden=$5
+       WHERE id_parada=$6 RETURNING *`,
+      { bind: [id_ruta, nombre, latitud, longitud, orden, id] }
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Parada no encontrada' });
+    }
+    res.json({ success: true, data: rows[0] });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error al actualizar parada' });
+    console.error("Error al actualizar parada:", err);
+    res.status(500).json({ success: false, error: 'Error al actualizar la parada' });
   }
 });
 
@@ -61,14 +79,17 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const parada = await Parada.findByPk(id);
-    if (!parada) return res.status(404).json({ error: 'Parada no encontrada' });
-
-    await parada.destroy();
-    res.json({ message: 'Parada eliminada correctamente' });
+    const [rows] = await sequelize.query(
+      'DELETE FROM paradas WHERE id_parada=$1 RETURNING *',
+      { bind: [id] }
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Parada no encontrada' });
+    }
+    res.json({ success: true, message: 'Parada eliminada correctamente' });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error al eliminar parada' });
+    console.error("Error al eliminar parada:", err);
+    res.status(500).json({ success: false, error: 'Error al eliminar la parada' });
   }
 });
 
