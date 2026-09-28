@@ -84,24 +84,6 @@
       </div>
     </div>
 
-    <!-- Tabla de vehículos (referencia) -->
-    <div class="card mb-4">
-      <div class="card-header bg-primary text-white d-flex justify-content-between">
-        <span>Vehículos (referencia)</span>
-        <button class="btn btn-secondary btn-sm" onclick="cargarVehiculos()">Actualizar</button>
-      </div>
-      <div class="card-body table-responsive">
-        <table class="table table-striped">
-          <thead class="table-dark">
-            <tr>
-              <th>ID</th><th>Placa</th><th>Conductor</th><th>Ruta</th>
-              <th>Capacidad</th><th>Estado</th>
-            </tr>
-          </thead>
-          <tbody id="tablaVehiculos"></tbody>
-        </table>
-      </div>
-    </div>
     <!-- Tabla de paradas CRUD -->
     <div class="card mb-4">
       <div class="card-header bg-primary text-white d-flex justify-content-between">
@@ -119,7 +101,6 @@
         </table>
       </div>
     </div>
-
     <!-- Modal para añadir/editar parada -->
     <div class="modal fade" id="modalParada" tabindex="-1">
       <div class="modal-dialog">
@@ -207,30 +188,10 @@
     const map = L.map('map').setView([3.7468, 8.7752], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    // Cargar vehículos (referencia)
-    async function cargarVehiculos() {
-      const res = await fetch("http://10.70.200.112:4000/transporteescolar/vehiculos");
-      const vehiculos = await res.json();
-      const tabla = document.getElementById("tablaVehiculos");
-      tabla.innerHTML = "";
-      vehiculos.forEach(v => {
-        tabla.innerHTML += `
-          <tr>
-            <td>${v.id}</td><td>${v.placa}</td><td>${v.conductor}</td>
-            <td>${v.ruta}</td><td>${v.capacidad}</td><td>${v.estado}</td>
-          </tr>`;
-        if (v.estado === "Activo") {
-          L.marker([v.latitud, v.longitud], {
-            icon: L.icon({iconUrl: 'bus_icon.png', iconSize:[32,32]})
-          }).addTo(map).bindPopup(`Bus ${v.id} - ${v.ruta}`);
-        }
-      });
-    }
-
     // Cargar paradas
     async function cargarParadas() {
-      const res = await fetch("http://10.70.200.112:4000/transporteescolar/paradas");
-      const paradas = await res.json();
+      const res = await fetch("/api/paradas");
+      const paradas = (await res.json()).data;
       const tabla = document.getElementById("tablaParadas");
       tabla.innerHTML = "";
       const coords = [];
@@ -240,8 +201,8 @@
             <td>${p.id_parada}</td><td>${p.id_ruta}</td><td>${p.nombre}</td>
             <td>${p.latitud}</td><td>${p.longitud}</td><td>${p.orden}</td>
             <td>
-              <button class="btn btn-sm btn-primary">Editar</button>
-              <button class="btn btn-sm btn-danger">Eliminar</button>
+              <button class="btn btn-sm btn-primary" onclick="editarParada(${p.id_parada})">Editar</button>
+              <button class="btn btn-sm btn-danger" onclick="eliminarParada(${p.id_parada})">Eliminar</button>
             </td>
           </tr>`;
         L.marker([p.latitud, p.longitud]).addTo(map).bindPopup(p.nombre);
@@ -262,7 +223,7 @@
         longitud: document.getElementById("longitudParada").value,
         orden: document.getElementById("ordenParada").value
       };
-      await fetch("http://10.70.200.112:4000/transporteescolar/paradas", {
+      await fetch("/api/paradas", {
         method: "POST",
         headers: {"Content-Type":"application/json"},
         body: JSON.stringify(parada)
@@ -270,6 +231,26 @@
       cargarParadas();
       bootstrap.Modal.getInstance(document.getElementById("modalParada")).hide();
     });
+
+    // Editar parada
+    async function editarParada(id) {
+      const res = await fetch(`/api/paradas/${id}`);
+      const parada = (await res.json()).data;
+      document.getElementById("idParada").value = parada.id_parada;
+      document.getElementById("idRuta").value = parada.id_ruta;
+      document.getElementById("nombreParada").value = parada.nombre;
+      document.getElementById("latitudParada").value = parada.latitud;
+      document.getElementById("longitudParada").value = parada.longitud;
+      document.getElementById("ordenParada").value = parada.orden;
+      new bootstrap.Modal(document.getElementById("modalParada")).show();
+    }
+
+    // Eliminar parada
+    async function eliminarParada(id) {
+      if (!confirm("¿Seguro que deseas eliminar esta parada?")) return;
+      await fetch(`/api/paradas/${id}`, { method: "DELETE" });
+      cargarParadas();
+    }
 
     // Gráficas
     new Chart(document.getElementById("graficoParadas"), {
@@ -292,7 +273,6 @@
     toast.show();
 
     // Inicializar carga
-    cargarVehiculos();
     cargarParadas();
   </script>
 </body>
