@@ -26,6 +26,15 @@ app.use('/api/vehiculos', require('./routes/vehiculos'));     // gestión de bus
 // 🔹 Servir frontend estático
 app.use(express.static(path.join(__dirname, '../frontend')));
 
+// 🔹 Rutas explícitas para páginas HTML
+app.get('/transporte', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/transporte.html'));
+});
+
+app.get('/smarttransit', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/smarttransit.html'));
+});
+
 // 🔹 Puerto
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, '0.0.0.0', () => {
