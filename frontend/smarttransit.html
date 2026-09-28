@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
   <style>
     body { background: linear-gradient(135deg, #003366, #004080); color: white; }
@@ -39,13 +41,13 @@
       </ul>
     </div>
   </header>
+
   <!-- Scroll frase -->
   <div class="scroll-msg text-center bg-success text-white py-2">
     <marquee behavior="scroll" direction="left" scrollamount="6">
       Bienvenido a SmartTransit UNGE – Transporte escolar en tiempo real
     </marquee>
   </div>
-
   <!-- Main -->
   <main class="container my-4">
     <!-- Métricas rápidas -->
@@ -75,7 +77,6 @@
         </div>
       </div>
     </div>
-
     <!-- Mapa -->
     <div class="card mb-4">
       <div class="card-header bg-primary text-white">Mapa Interactivo</div>
@@ -83,6 +84,7 @@
         <div id="map"></div>
       </div>
     </div>
+
     <!-- Tabla de vehículos -->
     <div class="card mb-4">
       <div class="card-header bg-primary text-white d-flex justify-content-between">
@@ -102,6 +104,61 @@
           </thead>
           <tbody id="tablaVehiculos"></tbody>
         </table>
+      </div>
+    </div>
+    <!-- Tabla de paradas CRUD -->
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white d-flex justify-content-between">
+        <span>Paradas</span>
+        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalParada">Añadir Parada</button>
+      </div>
+      <div class="card-body table-responsive">
+        <table class="table table-striped">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th><th>Ruta</th><th>Nombre</th><th>Latitud</th><th>Longitud</th><th>Orden</th><th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaParadas"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal para añadir/editar parada -->
+    <div class="modal fade" id="modalParada" tabindex="-1">
+      <div class="modal-dialog">
+        <form id="formParada" class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">Nueva Parada</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="idParada">
+            <div class="mb-3">
+              <label class="form-label">Ruta</label>
+              <select id="idRuta" class="form-select"></select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nombre</label>
+              <input type="text" id="nombreParada" class="form-control">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Latitud</label>
+              <input type="text" id="latitudParada" class="form-control">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Longitud</label>
+              <input type="text" id="longitudParada" class="form-control">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Orden</label>
+              <input type="number" id="ordenParada" class="form-control">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">Guardar</button>
+          </div>
+        </form>
       </div>
     </div>
     <!-- Gráficas -->
@@ -151,24 +208,56 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     // Inicializar mapa
-    const map = L.map('map').setView([3.75, 8.78], 13);
+    const map = L.map('map').setView([3.7468, 8.7752], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    // Ejemplo: marcador de parada
-    L.marker([3.75, 8.78]).addTo(map).bindPopup("Parada Central");
+    // Cargar paradas desde API
+    async function cargarParadas() {
+      const res = await fetch("http://10.70.200.112:4000/transporteescolar/paradas");
+      const paradas = await res.json();
+      const tabla = document.getElementById("tablaParadas");
+      tabla.innerHTML = "";
+      paradas.forEach(p => {
+        tabla.innerHTML += `
+          <tr>
+            <td>${p.id_parada}</td><td>${p.id_ruta}</td><td>${p.nombre}</td>
+            <td>${p.latitud}</td><td>${p.longitud}</td><td>${p.orden}</td>
+            <td>
+              <button class="btn btn-sm btn-primary" onclick="editarParada(${p.id_parada})">Editar</button>
+              <button class="btn btn-sm btn-danger" onclick="eliminarParada(${p.id_parada})">Eliminar</button>
+            </td>
+          </tr>`;
+        L.marker([p.latitud, p.longitud]).addTo(map).bindPopup(p.nombre);
+      });
+    }
 
-    // Ejemplo: marcador de bus
-    L.marker([3.76, 8.79], {icon: L.icon({iconUrl: 'bus_icon.png', iconSize:[32,32]})})
-      .addTo(map).bindPopup("Bus 1 - ETA 5 min");
+    // Guardar nueva parada
+    document.getElementById("formParada").addEventListener("submit", async e => {
+      e.preventDefault();
+      const parada = {
+        id_ruta: document.getElementById("idRuta").value,
+        nombre: document.getElementById("nombreParada").value,
+        latitud: document.getElementById("latitudParada").value,
+        longitud: document.getElementById("longitudParada").value,
+        orden: document.getElementById("ordenParada").value
+      };
+      await fetch("http://10.70.200.112:4000/transporteescolar/paradas", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify(parada)
+      });
+      cargarParadas();
+      bootstrap.Modal.getInstance(document.getElementById("modalParada")).hide();
+    });
 
     // Tabla de vehículos (ejemplo)
     const vehiculos = [
       {id:1, placa:"GE-1234", conductor:"Juan Pérez", ruta:"Campus Central", capacidad:40, estado:"Activo"},
       {id:2, placa:"GE-5678", conductor:"María Gómez", ruta:"Campus Sur", capacidad:35, estado:"En Ruta"}
     ];
-    const tabla = document.getElementById("tablaVehiculos");
+    const tablaVeh = document.getElementById("tablaVehiculos");
     vehiculos.forEach(v => {
-      tabla.innerHTML += `
+      tablaVeh.innerHTML += `
         <tr>
           <td>${v.id}</td><td>${v.placa}</td><td>${v.conductor}</td>
           <td>${v.ruta}</td><td>${v.capacidad}</td><td>${v.estado}</td>
@@ -198,6 +287,10 @@
     // Mostrar toast de notificación
     const toast = new bootstrap.Toast(document.getElementById('liveToast'));
     toast.show();
+
+    // Inicializar carga de paradas
+    cargarParadas();
   </script>
 </body>
 </html>
+   
