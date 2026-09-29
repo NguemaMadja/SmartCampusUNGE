@@ -4,106 +4,129 @@
   <meta charset="UTF-8">
   <title>SmartTransit UNGE</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Bootstrap y Leaflet -->
+
+  <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    body { background: linear-gradient(135deg, #003366, #004080); color: white; }
+    nav, header, footer { background-color: #004080; color: white; }
+    #map { height: 400px; border-radius: 10px; overflow: hidden; }
+    .card { color: black; }
+  </style>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">SmartTransit UNGE</a>
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <img src="logo/LOGO-UNGE-1.png" alt="Logo UNGE" height="40" class="me-2">
+        SmartTransit UNGE
+      </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link active" href="/smarttransit">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="/transporte">Transporte</a></li>
+          <li class="nav-item"><a class="nav-link" href="/vehiculos">Vehículos</a></li>
+          <li class="nav-item"><a class="nav-link" href="/usuarios">Usuarios</a></li>
+        </ul>
+      </div>
     </div>
   </nav>
-  <main class="container-fluid mt-3">
-    <div class="row">
-      <div class="col-md-8">
-        <div id="map" style="height:500px;"></div>
+  <header class="p-3 d-flex justify-content-between align-items-center">
+    <h4 class="mb-0">Movilidad Inteligente en Tiempo Real</h4>
+    <div class="dropdown">
+      <button class="btn btn-danger dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown">
+        Usuario
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item text-danger" href="#">Cerrar Sesión</a></li>
+        <li><span class="dropdown-item-text">Rol: Superadmin</span></li>
+        <li><span class="dropdown-item-text">ID: 001</span></li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="scroll-msg text-center bg-success text-white py-2">
+    <marquee behavior="scroll" direction="left" scrollamount="6">
+      Bienvenido a SmartTransit UNGE – Transporte escolar en tiempo real
+    </marquee>
+  </div>
+  <main class="container my-4">
+    <div class="row mb-4">
+      <div class="col-md-3"><div class="card text-center"><div class="card-header bg-primary text-white">Buses Activos</div><div class="card-body"><h3 id="busesActivos">0</h3></div></div></div>
+      <div class="col-md-3"><div class="card text-center"><div class="card-header bg-primary text-white">Fuera de Servicio</div><div class="card-body"><h3 id="busesInactivos">0</h3></div></div></div>
+      <div class="col-md-3"><div class="card text-center"><div class="card-header bg-primary text-white">ETA Promedio</div><div class="card-body"><h3 id="etaPromedio">-- min</h3></div></div></div>
+      <div class="col-md-3"><div class="card text-center"><div class="card-header bg-primary text-white">Alertas</div><div class="card-body"><h3 id="alertas">0</h3></div></div></div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">Mapa Interactivo</div>
+      <div class="card-body"><div id="map"></div></div>
+    </div>
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white d-flex justify-content-between">
+        <span>Paradas</span>
+        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalParada">Añadir Parada</button>
       </div>
-      <div class="col-md-4">
-        <h4>Gestión de Paradas</h4>
-        <button class="btn btn-success mb-2" data-bs-toggle="modal" data-bs-target="#modalParada">
-          <i class="bi bi-plus-circle"></i> Nueva Parada
-        </button>
+      <div class="card-body table-responsive">
         <table class="table table-striped">
-          <thead>
+          <thead class="table-dark">
             <tr>
-              <th>ID</th>
-              <th>Vehículo</th>
-              <th>Nombre Parada</th>
-              <th>Latitud</th>
-              <th>Longitud</th>
-              <th>Orden</th>
-              <th>Acciones</th>
+              <th>ID</th><th>Ruta</th><th>Nombre Parada</th><th>Latitud</th><th>Longitud</th><th>Orden</th><th>Acciones</th>
             </tr>
           </thead>
           <tbody id="tablaParadas"></tbody>
         </table>
       </div>
     </div>
-    <div class="row mt-4">
-      <div class="col-12">
-        <h4>Posiciones en Tiempo Real</h4>
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Vehículo</th>
-              <th>Ruta</th>
-              <th>Latitud</th>
-              <th>Longitud</th>
-              <th>Velocidad</th>
-              <th>Dirección</th>
-              <th>ETA</th>
-              <th>Última actualización</th>
-            </tr>
-          </thead>
-          <tbody id="tablaPosiciones"></tbody>
-        </table>
-      </div>
-    </div>
-    <!-- Modal Parada -->
     <div class="modal fade" id="modalParada" tabindex="-1">
       <div class="modal-dialog">
         <form id="formParada" class="modal-content">
-          <div class="modal-header">
+          <div class="modal-header bg-primary text-white">
             <h5 class="modal-title">Nueva Parada</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
             <input type="hidden" id="idParada">
             <div class="mb-3">
-              <label class="form-label">Vehículo</label>
+              <label class="form-label">Ruta (selecciona el bus)</label>
               <select id="idVehiculo" class="form-select"></select>
             </div>
-            <div class="mb-3">
-              <label class="form-label">Nombre de la Parada</label>
-              <input type="text" id="nombreParada" class="form-control">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Latitud</label>
-              <input type="text" id="latitudParada" class="form-control">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Longitud</label>
-              <input type="text" id="longitudParada" class="form-control">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Orden</label>
-              <input type="number" id="ordenParada" class="form-control">
-            </div>
+            <div class="mb-3"><label class="form-label">Nombre de la Parada</label><input type="text" id="nombreParada" class="form-control"></div>
+            <div class="mb-3"><label class="form-label">Latitud</label><input type="text" id="latitudParada" class="form-control"></div>
+            <div class="mb-3"><label class="form-label">Longitud</label><input type="text" id="longitudParada" class="form-control"></div>
+            <div class="mb-3"><label class="form-label">Orden</label><input type="number" id="ordenParada" class="form-control"></div>
           </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-primary">Guardar</button>
-          </div>
+          <div class="modal-footer"><button type="submit" class="btn btn-success">Guardar</button></div>
         </form>
       </div>
     </div>
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">
+        Posiciones en Tiempo Real
+      </div>
+      <div class="card-body table-responsive">
+        <table class="table table-striped">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th><th>Vehículo</th><th>Ruta</th><th>Latitud</th><th>Longitud</th><th>Velocidad</th><th>Dirección</th><th>ETA</th><th>Última actualización</th>
+            </tr>
+          </thead>
+          <tbody id="tablaPosiciones"></tbody>
+        </table>
+      </div>
+    </div>
   </main>
-  <footer class="text-center py-3 bg-dark text-light">
+  <footer class="text-center py-3">
     <p>© 2026 Universidad Nacional de Guinea Ecuatorial – SmartTransit UNGE</p>
     <div class="social-buttons">
       <a href="#" class="btn btn-outline-light"><i class="bi bi-facebook"></i></a>
@@ -120,7 +143,7 @@
     const map = L.map('map').setView([3.7468, 8.7752], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-    // Cargar vehículos
+    // Cargar vehículos para el select
     async function cargarVehiculos() {
       const res = await fetch("/api/vehiculos");
       const vehiculos = (await res.json()).data;
@@ -187,40 +210,40 @@
 
     // Eliminar parada
     async function eliminarParada(id) {
+      if (!confirm("¿Seguro que deseas eliminar esta parada?")) return;
       await fetch(`/api/paradas/${id}`, { method: "DELETE" });
       cargarParadas();
     }
 
-    // Cargar posiciones dinámicas
+    // Cargar posiciones dinámicas desde los kits
     async function cargarPosiciones() {
       const res = await fetch("/api/posiciones");
       const posiciones = (await res.json()).data;
       const tabla = document.getElementById("tablaPosiciones");
       tabla.innerHTML = "";
-      posiciones.forEach(pos => {
+      posiciones.forEach(p => {
         tabla.innerHTML += `
           <tr>
-            <td>${pos.id_posicion}</td>
-            <td>${pos.id_vehiculo}</td>
-            <td>${pos.ruta}</td>
-            <td>${pos.latitud}</td>
-            <td>${pos.longitud}</td>
-            <td>${pos.velocidad} km/h</td>
-            <td>${pos.direccion}</td>
-            <td>${pos.eta_minutos} min</td>
-            <td>${pos.timestamp}</td>
+            <td>${p.id_posicion}</td>
+            <td>${p.id_vehiculo}</td>
+            <td>${p.ruta || ''}</td>
+            <td>${p.latitud}</td>
+            <td>${p.longitud}</td>
+            <td>${p.velocidad || '--'}</td>
+            <td>${p.direccion || '--'}</td>
+            <td>${p.eta_minutos || '--'} min</td>
+            <td>${p.timestamp}</td>
           </tr>`;
-        // Añadir marcador al mapa
-        L.marker([pos.latitud, pos.longitud]).addTo(map)
-          .bindPopup(`Bus ${pos.id_vehiculo} – Ruta ${pos.ruta}<br>${pos.direccion}<br>ETA: ${pos.eta_minutos} min`);
+        L.marker([p.latitud, p.longitud]).addTo(map).bindPopup(`Bus ${p.id_vehiculo} – ${p.ruta || ''}`);
       });
     }
 
-    // Inicialización
+    // Inicializar carga
     cargarVehiculos();
     cargarParadas();
     cargarPosiciones();
-    setInterval(cargarPosiciones, 60000); // refrescar cada 60s
+    // Actualizar posiciones cada 60 segundos
+    setInterval(cargarPosiciones, 60000);
   </script>
 </body>
 </html>
