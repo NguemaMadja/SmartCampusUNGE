@@ -24,6 +24,8 @@ app.use('/api/transporte', require('./routes/transporte'));   // transporte esco
 app.use('/api/vehiculos', require('./routes/vehiculos'));     // gestión de buses
 app.use('/api/paradas', require('./routes/paradas'));         // gestión de paradas (nuevo CRUD)
 app.use('/api/rutas', require('./routes/rutas'));
+app.use('/api/posiciones', require('./routes/posiciones'));   // posiciones dinámicas de buses
+
 
 
 // 🔹 Servir frontend estático
