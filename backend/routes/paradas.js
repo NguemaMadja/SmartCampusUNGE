@@ -22,7 +22,7 @@ router.get('/:id', async (req, res) => {
       'SELECT * FROM paradas WHERE id_parada = $1',
       { bind: [id] }
     );
-    if (rows.length === 0) {
+    if (!rows || rows.length === 0) {
       return res.status(404).json({ success: false, error: 'Parada no encontrada' });
     }
     res.json({ success: true, data: rows[0] });
@@ -37,8 +37,8 @@ router.post('/', async (req, res) => {
   try {
     const { id_ruta, nombre, latitud, longitud, orden } = req.body;
 
-    if (!id_ruta || !nombre || !latitud || !longitud) {
-      return res.status(400).json({ success: false, error: 'Todos los campos obligatorios deben completarse' });
+    if (!id_ruta || !nombre || !latitud || !longitud || !orden) {
+      return res.status(400).json({ success: false, error: 'Todos los campos deben completarse' });
     }
 
     const [rows] = await sequelize.query(
@@ -65,7 +65,7 @@ router.put('/:id', async (req, res) => {
        WHERE id_parada=$6 RETURNING *`,
       { bind: [id_ruta, nombre, latitud, longitud, orden, id] }
     );
-    if (rows.length === 0) {
+    if (!rows || rows.length === 0) {
       return res.status(404).json({ success: false, error: 'Parada no encontrada' });
     }
     res.json({ success: true, data: rows[0] });
@@ -83,7 +83,7 @@ router.delete('/:id', async (req, res) => {
       'DELETE FROM paradas WHERE id_parada=$1 RETURNING *',
       { bind: [id] }
     );
-    if (rows.length === 0) {
+    if (!rows || rows.length === 0) {
       return res.status(404).json({ success: false, error: 'Parada no encontrada' });
     }
     res.json({ success: true, message: 'Parada eliminada correctamente' });
