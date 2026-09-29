@@ -23,6 +23,8 @@ app.use('/api/configuracion', require('./routes/configuracion'));
 app.use('/api/transporte', require('./routes/transporte'));   // transporte escolar (líneas)
 app.use('/api/vehiculos', require('./routes/vehiculos'));     // gestión de buses
 app.use('/api/paradas', require('./routes/paradas'));         // gestión de paradas (nuevo CRUD)
+app.use('/api/rutas', require('./routes/rutas'));
+
 
 // 🔹 Servir frontend estático
 app.use(express.static(path.join(__dirname, '../frontend')));
