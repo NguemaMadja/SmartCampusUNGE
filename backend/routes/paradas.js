@@ -32,19 +32,19 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// 🔹 Crear nueva parada (usando id_vehiculo)
+// 🔹 Crear nueva parada (usando id_vehiculo y nombre_parada)
 router.post('/', async (req, res) => {
   try {
-    const { id_vehiculo, nombre, latitud, longitud, orden } = req.body;
+    const { id_vehiculo, nombre_parada, latitud, longitud, orden } = req.body;
 
-    if (!id_vehiculo || !nombre || !latitud || !longitud || !orden) {
+    if (!id_vehiculo || !nombre_parada || !latitud || !longitud || !orden) {
       return res.status(400).json({ success: false, error: 'Todos los campos deben completarse' });
     }
 
     const [rows] = await sequelize.query(
-      `INSERT INTO paradas (id_vehiculo, nombre, latitud, longitud, orden)
+      `INSERT INTO paradas (id_vehiculo, nombre_parada, latitud, longitud, orden)
        VALUES ($1,$2,$3,$4,$5) RETURNING *`,
-      { bind: [id_vehiculo, nombre, latitud, longitud, orden] }
+      { bind: [id_vehiculo, nombre_parada, latitud, longitud, orden] }
     );
     res.json({ success: true, data: rows[0] });
   } catch (err) {
@@ -57,13 +57,13 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { id_vehiculo, nombre, latitud, longitud, orden } = req.body;
+    const { id_vehiculo, nombre_parada, latitud, longitud, orden } = req.body;
 
     const [rows] = await sequelize.query(
       `UPDATE paradas 
-       SET id_vehiculo=$1, nombre=$2, latitud=$3, longitud=$4, orden=$5
+       SET id_vehiculo=$1, nombre_parada=$2, latitud=$3, longitud=$4, orden=$5
        WHERE id_parada=$6 RETURNING *`,
-      { bind: [id_vehiculo, nombre, latitud, longitud, orden, id] }
+      { bind: [id_vehiculo, nombre_parada, latitud, longitud, orden, id] }
     );
     if (!rows || rows.length === 0) {
       return res.status(404).json({ success: false, error: 'Parada no encontrada' });
