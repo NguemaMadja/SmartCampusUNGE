@@ -112,24 +112,26 @@
           <div class="modal-body">
             <input type="hidden" id="idParada">
             <div class="mb-3">
-              <label class="form-label">Ruta</label>
-              <select id="idRuta" class="form-select"></select>
+              <label class="form-label">Ruta (selecciona la ruta existente)</label>
+              <select id="idRuta" class="form-select">
+                <!-- Se cargará dinámicamente desde la BD -->
+              </select>
             </div>
             <div class="mb-3">
-              <label class="form-label">Nombre</label>
-              <input type="text" id="nombreParada" class="form-control">
+              <label class="form-label">Nombre de la parada</label>
+              <input type="text" id="nombreParada" class="form-control" placeholder="Ej: Parada Campus UNGE">
             </div>
             <div class="mb-3">
-              <label class="form-label">Latitud</label>
-              <input type="text" id="latitudParada" class="form-control">
+              <label class="form-label">Latitud (formato decimal)</label>
+              <input type="text" id="latitudParada" class="form-control" placeholder="Ej: 3.746800">
             </div>
             <div class="mb-3">
-              <label class="form-label">Longitud</label>
-              <input type="text" id="longitudParada" class="form-control">
+              <label class="form-label">Longitud (formato decimal)</label>
+              <input type="text" id="longitudParada" class="form-control" placeholder="Ej: 8.775200">
             </div>
             <div class="mb-3">
-              <label class="form-label">Orden</label>
-              <input type="number" id="ordenParada" class="form-control">
+              <label class="form-label">Orden (posición en la ruta)</label>
+              <input type="number" id="ordenParada" class="form-control" placeholder="Ej: 1">
             </div>
           </div>
           <div class="modal-footer">
@@ -178,7 +180,6 @@
       <a href="#" class="btn btn-outline-light"><i class="bi bi-linkedin"></i></a>
     </div>
   </footer>
-
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -231,7 +232,6 @@
       cargarParadas();
       bootstrap.Modal.getInstance(document.getElementById("modalParada")).hide();
     });
-
     // Editar parada
     async function editarParada(id) {
       const res = await fetch(`/api/paradas/${id}`);
