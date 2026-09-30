@@ -281,7 +281,7 @@
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
       return R * c;
     }
-    // ============================
+        // ============================
     // 📌 CRUD edificios
     // ============================
     document.getElementById("formEdificio").addEventListener("submit", async e => {
@@ -402,6 +402,44 @@
     };
 
     // ============================
+    // 📌 Trazar ruta con Mapbox Directions
+    // ============================
+    async function trazarRuta(origen, destino) {
+      const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${origen.lng},${origen.lat};${destino.lng},${destino.lat}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const route = data.routes[0];
+
+      // Dibujar polilínea
+      if (map.getSource('route')) {
+        map.removeLayer('route');
+        map.removeSource('route');
+      }
+      map.addSource('route', {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          geometry: route.geometry
+        }
+      });
+      map.addLayer({
+        id: 'route',
+        type: 'line',
+        source: 'route',
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: { 'line-color': '#ff0000', 'line-width': 4 }
+      });
+
+      // Mostrar distancia y tiempo
+      const distanciaKm = (route.distance / 1000).toFixed(2);
+      const tiempoMinCoche = (route.duration / 60).toFixed(0);
+      const tiempoMinPie = ((distanciaKm / 5) * 60).toFixed(0); // caminando ~5 km/h
+
+      document.getElementById("distancia").innerText = `Distancia: ${distanciaKm} km`;
+      document.getElementById("tiempo").innerText = `Tiempo estimado: 🚶 ${tiempoMinPie} min | 🚗 ${tiempoMinCoche} min`;
+    }
+
+    // ============================
     // 📌 Inicializar
     // ============================
     cargarEdificios();
@@ -409,3 +447,4 @@
   </script>
 </body>
 </html>
+
