@@ -17,8 +17,8 @@
   <style>
     body { background: linear-gradient(135deg, #003366, #004080); color: white; }
     nav, header, footer { background-color: #004080; color: white; }
-    #map { height: 500px; border-radius: 10px; overflow: hidden; }
-    .card { color: black; }
+    #map { height: 500px; border-radius: 10px; overflow: hidden; transition: all 0.5s ease; }
+    .card { color: black; transition: all 0.5s ease; }
     .scroll-msg { font-weight: bold; }
     .dark-mode { background: #121212; color: #e0e0e0; }
     .info-card {
@@ -32,7 +32,11 @@
       box-shadow: 0 4px 8px rgba(0,0,0,0.3);
       z-index: 1000;
       display: none;
+      animation: slideIn 0.5s forwards;
     }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+    .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 2000; }
   </style>
 </head>
 <body>
@@ -98,6 +102,7 @@
         <button class="btn btn-success" onclick="buscarLugar()">Buscar</button>
         <button class="btn btn-info ms-2" onclick="miUbicacion()">📍 Mi ubicación</button>
       </div>
+      <div id="sugerencias" class="list-group mt-2"></div>
       <div id="mensajeBienvenida" class="mt-2 text-success fw-bold"></div>
     </div>
 
@@ -114,6 +119,8 @@
         </div>
       </div>
     </div>
+    <!-- Toast container -->
+    <div class="toast-container" id="toastContainer"></div>
     <!-- Tabla edificios -->
     <div class="card mb-4">
       <div class="card-header bg-primary text-white d-flex justify-content-between">
@@ -224,7 +231,31 @@
     }
 
     // ============================
-    // 📌 Buscar edificio y trazar ruta con carreteras
+    // 📌 Búsqueda predictiva
+    // ============================
+    document.getElementById("buscadorLugar").addEventListener("input", function() {
+      const query = this.value.toLowerCase();
+      const sugerenciasDiv = document.getElementById("sugerencias");
+      sugerenciasDiv.innerHTML = "";
+      if (query.length > 1) {
+        Object.keys(markers).forEach(nombre => {
+          if (nombre.includes(query)) {
+            const item = document.createElement("button");
+            item.className = "list-group-item list-group-item-action";
+            item.textContent = markers[nombre].data.nombre_lugar;
+            item.onclick = () => {
+              document.getElementById("buscadorLugar").value = markers[nombre].data.nombre_lugar;
+              sugerenciasDiv.innerHTML = "";
+              buscarLugar();
+            };
+            sugerenciasDiv.appendChild(item);
+          }
+        });
+      }
+    });
+
+    // ============================
+    // 📌 Buscar edificio y rutas alternativas
     // ============================
     function buscarLugar() {
       const nombre = document.getElementById("buscadorLugar").value.trim().toLowerCase();
@@ -247,7 +278,9 @@
             show: false,
             addWaypoints: false,
             draggableWaypoints: false,
-            createMarker: () => null
+            createMarker: () => null,
+            router: new L.Routing.OSRMv1({ serviceUrl: 'https://router.project-osrm.org/route/v1' }),
+            alternatives: true
           }).addTo(map);
 
           routingControl.on('routesfound', function(e) {
@@ -267,10 +300,12 @@
     }
 
     // ============================
-    // 📌 Cerrar tarjeta flotante
+    // 📌 Cerrar tarjeta flotante con animación
     // ============================
     function cerrarInfo() {
-      document.getElementById("infoCard").style.display = "none";
+      const card = document.getElementById("infoCard");
+      card.style.animation = "fadeOut 0.5s forwards";
+      setTimeout(() => { card.style.display = "none"; card.style.animation = "slideIn 0.5s forwards"; }, 500);
     }
 
     // ============================
@@ -292,7 +327,7 @@
     // 📌 Favoritos
     // ============================
     function mostrarFavoritos() {
-      alert("Tus favoritos: " + favoritos.join(", "));
+      mostrarToast("⭐ Tus favoritos: " + favoritos.join(", "));
     }
 
     // ============================
@@ -307,7 +342,8 @@
         data: {
           labels: data.labels,
           datasets: [{ label: 'Consultas', data: data.consultas, backgroundColor: 'blue' }]
-        }
+        },
+        options: { animation: { duration: 800, easing: 'easeOutQuart' } }
       });
 
       new Chart(document.getElementById("graficoVisitas"), {
@@ -315,7 +351,8 @@
         data: {
           labels: data.fechas,
           datasets: [{ label: 'Visitas', data: data.visitas, borderColor: 'green' }]
-        }
+        },
+        options: { animation: { duration: 800, easing: 'easeOutQuart' } }
       });
     }
 
@@ -325,6 +362,7 @@
     function exportarCSV() {
       const blob = new Blob([JSON.stringify(favoritos)], { type: "text/csv;charset=utf-8" });
       saveAs(blob, "favoritos.csv");
+      mostrarToast("📂 Exportación CSV completada");
     }
 
     function exportarPDF() {
@@ -333,6 +371,7 @@
       doc.text("Reporte de Favoritos", 10, 10);
       doc.text(favoritos.join(", "), 10, 20);
       doc.save("favoritos.pdf");
+      mostrarToast("📄 Exportación PDF completada");
     }
 
     // ============================
@@ -340,6 +379,7 @@
     // ============================
     function modoPresentacion() {
       document.documentElement.requestFullscreen();
+      mostrarToast("🖥️ Modo presentación activado");
     }
 
     // ============================
@@ -352,7 +392,22 @@
           document.getElementById("buscadorLugar").value = decodedText;
           buscarLugar();
           qr.stop();
+          mostrarToast("📷 QR escaneado: " + decodedText);
         });
+    }
+
+    // ============================
+    // 📌 Notificaciones visuales (toasts)
+    // ============================
+    function mostrarToast(mensaje) {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      toast.className = "toast align-items-center text-bg-primary border-0 show mb-2";
+      toast.role = "alert";
+      toast.innerHTML = `<div class="d-flex"><div class="toast-body">${mensaje}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.parentElement.parentElement.remove()"></button></div>`;
+      container.appendChild(toast);
+      setTimeout(() => { toast.remove(); }, 4000);
     }
 
     // ============================
@@ -360,7 +415,7 @@
     // ============================
     const evtSource = new EventSource("/api/eventos");
     evtSource.onmessage = function(e) {
-      alert("🔔 Evento: " + e.data);
+      mostrarToast("🔔 Evento: " + e.data);
     };
 
     // ============================
