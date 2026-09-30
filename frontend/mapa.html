@@ -7,8 +7,8 @@
 
   <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Mapbox GL -->
-  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+  <!-- Leaflet -->
+  <link href="https://unpkg.com/leaflet/dist/leaflet.css" rel="stylesheet">
   <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
@@ -164,24 +164,23 @@
   </footer>
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
   <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
   <script>
-    mapboxgl.accessToken = 'TU_TOKEN_MAPBOX'; // 🔹 Reemplaza con tu token real
-    const map = new mapboxgl.Map({
-      container: 'map',
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: [8.6732, 3.7166],
-      zoom: 16
-    });
+    // Inicializar mapa Leaflet
+    const map = L.map('map').setView([3.7166, 8.6732], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
     let markers = {};
     let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
     let userLocation = null;
+    let polyline = null;
 
     // ============================
     // 📌 Cargar edificios
@@ -203,10 +202,8 @@
               <button class="btn btn-danger btn-sm" onclick="eliminarEdificio(${e.id_edificio})">Eliminar</button>
             </td>
           </tr>`;
-        const marker = new mapboxgl.Marker({ color: "blue" })
-          .setLngLat([e.longitud, e.latitud])
-          .setPopup(new mapboxgl.Popup().setHTML(`<b>${e.nombre_lugar}</b>`))
-          .addTo(map);
+        const marker = L.marker([e.latitud, e.longitud]).addTo(map)
+          .bindPopup(`<b>${e.nombre_lugar}</b>`);
         markers[e.nombre_lugar.toLowerCase()] = { marker, data: e };
       });
     }
@@ -214,42 +211,26 @@
     // ============================
     // 📌 Buscar edificio y trazar ruta
     // ============================
-    async function buscarLugar() {
+    function buscarLugar() {
       const nombre = document.getElementById("buscadorLugar").value.trim().toLowerCase();
       if (!nombre) return;
       if (markers[nombre]) {
         const { marker, data } = markers[nombre];
-        map.flyTo({ center: marker.getLngLat(), zoom: 18 });
-        marker.togglePopup();
+        map.setView([data.latitud, data.longitud], 18);
+        marker.openPopup();
         document.getElementById("mensajeBienvenida").innerText =
           `Bienvenido al lugar de interés: ${data.nombre_lugar}`;
 
         if (userLocation) {
           const distancia = calcularDistancia(userLocation.lat, userLocation.lng, data.latitud, data.longitud);
           document.getElementById("distancia").innerText = `Distancia: ${distancia.toFixed(2)} km`;
-          document.getElementById("tiempo").innerText = `Tiempo estimado caminando: ${(distancia/5*60).toFixed(0)} min | en coche: ${(distancia/40*60).toFixed(0)} min`;
+          document.getElementById("tiempo").innerText = `Tiempo estimado: 🚶 ${(distancia/5*60).toFixed(0)} min | 🚗 ${(distancia/40*60).toFixed(0)} min`;
 
-          new mapboxgl.Marker({ color: "red" })
-            .setLngLat([userLocation.lng, userLocation.lat])
-            .setPopup(new mapboxgl.Popup().setHTML("📍 Estás aquí"))
-            .addTo(map);
-
-          const route = [ [userLocation.lng, userLocation.lat], [data.longitud, data.latitud] ];
-          map.addSource('route', {
-            'type': 'geojson',
-            'data': {
-              'type': 'Feature',
-              'properties': {},
-              'geometry': { 'type': 'LineString', 'coordinates': route }
-            }
-          });
-          map.addLayer({
-            'id': 'route',
-            'type': 'line',
-            'source': 'route',
-            'layout': { 'line-join': 'round', 'line-cap': 'round' },
-            'paint': { 'line-color': '#ff0000', 'line-width': 4 }
-          });
+          if (polyline) map.removeLayer(polyline);
+          polyline = L.polyline([[userLocation.lat, userLocation.lng], [data.latitud, data.longitud]], {
+            color: 'red',
+            weight: 4
+          }).addTo(map);
         }
       } else {
         document.getElementById("mensajeBienvenida").innerText = "Lugar no encontrado en la base de datos.";
@@ -263,7 +244,11 @@
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(pos => {
           userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          map.flyTo({ center: [userLocation.lng, userLocation.lat], zoom: 17 });
+          L.marker([userLocation.lat, userLocation.lng], { color: 'red' })
+            .addTo(map)
+            .bindPopup("📍 Estás aquí")
+            .openPopup();
+          map.setView([userLocation.lat, userLocation.lng], 17);
         });
       }
     }
@@ -281,7 +266,8 @@
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
       return R * c;
     }
-        // ============================
+
+    // ============================
     // 📌 CRUD edificios
     // ============================
     document.getElementById("formEdificio").addEventListener("submit", async e => {
@@ -325,7 +311,6 @@
       await fetch(`/api/edificios/${id}`, { method: "DELETE" });
       cargarEdificios();
     }
-
     // ============================
     // 📌 Favoritos
     // ============================
@@ -402,44 +387,6 @@
     };
 
     // ============================
-    // 📌 Trazar ruta con Mapbox Directions
-    // ============================
-    async function trazarRuta(origen, destino) {
-      const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${origen.lng},${origen.lat};${destino.lng},${destino.lat}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      const route = data.routes[0];
-
-      // Dibujar polilínea
-      if (map.getSource('route')) {
-        map.removeLayer('route');
-        map.removeSource('route');
-      }
-      map.addSource('route', {
-        type: 'geojson',
-        data: {
-          type: 'Feature',
-          geometry: route.geometry
-        }
-      });
-      map.addLayer({
-        id: 'route',
-        type: 'line',
-        source: 'route',
-        layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: { 'line-color': '#ff0000', 'line-width': 4 }
-      });
-
-      // Mostrar distancia y tiempo
-      const distanciaKm = (route.distance / 1000).toFixed(2);
-      const tiempoMinCoche = (route.duration / 60).toFixed(0);
-      const tiempoMinPie = ((distanciaKm / 5) * 60).toFixed(0); // caminando ~5 km/h
-
-      document.getElementById("distancia").innerText = `Distancia: ${distanciaKm} km`;
-      document.getElementById("tiempo").innerText = `Tiempo estimado: 🚶 ${tiempoMinPie} min | 🚗 ${tiempoMinCoche} min`;
-    }
-
-    // ============================
     // 📌 Inicializar
     // ============================
     cargarEdificios();
@@ -447,4 +394,4 @@
   </script>
 </body>
 </html>
-
+ 
