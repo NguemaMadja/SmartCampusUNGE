@@ -6,7 +6,9 @@ const sequelize = require('../db'); // conexión Sequelize
 // 🔹 Obtener todas las paradas
 router.get('/', async (req, res) => {
   try {
-    const [rows] = await sequelize.query('SELECT * FROM paradas ORDER BY id_parada');
+    const [rows] = await sequelize.query(
+      'SELECT id_parada, id_vehiculo, nombre_parada, latitud, longitud, orden FROM paradas ORDER BY id_parada'
+    );
     res.json({ success: true, data: rows });
   } catch (err) {
     console.error("Error al obtener paradas:", err);
@@ -19,7 +21,7 @@ router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const [rows] = await sequelize.query(
-      'SELECT * FROM paradas WHERE id_parada = $1',
+      'SELECT id_parada, id_vehiculo, nombre_parada, latitud, longitud, orden FROM paradas WHERE id_parada = $1',
       { bind: [id] }
     );
     if (!rows || rows.length === 0) {
@@ -43,7 +45,7 @@ router.post('/', async (req, res) => {
 
     const [rows] = await sequelize.query(
       `INSERT INTO paradas (id_vehiculo, nombre_parada, latitud, longitud, orden)
-       VALUES ($1,$2,$3,$4,$5) RETURNING *`,
+       VALUES ($1,$2,$3,$4,$5) RETURNING id_parada, id_vehiculo, nombre_parada, latitud, longitud, orden`,
       { bind: [id_vehiculo, nombre_parada, latitud, longitud, orden] }
     );
     res.json({ success: true, data: rows[0] });
@@ -62,7 +64,7 @@ router.put('/:id', async (req, res) => {
     const [rows] = await sequelize.query(
       `UPDATE paradas 
        SET id_vehiculo=$1, nombre_parada=$2, latitud=$3, longitud=$4, orden=$5
-       WHERE id_parada=$6 RETURNING *`,
+       WHERE id_parada=$6 RETURNING id_parada, id_vehiculo, nombre_parada, latitud, longitud, orden`,
       { bind: [id_vehiculo, nombre_parada, latitud, longitud, orden, id] }
     );
     if (!rows || rows.length === 0) {
@@ -80,7 +82,7 @@ router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const [rows] = await sequelize.query(
-      'DELETE FROM paradas WHERE id_parada=$1 RETURNING *',
+      'DELETE FROM paradas WHERE id_parada=$1 RETURNING id_parada',
       { bind: [id] }
     );
     if (!rows || rows.length === 0) {
