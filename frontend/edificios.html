@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Edificios UNGE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    body { background: linear-gradient(135deg, #003366, #004080); color: white; }
+    nav, header, footer { background-color: #004080; color: white; }
+    #map { height: 450px; border-radius: 10px; overflow: hidden; }
+    .card { color: black; }
+    .scroll-msg { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <img src="logo/LOGO-UNGE-1.png" alt="Logo UNGE" height="40" class="me-2">
+        Edificios UNGE
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="/smarttransit">SmartTransit</a></li>
+          <li class="nav-item"><a class="nav-link" href="/transporte">Transporte</a></li>
+          <li class="nav-item"><a class="nav-link" href="/vehiculos">Vehículos</a></li>
+          <li class="nav-item"><a class="nav-link active" href="/edificios">Edificios</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header class="p-3 d-flex justify-content-between align-items-center">
+    <h4 class="mb-0">Mapa y Gestión de Edificios</h4>
+    <div class="dropdown">
+      <button class="btn btn-danger dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown">
+        Usuario
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item text-danger" href="#">Cerrar Sesión</a></li>
+        <li><span class="dropdown-item-text">Rol: Superadmin</span></li>
+        <li><span class="dropdown-item-text">ID: 001</span></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- Scroll message -->
+  <div class="scroll-msg text-center bg-success text-white py-2">
+    <marquee behavior="scroll" direction="left" scrollamount="6">
+      Bienvenido al módulo de Edificios – Localiza y gestiona espacios del campus UNGE
+    </marquee>
+  </div>
+  <!-- Main -->
+  <main class="container my-4">
+    <!-- Buscador -->
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">Buscar Edificio</div>
+      <div class="card-body d-flex">
+        <input type="text" id="buscadorLugar" class="form-control me-2" placeholder="Introduce el nombre del edificio...">
+        <button class="btn btn-success" onclick="buscarLugar()">Buscar</button>
+      </div>
+      <div id="mensajeBienvenida" class="mt-2 text-success fw-bold"></div>
+    </div>
+
+    <!-- Mapa -->
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">Mapa Interactivo del Campus</div>
+      <div class="card-body"><div id="map"></div></div>
+    </div>
+
+    <!-- Tabla edificios -->
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white d-flex justify-content-between">
+        <span>Edificios Registrados</span>
+        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalEdificio">Añadir Edificio</button>
+      </div>
+      <div class="card-body table-responsive">
+        <table class="table table-striped">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th><th>Nombre Lugar</th><th>Latitud</th><th>Longitud</th><th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaEdificios"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal nuevo edificio -->
+    <div class="modal fade" id="modalEdificio" tabindex="-1">
+      <div class="modal-dialog">
+        <form id="formEdificio" class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">Nuevo Edificio</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="idEdificio">
+            <div class="mb-3"><label class="form-label">Nombre del Lugar</label><input type="text" id="nombreLugar" class="form-control"></div>
+            <div class="mb-3"><label class="form-label">Latitud</label><input type="text" id="latitudEdificio" class="form-control"></div>
+            <div class="mb-3"><label class="form-label">Longitud</label><input type="text" id="longitudEdificio" class="form-control"></div>
+          </div>
+          <div class="modal-footer"><button type="submit" class="btn btn-success">Guardar</button></div>
+        </form>
+      </div>
+    </div>
+  </main>
+  <!-- Footer -->
+  <footer class="text-center py-3">
+    <p>© 2026 Universidad Nacional de Guinea Ecuatorial – SmartCampus UNGE</p>
+    <div class="social-buttons">
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-facebook"></i></a>
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-twitter"></i></a>
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-instagram"></i></a>
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-linkedin"></i></a>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([3.7166, 8.6732], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    let edificiosData = [];
+    let markers = {};
+    let polyline;
+    // Cargar edificios
+    async function cargarEdificios() {
+      const res = await fetch("/api/edificios");
+      const edificios = (await res.json()).data;
+      edificiosData = edificios;
+      const tabla = document.getElementById("tablaEdificios");
+      tabla.innerHTML = "";
+      edificios.forEach(e => {
+        tabla.innerHTML += `
+          <tr>
+            <td>${e.id_edificio}</td>
+            <td>${e.nombre_lugar}</td>
+            <td>${e.latitud}</td>
+            <td>${e.longitud}</td>
+            <td>
+              <button class="btn btn-warning btn-sm" onclick="editarEdificio(${e.id_edificio})">Editar</button>
+              <button class="btn btn-danger btn-sm" onclick="eliminarEdificio(${e.id_edificio})">Eliminar</button>
+            </td>
+          </tr>`;
+        const marker = L.marker([e.latitud, e.longitud]).addTo(map)
+          .bindPopup(`<b>${e.nombre_lugar}</b><br>Lat: ${e.latitud}, Lng: ${e.longitud}`);
+        markers[e.nombre_lugar.toLowerCase()] = marker;
+      });
+    }
+
+    // Buscar edificio
+    function buscarLugar() {
+      const nombre = document.getElementById("buscadorLugar").value.trim().toLowerCase();
+      if (!nombre) return;
+      if (markers[nombre]) {
+        const marker = markers[nombre];
+        map.setView(marker.getLatLng(), 18);
+        marker.openPopup();
+        document.getElementById("mensajeBienvenida").innerText =
+          `Bienvenido al lugar de interés: ${nombre.toUpperCase()}`;
+        const entrada = markers["entrada-principal"];
+        if (entrada) {
+          if (polyline) map.removeLayer(polyline);
+          polyline = L.polyline([entrada.getLatLng(), marker.getLatLng()],
+            { color: 'red', weight: 4 }).addTo(map);
+        }
+      } else {
+        document.getElementById("mensajeBienvenida").innerText =
+          "Lugar no encontrado en la base de datos.";
+      }
+    }
+    // Guardar nuevo edificio
+    document.getElementById("formEdificio").addEventListener("submit", async e => {
+      e.preventDefault();
+      const edificio = {
+        nombre_lugar: document.getElementById("nombreLugar").value,
+        latitud: document.getElementById("latitudEdificio").value,
+        longitud: document.getElementById("longitudEdificio").value
+      };
+      await fetch("/api/edificios", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify(edificio)
+      });
+      cargarEdificios();
+      bootstrap.Modal.getInstance(document.getElementById("modalEdificio")).hide();
+    });
+
+    // Editar edificio
+    async function editarEdificio(id) {
+      const res = await fetch(`/api/edificios/${id}`);
+      const edificio = (await res.json()).data;
+      document.getElementById("idEdificio").value = edificio.id_edificio;
+      document.getElementById("nombreLugar").value = edificio.nombre_lugar;
+      document.getElementById("latitudEdificio").value = edificio.latitud;
+      document.getElementById("longitudEdificio").value = edificio.longitud;
+      new bootstrap.Modal(document.getElementById("modalEdificio")).show();
+    }
+
+    // Eliminar edificio
+    async function eliminarEdificio(id) {
+      if (!confirm("¿Seguro que deseas eliminar este edificio?")) return;
+      await fetch(`/api/edificios/${id}`, { method: "DELETE" });
+      cargarEdificios();
+    }
+
+    // Inicializar
+    cargarEdificios();
+  </script>
+</body>
+</html>
