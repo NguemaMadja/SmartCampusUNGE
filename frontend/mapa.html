@@ -37,6 +37,39 @@
     @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
     .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 2000; }
+
+
+
+    .btn-gradient-blue {
+  background: linear-gradient(45deg, #007bff, #66b2ff);
+  color: white;
+  font-weight: bold;
+  transition: transform 0.3s, box-shadow 0.3s;
+  border-radius: 8px;
+}
+.btn-gradient-green {
+  background: linear-gradient(45deg, #28a745, #85e085);
+  color: white;
+  font-weight: bold;
+  transition: transform 0.3s, box-shadow 0.3s;
+  border-radius: 8px;
+}
+.btn-gradient-orange {
+  background: linear-gradient(45deg, #fd7e14, #ffb366);
+  color: white;
+  font-weight: bold;
+  transition: transform 0.3s, box-shadow 0.3s;
+  border-radius: 8px;
+}
+.btn-gradient-blue:hover,
+.btn-gradient-green:hover,
+.btn-gradient-orange:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(0,0,0,0.3);
+}
+
+
+    
   </style>
 </head>
 <body>
@@ -51,12 +84,28 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-        <ul class="navbar-nav">
-          <li class="nav-item"><a class="nav-link active" href="/mapa">Mapa</a></li>
-          <a href="panel_superadmin.html">Volver al Panel</a>
-          <li class="nav-item"><a class="nav-link" href="/transporte">Transporte</a></li>
-          
-        </ul>
+       <ul class="navbar-nav d-flex gap-2">
+
+         
+  <li class="nav-item">
+    <a href="/mapa" class="btn btn-gradient-blue shadow-sm">
+      🗺️ Mapa
+    </a>
+  </li>
+  <li class="nav-item">
+    <a href="panel_superadmin.html" class="btn btn-gradient-green shadow-sm">
+      🔙 Volver al Panel
+    </a>
+  </li>
+  <li class="nav-item">
+    <a href="/transporte" class="btn btn-gradient-orange shadow-sm">
+      🚍 Transporte
+    </a>
+  </li>
+</ul>
+
+
+        
       </div>
     </div>
   </nav>
