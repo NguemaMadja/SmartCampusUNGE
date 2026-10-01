@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión Académica - SmartCampusUNGE</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #003366, #004080);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      color: white;
+    }
+    .navbar { background-color: #004080; height: 60px; display: flex; align-items: center; }
+    .scroll-msg { background-color: #008000; color: #fff; font-weight: bold; padding: 5px; flex: 1; margin: 0 60px; }
+    .scroll-msg marquee { font-size: 1.1em; }
+    .container-main { flex: 1; padding: 20px; }
+    .card { margin-bottom: 20px; }
+    footer { background-color: #004080; color: white; padding: 15px; text-align: center; margin-top: auto; }
+    .social-buttons .btn { margin: 5px; border-radius: 50%; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; }
+    .btn-nav { background-color: #006400; color: #fff; border-radius: 8px; padding: 8px 20px; margin: 5px; transition: 0.3s; }
+    .btn-nav:hover { background-color: #004d26; transform: scale(1.05); }
+  </style>
+</head>
+<body>
+  <!-- Cabecera -->
+  <nav class="navbar navbar-dark">
+    <a class="navbar-brand d-flex align-items-center ms-3" href="index.html">
+      <img src="logo/LOGO-UNGE-1.png" alt="Logo UNGE" class="img-fluid me-2" style="max-height:50px;">
+      <span>SmartCampusUNGE</span>
+    </a>
+    <div class="scroll-msg text-center">
+      <marquee behavior="scroll" direction="left" scrollamount="6">
+        Gestión Académica: Facultades, Departamentos, Carreras, Asignaturas y Asistencia
+      </marquee>
+    </div>
+    <div class="dropdown me-3">
+      <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+        Usuario Conectado
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" href="#">ID: 12345</a></li>
+        <li><a class="dropdown-item" href="#">Nombre: Profesor UNGE</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item text-danger" href="logout.html">Cerrar Sesión</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Contenido principal -->
+  <div class="container-main container">
+    <h2 class="text-center text-white mb-4">Gestión Académica</h2>
+
+    <!-- Botones de navegación a módulos -->
+    <div class="d-flex justify-content-center mb-4 flex-wrap">
+      <a href="facultades.html" class="btn btn-primary m-2"><i class="bi bi-building"></i> Facultades</a>
+      <a href="departamentos.html" class="btn btn-success m-2"><i class="bi bi-diagram-3"></i> Departamentos</a>
+      <a href="carreras.html" class="btn btn-warning m-2"><i class="bi bi-mortarboard"></i> Carreras</a>
+      <a href="asignaturas.html" class="btn btn-info m-2"><i class="bi bi-journal-bookmark"></i> Asignaturas</a>
+      <a href="asistencia_profesor.html" class="btn btn-danger m-2"><i class="bi bi-person-check"></i> Asistencia Profesores</a>
+    </div>
+
+    <!-- Botones de navegación adelante/atrás -->
+    <div class="text-center mb-4">
+      <button class="btn-nav" onclick="window.history.back()"><i class="bi bi-arrow-left-circle"></i> Atrás</button>
+      <button class="btn-nav" onclick="window.history.forward()"><i class="bi bi-arrow-right-circle"></i> Adelante</button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
+    <div class="social-buttons">
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-twitter"></i></a>
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-facebook"></i></a>
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-instagram"></i></a>
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-youtube"></i></a>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
