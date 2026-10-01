@@ -190,8 +190,7 @@
 
         tabla.draw();
 
-
-        async function cargarCarreras() {
+async function cargarCarreras() {
   try {
     const res = await fetch(`${API_BASE}/api/carreras`);
     const data = await res.json();
@@ -232,6 +231,8 @@
     console.error("Error cargando carreras:", err);
   }
 }
+
+      
 
         
         
