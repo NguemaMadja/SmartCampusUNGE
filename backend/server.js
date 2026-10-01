@@ -26,7 +26,7 @@ app.use('/api/vehiculos', require('./routes/vehiculos'));     // gestión de bus
 app.use('/api/paradas', require('./routes/paradas'));         // gestión de paradas
 app.use('/api/rutas', require('./routes/rutas'));
 app.use('/api/posiciones', require('./routes/posiciones'));   // posiciones dinámicas de buses
-app.use('/api/edificios', require('./routes/edificios');      // gestión de edificios
+app.use('/api/edificios', require('./routes/edificios'));      // gestión de edificios
 app.use('/api/facultades', require('./routes/facultades'));   // 🔹 NUEVO
 app.use('/api/departamentos', require('./routes/departamentos')); // 🔹 NUEVO
 app.use('/api/carreras', require('./routes/carreras'));       // 🔹 NUEVO
