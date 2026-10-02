@@ -78,7 +78,12 @@
       <input type="text" id="buscarAula" class="form-control w-50 mx-auto" placeholder="Buscar aula...">
     </div>
     <div class="card">
-      <div class="card-header bg-primary text-white">Listado de Aulas</div>
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <span>Listado de Aulas</span>
+        <button class="btn btn-success btn-sm" id="btnNuevaAula">
+          <i class="bi bi-plus-square"></i> Añadir Aula
+        </button>
+      </div>
       <div class="card-body">
         <table class="table table-striped table-hover text-dark" id="tablaAulas">
           <thead class="table-dark">
@@ -86,6 +91,7 @@
               <th>ID</th>
               <th>Nombre</th>
               <th>Capacidad</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -142,7 +148,15 @@
             tabla.row.add([
               a.id_aula,
               a.nombre,
-              a.capacidad
+              a.capacidad,
+              `
+                <button class="btn btn-warning btn-sm me-1" onclick="editarAula(${a.id_aula})">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="eliminarAula(${a.id_aula})">
+                  <i class="bi bi-trash"></i>
+                </button>
+              `
             ]);
           });
         } else {
@@ -169,6 +183,23 @@
         const texto = fila.textContent.toLowerCase();
         fila.style.display = texto.includes(filtro) ? '' : 'none';
       });
+    });
+
+    // Funciones de acción
+    function editarAula(id) {
+      alert(`Editar aula con ID ${id}`);
+      // Aquí puedes abrir un modal o redirigir a un formulario de edición
+    }
+
+    function eliminarAula(id) {
+      alert(`Eliminar aula con ID ${id}`);
+      // Aquí puedes llamar al endpoint DELETE /api/aulas/:id
+    }
+
+    // Botón Añadir Aula
+    document.getElementById('btnNuevaAula').addEventListener('click', () => {
+      alert("Añadir nueva aula");
+      // Aquí puedes abrir un modal o formulario para crear un aula
     });
 
     // Inicializar
