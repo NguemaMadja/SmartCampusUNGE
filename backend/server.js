@@ -14,23 +14,25 @@ sequelize.authenticate()
   .then(() => console.log('Conexión a BD establecida'))
   .catch(err => console.error('Error de conexión:', err));
 
-// 🔹 Rutas API (prefijo /api para evitar conflicto con frontend)
+// 🔹 Rutas API
 app.use('/api/usuarios', require('./routes/usuarios'));
-app.use('/api/sensores', require('./routes/sensores'));       // métricas IoT
-app.use('/api/asistencia', require('./routes/asistencia'));   // asistencia académica (estudiantes)
-app.use('/api/asistencia_profesor', require('./routes/asistencia_profesor')); // 🔹 NUEVO: asistencia de profesores
-app.use('/api/qr', require('./routes/qr'));                   // módulo QR
+app.use('/api/sensores', require('./routes/sensores'));
+app.use('/api/asistencia', require('./routes/asistencia'));   // estudiantes
+app.use('/api/asistencia_profesor', require('./routes/asistencia_profesor')); // profesores
+app.use('/api/qr', require('./routes/qr'));
 app.use('/api/configuracion', require('./routes/configuracion'));
-app.use('/api/transporte', require('./routes/transporte'));   // transporte escolar (líneas)
-app.use('/api/vehiculos', require('./routes/vehiculos'));     // gestión de buses
-app.use('/api/paradas', require('./routes/paradas'));         // gestión de paradas
+app.use('/api/transporte', require('./routes/transporte'));
+app.use('/api/vehiculos', require('./routes/vehiculos'));
+app.use('/api/paradas', require('./routes/paradas'));
 app.use('/api/rutas', require('./routes/rutas'));
-app.use('/api/posiciones', require('./routes/posiciones'));   // posiciones dinámicas de buses
-app.use('/api/edificios', require('./routes/edificios'));      // gestión de edificios
-app.use('/api/facultades', require('./routes/facultades'));   // 🔹 NUEVO
-app.use('/api/departamentos', require('./routes/departamentos')); // 🔹 NUEVO
-app.use('/api/carreras', require('./routes/carreras'));       // 🔹 NUEVO
-app.use('/api/asignaturas', require('./routes/asignaturas')); // 🔹 NUEVO
+app.use('/api/posiciones', require('./routes/posiciones'));
+app.use('/api/edificios', require('./routes/edificios'));
+app.use('/api/facultades', require('./routes/facultades'));
+app.use('/api/departamentos', require('./routes/departamentos'));
+app.use('/api/carreras', require('./routes/carreras'));
+app.use('/api/asignaturas', require('./routes/asignaturas'));
+app.use('/api/aulas', require('./routes/aulas'));             // 🔹 NUEVO
+app.use('/api/profesores', require('./routes/profesores'));   // 🔹 NUEVO
 
 // 🔹 Servir frontend estático
 app.use(express.static(path.join(__dirname, '../frontend')));
@@ -67,6 +69,14 @@ app.get('/asignaturas', (req, res) => {
 
 app.get('/asistencia_profesor', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/asistencia_profesor.html'));
+});
+
+app.get('/aulas', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/aulas.html'));
+});
+
+app.get('/profesores', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/profesores.html'));
 });
 
 // 🔹 Puerto
