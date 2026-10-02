@@ -139,7 +139,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
   <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
   <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
-  
   <script>
     const API_BASE = "https://smartcampusunge.onrender.com";
     let acciones = 0;
@@ -157,51 +156,42 @@
       }
     });
 
+    // Cargar carreras desde la API
+    async function cargarCarreras() {
+      try {
+        const res = await fetch(`${API_BASE}/api/carreras`);
+        if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
 
-      <!-- Lógica CRUD -->
-  <script>
-    const API_BASE = "https://smartcampusunge.onrender.com";
-    let acciones = 0;
+        const data = await res.json();
 
-   async function cargarCarreras() {
-  try {
-    const res = await fetch(`${API_BASE}/api/carreras`);
+        tabla.clear();
 
-    if (!res.ok) {
-      throw new Error(`Error HTTP: ${res.status}`);
+        if (Array.isArray(data.data)) {
+          data.data.forEach(c => {
+            tabla.row.add([
+              c.id_carrera,
+              c.nombre,
+              c.id_departamento,
+              `
+                <button class="btn btn-sm btn-warning" onclick="editarCarrera(${c.id_carrera}, '${c.nombre}', ${c.id_departamento})"><i class="bi bi-pencil"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="eliminarCarrera(${c.id_carrera})"><i class="bi bi-trash"></i></button>
+              `
+            ]);
+          });
+        } else {
+          console.warn("La respuesta no contiene un array en data.data:", data);
+        }
+
+        tabla.draw();
+
+        document.getElementById('totalCarreras').textContent = Array.isArray(data.data) ? data.data.length : 0;
+        if (Array.isArray(data.data) && data.data.length > 0) {
+          document.getElementById('ultimaCarrera').textContent = data.data[data.data.length - 1].nombre;
+        }
+      } catch (err) {
+        console.error("Error cargando carreras:", err);
+      }
     }
-
-    const data = await res.json();
-
-    tabla.clear();
-
-    if (Array.isArray(data.data)) {
-      data.data.forEach(c => {
-        tabla.row.add([
-          c.id_carrera,
-          c.nombre,
-          c.id_departamento,
-          `
-            <button class="btn btn-sm btn-warning" onclick="editarCarrera(${c.id_carrera}, '${c.nombre}', ${c.id_departamento})"><i class="bi bi-pencil"></i></button>
-            <button class="btn btn-sm btn-danger" onclick="eliminarCarrera(${c.id_carrera})"><i class="bi bi-trash"></i></button>
-          `
-        ]);
-      });
-    } else {
-      console.warn("La respuesta no contiene un array en data.data:", data);
-    }
-
-    tabla.draw();
-
-    document.getElementById('totalCarreras').textContent = Array.isArray(data.data) ? data.data.length : 0;
-    if (Array.isArray(data.data) && data.data.length > 0) {
-      document.getElementById('ultimaCarrera').textContent = data.data[data.data.length - 1].nombre;
-    }
-  } catch (err) {
-    console.error("Error cargando carreras:", err);
-  }
-}
-
 
     // Guardar carrera (crear/editar)
     document.getElementById('formCarrera').addEventListener('submit', async e => {
