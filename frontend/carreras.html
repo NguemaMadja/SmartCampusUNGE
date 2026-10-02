@@ -156,6 +156,7 @@
       }
     });
 
+    // Cargar carreras desde la API
     async function cargarCarreras() {
       try {
         const res = await fetch(`${API_BASE}/api/carreras`);
@@ -195,6 +196,7 @@
       }
     }
 
+    // Guardar carrera (crear/editar)
     document.getElementById('formCarrera').addEventListener('submit', async e => {
       e.preventDefault();
       const id = document.getElementById('carreraId').value;
@@ -221,6 +223,7 @@
       document.getElementById('accionesRecientes')?.textContent = acciones;
     });
 
+    // Editar carrera
     function editarCarrera(id, nombre, id_departamento) {
       document.getElementById('carreraId').value = id;
       document.getElementById('nombre').value = nombre;
@@ -228,6 +231,7 @@
       new bootstrap.Modal(document.getElementById('modalCarrera')).show();
     }
 
+    // Eliminar carrera
     async function eliminarCarrera(id) {
       if (confirm('¿Seguro que deseas eliminar esta carrera?')) {
         await fetch(`${API_BASE}/api/carreras/${id}`, { method: 'DELETE' });
