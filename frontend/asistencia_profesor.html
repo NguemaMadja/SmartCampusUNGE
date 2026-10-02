@@ -85,6 +85,9 @@
             <tr>
               <th>ID</th>
               <th>Profesor</th>
+              <th>Facultad</th>
+              <th>Departamento</th>
+              <th>Carrera</th>
               <th>Asignatura</th>
               <th>Aula</th>
               <th>Fecha</th>
@@ -121,7 +124,6 @@
   <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
   <script>
     const API_BASE = "https://smartcampusunge.onrender.com";
-    let acciones = 0;
 
     // Inicializar DataTable con exportación
     const tabla = $('#tablaAsistencia').DataTable({
@@ -134,10 +136,11 @@
       language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' }
     });
 
-    // Cargar asistencias desde la API
-    async function cargarAsistencias() {
+    // Cargar asistencias desde la API con filtros
+    async function cargarAsistencias(filtros = {}) {
       try {
-        const res = await fetch(`${API_BASE}/api/asistencia_profesor`);
+        const query = new URLSearchParams(filtros).toString();
+        const res = await fetch(`${API_BASE}/api/asistencia_profesor?${query}`);
         if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
         const data = await res.json();
 
@@ -148,6 +151,9 @@
             tabla.row.add([
               a.id_asistencia,
               a.profesor,
+              a.facultad,
+              a.departamento,
+              a.carrera,
               a.asignatura,
               a.aula,
               a.fecha,
