@@ -77,6 +77,36 @@
     <div class="search-box text-center">
       <input type="text" id="buscarAsistencia" class="form-control w-50 mx-auto" placeholder="Buscar asistencia...">
     </div>
+
+
+
+    <div class="row mb-3 text-center">
+  <div class="col-md-3">
+    <select id="filtroFacultad" class="form-select">
+      <option value="">-- Facultad --</option>
+      <!-- Opciones dinámicas desde BD -->
+    </select>
+  </div>
+  <div class="col-md-3">
+    <select id="filtroDepartamento" class="form-select">
+      <option value="">-- Departamento --</option>
+    </select>
+  </div>
+  <div class="col-md-3">
+    <select id="filtroCarrera" class="form-select">
+      <option value="">-- Carrera --</option>
+    </select>
+  </div>
+  <div class="col-md-3">
+    <select id="filtroAsignatura" class="form-select">
+      <option value="">-- Asignatura --</option>
+    </select>
+  </div>
+</div>
+
+
+    
+    
     <div class="card">
       <div class="card-header bg-primary text-white">Listado de Asistencias</div>
       <div class="card-body">
@@ -135,6 +165,29 @@
       ],
       language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' }
     });
+
+
+
+
+    // Función para aplicar filtros
+function aplicarFiltros() {
+  const filtros = {
+    facultad: document.getElementById('filtroFacultad').value,
+    departamento: document.getElementById('filtroDepartamento').value,
+    carrera: document.getElementById('filtroCarrera').value,
+    asignatura: document.getElementById('filtroAsignatura').value
+  };
+  cargarAsistencias(filtros);
+}
+
+// Escuchar cambios en los selects
+['filtroFacultad','filtroDepartamento','filtroCarrera','filtroAsignatura'].forEach(id => {
+  document.getElementById(id).addEventListener('change', aplicarFiltros);
+});
+
+
+
+    
 
     // Cargar asistencias desde la API con filtros
     async function cargarAsistencias(filtros = {}) {
