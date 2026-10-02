@@ -163,45 +163,45 @@
     const API_BASE = "https://smartcampusunge.onrender.com";
     let acciones = 0;
 
-    // Cargar carreras desde la API
-    async function cargarCarreras() {
-      try {
-        const res = await fetch(`${API_BASE}/api/carreras`);
-        const data = await res.json();
+   async function cargarCarreras() {
+  try {
+    const res = await fetch(`${API_BASE}/api/carreras`);
 
-        tabla.clear();
-
-        if (Array.isArray(data.data)) {
-          data.data.forEach(c => {
-            tabla.row.add([
-              c.id_carrera,
-              c.nombre,
-              c.id_departamento,
-              `
-                <button class="btn btn-sm btn-warning" onclick="editarCarrera(${c.id_carrera}, '${c.nombre}', ${c.id_departamento})"><i class="bi bi-pencil"></i></button>
-                <button class="btn btn-sm btn-danger" onclick="eliminarCarrera(${c.id_carrera})"><i class="bi bi-trash"></i></button>
-              `
-            ]);
-          });
-        } else {
-          console.warn("La respuesta no contiene un array en data.data:", data);
-        }
-
-        tabla.draw();
-
-        // Actualizar métricas del dashboard
-        const totalCarrerasEl = document.getElementById('totalCarreras');
-        const ultimaCarreraEl = document.getElementById('ultimaCarrera');
-        if (totalCarrerasEl) {
-          totalCarrerasEl.textContent = Array.isArray(data.data) ? data.data.length : 0;
-        }
-        if (ultimaCarreraEl && Array.isArray(data.data) && data.data.length > 0) {
-          ultimaCarreraEl.textContent = data.data[data.data.length - 1].nombre;
-        }
-      } catch (err) {
-        console.error("Error cargando carreras:", err);
-      }
+    if (!res.ok) {
+      throw new Error(`Error HTTP: ${res.status}`);
     }
+
+    const data = await res.json();
+
+    tabla.clear();
+
+    if (Array.isArray(data.data)) {
+      data.data.forEach(c => {
+        tabla.row.add([
+          c.id_carrera,
+          c.nombre,
+          c.id_departamento,
+          `
+            <button class="btn btn-sm btn-warning" onclick="editarCarrera(${c.id_carrera}, '${c.nombre}', ${c.id_departamento})"><i class="bi bi-pencil"></i></button>
+            <button class="btn btn-sm btn-danger" onclick="eliminarCarrera(${c.id_carrera})"><i class="bi bi-trash"></i></button>
+          `
+        ]);
+      });
+    } else {
+      console.warn("La respuesta no contiene un array en data.data:", data);
+    }
+
+    tabla.draw();
+
+    document.getElementById('totalCarreras').textContent = Array.isArray(data.data) ? data.data.length : 0;
+    if (Array.isArray(data.data) && data.data.length > 0) {
+      document.getElementById('ultimaCarrera').textContent = data.data[data.data.length - 1].nombre;
+    }
+  } catch (err) {
+    console.error("Error cargando carreras:", err);
+  }
+}
+
 
     // Guardar carrera (crear/editar)
     document.getElementById('formCarrera').addEventListener('submit', async e => {
