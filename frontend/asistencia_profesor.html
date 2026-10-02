@@ -80,11 +80,11 @@
 
 
 
+
     <div class="row mb-3 text-center">
   <div class="col-md-3">
     <select id="filtroFacultad" class="form-select">
       <option value="">-- Facultad --</option>
-      <!-- Opciones dinámicas desde BD -->
     </select>
   </div>
   <div class="col-md-3">
@@ -103,6 +103,9 @@
     </select>
   </div>
 </div>
+
+
+    
 
 
     
@@ -169,7 +172,36 @@
 
 
 
-    // Función para aplicar filtros
+    // Poblar selects dinámicamente desde la API
+async function cargarOpciones() {
+  try {
+    const [facRes, depRes, carRes, asiRes] = await Promise.all([
+      fetch(`${API_BASE}/api/facultades`),
+      fetch(`${API_BASE}/api/departamentos`),
+      fetch(`${API_BASE}/api/carreras`),
+      fetch(`${API_BASE}/api/asignaturas`)
+    ]);
+
+    const facultades = await facRes.json();
+    const departamentos = await depRes.json();
+    const carreras = await carRes.json();
+    const asignaturas = await asiRes.json();
+
+    const selFac = document.getElementById('filtroFacultad');
+    const selDep = document.getElementById('filtroDepartamento');
+    const selCar = document.getElementById('filtroCarrera');
+    const selAsi = document.getElementById('filtroAsignatura');
+
+    facultades.data.forEach(f => selFac.innerHTML += `<option value="${f.id_facultad}">${f.nombre}</option>`);
+    departamentos.data.forEach(d => selDep.innerHTML += `<option value="${d.id_departamento}">${d.nombre}</option>`);
+    carreras.data.forEach(c => selCar.innerHTML += `<option value="${c.id_carrera}">${c.nombre}</option>`);
+    asignaturas.data.forEach(a => selAsi.innerHTML += `<option value="${a.id_asignatura}">${a.nombre}</option>`);
+  } catch (err) {
+    console.error("Error cargando opciones:", err);
+  }
+}
+
+// Aplicar filtros automáticamente al cambiar selects
 function aplicarFiltros() {
   const filtros = {
     facultad: document.getElementById('filtroFacultad').value,
@@ -180,10 +212,16 @@ function aplicarFiltros() {
   cargarAsistencias(filtros);
 }
 
-// Escuchar cambios en los selects
 ['filtroFacultad','filtroDepartamento','filtroCarrera','filtroAsignatura'].forEach(id => {
   document.getElementById(id).addEventListener('change', aplicarFiltros);
 });
+
+// Inicializar opciones y asistencias
+cargarOpciones();
+cargarAsistencias();
+
+
+    
 
 
 
