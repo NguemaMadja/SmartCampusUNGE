@@ -73,7 +73,6 @@
     <div class="text-center mb-4">
       <button class="btn-nav" onclick="window.history.back()"><i class="bi bi-arrow-left-circle"></i> Atrás</button>
       <button class="btn-nav" onclick="window.history.forward()"><i class="bi bi-arrow-right-circle"></i> Adelante</button>
-      <!-- Botón nuevo para vínculos académicos -->
       <a href="relaciones.html" class="btn-nav"><i class="bi bi-link"></i> Vínculo Académico</a>
     </div>
     <div class="search-box text-center">
@@ -142,8 +141,6 @@
       <div class="modal-body">
         <input type="hidden" id="editarIdProfesor">
         <div class="mb-3">
-          <label for="editarNombreProfesor" class="form-label">
-                    <div class="mb-3">
           <label for="editarNombreProfesor" class="form-label">Nombre</label>
           <input type="text" class="form-control" id="editarNombreProfesor" required>
         </div>
@@ -198,6 +195,9 @@
       language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' }
     });
 
+
+
+
     // Cargar profesores desde la API
     async function cargarProfesores() {
       try {
@@ -247,7 +247,6 @@
         fila.style.display = texto.includes(filtro) ? '' : 'none';
       });
     });
-
     // Funciones de acción
     function editarProfesor(id) {
       const fila = tabla.row((idx, data) => data[0] == id).data();
@@ -324,3 +323,4 @@
   </script>
 </body>
 </html>
+    
