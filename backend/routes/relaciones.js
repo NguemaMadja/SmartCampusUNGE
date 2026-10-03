@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../db'); // Ajusta según tu configuración de conexión
+const pool = require('../db'); // conexión a PostgreSQL
 
 // =======================
 // GET: Listar todas las relaciones
@@ -36,7 +36,6 @@ router.post('/', async (req, res) => {
   try {
     const { id_profesor, facultades, departamentos, carreras, asignaturas } = req.body;
 
-    // Insertar múltiples vínculos según arrays recibidos
     let inserted = [];
     for (const f of facultades) {
       for (const d of departamentos) {
@@ -68,7 +67,6 @@ router.put('/:id', async (req, res) => {
     const { id } = req.params;
     const { facultades, departamentos, carreras, asignaturas } = req.body;
 
-    // Actualizar la relación principal (ejemplo: tomar el primer valor de cada array)
     const result = await pool.query(
       `UPDATE relaciones
        SET id_facultad = $1,
