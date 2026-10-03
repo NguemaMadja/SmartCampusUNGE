@@ -194,7 +194,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
   <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
   <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
-  <script>
+
+  
+   <script>
     const API_BASE = "https://smartcampusunge.onrender.com";
 
     // Inicializar DataTable
@@ -245,6 +247,59 @@
       }
     }
 
+    // Cargar opciones en los selects desde la BD
+    async function cargarOpciones() {
+      try {
+        // Profesores
+        const resProf = await fetch(`${API_BASE}/api/profesores`);
+        const dataProf = await resProf.json();
+        const profesorSelect = document.getElementById('profesorSelect');
+        profesorSelect.innerHTML = '';
+        dataProf.data.forEach(p => {
+          profesorSelect.innerHTML += `<option value="${p.id_profesor}">${p.nombre}</option>`;
+        });
+
+        // Facultades
+        const resFac = await fetch(`${API_BASE}/api/facultades`);
+        const dataFac = await resFac.json();
+        const facultadSelect = document.getElementById('facultadSelect');
+        facultadSelect.innerHTML = '';
+        dataFac.data.forEach(f => {
+          facultadSelect.innerHTML += `<option value="${f.id_facultad}">${f.nombre}</option>`;
+        });
+
+        // Departamentos
+        const resDep = await fetch(`${API_BASE}/api/departamentos`);
+        const dataDep = await resDep.json();
+        const departamentoSelect = document.getElementById('departamentoSelect');
+        departamentoSelect.innerHTML = '';
+        dataDep.data.forEach(d => {
+          departamentoSelect.innerHTML += `<option value="${d.id_departamento}">${d.nombre}</option>`;
+        });
+
+        // Carreras
+        const resCar = await fetch(`${API_BASE}/api/carreras`);
+        const dataCar = await resCar.json();
+        const carreraSelect = document.getElementById('carreraSelect');
+        carreraSelect.innerHTML = '';
+        dataCar.data.forEach(c => {
+          carreraSelect.innerHTML += `<option value="${c.id_carrera}">${c.nombre}</option>`;
+        });
+
+        // Asignaturas
+        const resAsig = await fetch(`${API_BASE}/api/asignaturas`);
+        const dataAsig = await resAsig.json();
+        const asignaturaSelect = document.getElementById('asignaturaSelect');
+        asignaturaSelect.innerHTML = '';
+        dataAsig.data.forEach(a => {
+          asignaturaSelect.innerHTML += `<option value="${a.id_asignatura}">${a.nombre}</option>`;
+        });
+
+      } catch (err) {
+        console.error("Error cargando opciones:", err);
+      }
+    }
+
     // Funciones de acción
     function editarRelacion(id) {
       document.getElementById('editarIdRelacion').value = id;
@@ -265,6 +320,7 @@
 
     // Botón Nueva Relación
     document.getElementById('btnNuevaRelacion').addEventListener('click', () => {
+      cargarOpciones(); // 🔹 Cargar datos desde la BD
       const modal = new bootstrap.Modal(document.getElementById('modalNuevaRelacion'));
       modal.show();
     });
