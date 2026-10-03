@@ -99,10 +99,7 @@
       </div>
     </div>
   </div>
-
-
-
-  <!-- Modal Añadir Aula -->
+<!-- Modal Añadir Aula -->
 <div class="modal fade" id="modalNuevaAula" tabindex="-1" aria-labelledby="modalNuevaAulaLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form class="modal-content" id="formNuevaAula">
@@ -127,8 +124,7 @@
     </form>
   </div>
 </div>
-
-  <!-- Modal Editar Aula -->
+<!-- Modal Editar Aula -->
 <div class="modal fade" id="modalEditarAula" tabindex="-1" aria-labelledby="modalEditarAulaLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form class="modal-content" id="formEditarAula">
@@ -154,9 +150,6 @@
     </form>
   </div>
 </div>
-
-
-  
   <footer>
     <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
     <div class="social-buttons">
@@ -217,8 +210,6 @@
               `
             ]);
           });
-        } else {
-          console.warn("La respuesta no contiene un array en data.data:", data);
         }
 
         tabla.draw();
@@ -242,86 +233,72 @@
         fila.style.display = texto.includes(filtro) ? '' : 'none';
       });
     });
-
     // Funciones de acción
     function editarAula(id) {
-      alert(`Editar aula con ID ${id}`);
-      // Aquí puedes abrir un modal o redirigir a un formulario de edición
+      const fila = tabla.row((idx, data) => data[0] == id).data();
+      document.getElementById('editarIdAula').value = id;
+      document.getElementById('editarNombreAula').value = fila[1];
+      document.getElementById('editarCapacidadAula').value = fila[2];
+      const modal = new bootstrap.Modal(document.getElementById('modalEditarAula'));
+      modal.show();
     }
 
-    function eliminarAula(id) {
-      alert(`Eliminar aula con ID ${id}`);
-      // Aquí puedes llamar al endpoint DELETE /api/aulas/:id
+    async function eliminarAula(id) {
+      if (confirm(`¿Seguro que deseas eliminar el aula con ID ${id}?`)) {
+        try {
+          const res = await fetch(`${API_BASE}/api/aulas/${id}`, { method: 'DELETE' });
+          if (res.ok) cargarAulas();
+        } catch (err) {
+          console.error("Error eliminando aula:", err);
+        }
+      }
     }
-
-
 
     // Botón Añadir Aula abre modal
-document.getElementById('btnNuevaAula').addEventListener('click', () => {
-  const modal = new bootstrap.Modal(document.getElementById('modalNuevaAula'));
-  modal.show();
-});
-
-// Guardar nueva aula
-document.getElementById('formNuevaAula').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const nombre = document.getElementById('nombreAula').value;
-  const capacidad = document.getElementById('capacidadAula').value;
-
-  try {
-    const res = await fetch(`${API_BASE}/api/aulas`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nombre, capacidad })
-    });
-    if (res.ok) {
-      cargarAulas();
-      bootstrap.Modal.getInstance(document.getElementById('modalNuevaAula')).hide();
-    }
-  } catch (err) {
-    console.error("Error guardando aula:", err);
-  }
-});
-
-// Editar aula abre modal con datos
-function editarAula(id) {
-  const fila = tabla.row((idx, data) => data[0] == id).data();
-  document.getElementById('editarIdAula').value = id;
-  document.getElementById('editarNombreAula').value = fila[1];
-  document.getElementById('editarCapacidadAula').value = fila[2];
-  const modal = new bootstrap.Modal(document.getElementById('modalEditarAula'));
-  modal.show();
-}
-
-// Guardar cambios de edición
-document.getElementById('formEditarAula').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const id = document.getElementById('editarIdAula').value;
-  const nombre = document.getElementById('editarNombreAula').value;
-  const capacidad = document.getElementById('editarCapacidadAula').value;
-
-  try {
-    const res = await fetch(`${API_BASE}/api/aulas/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nombre, capacidad })
-    });
-    if (res.ok) {
-      cargarAulas();
-      bootstrap.Modal.getInstance(document.getElementById('modalEditarAula')).hide();
-    }
-  } catch (err) {
-    console.error("Error actualizando aula:", err);
-  }
-}
-
-
-
-    
-    // Botón Añadir Aula
     document.getElementById('btnNuevaAula').addEventListener('click', () => {
-      alert("Añadir nueva aula");
-      // Aquí puedes abrir un modal o formulario para crear un aula
+      const modal = new bootstrap.Modal(document.getElementById('modalNuevaAula'));
+      modal.show();
+    });
+
+    // Guardar nueva aula
+    document.getElementById('formNuevaAula').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nombre = document.getElementById('nombreAula').value;
+      const capacidad = document.getElementById('capacidadAula').value;
+      try {
+        const res = await fetch(`${API_BASE}/api/aulas`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre, capacidad })
+        });
+        if (res.ok) {
+          cargarAulas();
+          bootstrap.Modal.getInstance(document.getElementById('modalNuevaAula')).hide();
+        }
+      } catch (err) {
+        console.error("Error guardando aula:", err);
+      }
+    });
+
+    // Guardar cambios de edición
+    document.getElementById('formEditarAula').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('editarIdAula').value;
+      const nombre = document.getElementById('editarNombreAula').value;
+      const capacidad = document.getElementById('editarCapacidadAula').value;
+      try {
+        const res = await fetch(`${API_BASE}/api/aulas/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre, capacidad })
+        });
+        if (res.ok) {
+          cargarAulas();
+          bootstrap.Modal.getInstance(document.getElementById('modalEditarAula')).hide();
+        }
+      } catch (err) {
+        console.error("Error actualizando aula:", err);
+      }
     });
 
     // Inicializar
