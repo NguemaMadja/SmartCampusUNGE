@@ -17,8 +17,9 @@ sequelize.authenticate()
 // 🔹 Rutas API
 app.use('/api/usuarios', require('./routes/usuarios'));
 app.use('/api/sensores', require('./routes/sensores'));
-app.use('/api/asistencia', require('./routes/asistencia'));   // estudiantes
+app.use('/api/asistencia', require('./routes/asistencia'));              // estudiantes
 app.use('/api/asistencia_profesor', require('./routes/asistencia_profesor')); // profesores
+app.use('/api/asistencia/manual', require('./routes/asistencia_manual'));     // 🔹 NUEVO: asistencia manual admin
 app.use('/api/qr', require('./routes/qr'));
 app.use('/api/configuracion', require('./routes/configuracion'));
 app.use('/api/transporte', require('./routes/transporte'));
@@ -31,8 +32,8 @@ app.use('/api/facultades', require('./routes/facultades'));
 app.use('/api/departamentos', require('./routes/departamentos'));
 app.use('/api/carreras', require('./routes/carreras'));
 app.use('/api/asignaturas', require('./routes/asignaturas'));
-app.use('/api/aulas', require('./routes/aulas'));             // 🔹 NUEVO
-app.use('/api/profesores', require('./routes/profesores'));   // 🔹 NUEVO
+app.use('/api/aulas', require('./routes/aulas'));                        // 🔹 NUEVO
+app.use('/api/profesores', require('./routes/profesores'));              // 🔹 NUEVO
 
 // 🔹 Servir frontend estático
 app.use(express.static(path.join(__dirname, '../frontend')));
