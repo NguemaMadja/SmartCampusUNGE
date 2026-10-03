@@ -99,6 +99,64 @@
       </div>
     </div>
   </div>
+
+
+
+  <!-- Modal Añadir Aula -->
+<div class="modal fade" id="modalNuevaAula" tabindex="-1" aria-labelledby="modalNuevaAulaLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form class="modal-content" id="formNuevaAula">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="modalNuevaAulaLabel"><i class="bi bi-plus-square"></i> Añadir Aula</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="nombreAula" class="form-label">Nombre del Aula</label>
+          <input type="text" class="form-control" id="nombreAula" required>
+        </div>
+        <div class="mb-3">
+          <label for="capacidadAula" class="form-label">Capacidad</label>
+          <input type="number" class="form-control" id="capacidadAula" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+  <!-- Modal Editar Aula -->
+<div class="modal fade" id="modalEditarAula" tabindex="-1" aria-labelledby="modalEditarAulaLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form class="modal-content" id="formEditarAula">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title" id="modalEditarAulaLabel"><i class="bi bi-pencil"></i> Editar Aula</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editarIdAula">
+        <div class="mb-3">
+          <label for="editarNombreAula" class="form-label">Nombre del Aula</label>
+          <input type="text" class="form-control" id="editarNombreAula" required>
+        </div>
+        <div class="mb-3">
+          <label for="editarCapacidadAula" class="form-label">Capacidad</label>
+          <input type="number" class="form-control" id="editarCapacidadAula" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-warning">Actualizar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+  
   <footer>
     <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
     <div class="social-buttons">
@@ -196,6 +254,70 @@
       // Aquí puedes llamar al endpoint DELETE /api/aulas/:id
     }
 
+
+
+    // Botón Añadir Aula abre modal
+document.getElementById('btnNuevaAula').addEventListener('click', () => {
+  const modal = new bootstrap.Modal(document.getElementById('modalNuevaAula'));
+  modal.show();
+});
+
+// Guardar nueva aula
+document.getElementById('formNuevaAula').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const nombre = document.getElementById('nombreAula').value;
+  const capacidad = document.getElementById('capacidadAula').value;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/aulas`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, capacidad })
+    });
+    if (res.ok) {
+      cargarAulas();
+      bootstrap.Modal.getInstance(document.getElementById('modalNuevaAula')).hide();
+    }
+  } catch (err) {
+    console.error("Error guardando aula:", err);
+  }
+});
+
+// Editar aula abre modal con datos
+function editarAula(id) {
+  const fila = tabla.row((idx, data) => data[0] == id).data();
+  document.getElementById('editarIdAula').value = id;
+  document.getElementById('editarNombreAula').value = fila[1];
+  document.getElementById('editarCapacidadAula').value = fila[2];
+  const modal = new bootstrap.Modal(document.getElementById('modalEditarAula'));
+  modal.show();
+}
+
+// Guardar cambios de edición
+document.getElementById('formEditarAula').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('editarIdAula').value;
+  const nombre = document.getElementById('editarNombreAula').value;
+  const capacidad = document.getElementById('editarCapacidadAula').value;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/aulas/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, capacidad })
+    });
+    if (res.ok) {
+      cargarAulas();
+      bootstrap.Modal.getInstance(document.getElementById('modalEditarAula')).hide();
+    }
+  } catch (err) {
+    console.error("Error actualizando aula:", err);
+  }
+}
+
+
+
+    
     // Botón Añadir Aula
     document.getElementById('btnNuevaAula').addEventListener('click', () => {
       alert("Añadir nueva aula");
