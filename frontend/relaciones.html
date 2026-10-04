@@ -102,7 +102,11 @@
       </div>
     </div>
   </div>
-<!-- Modal Nueva Relación -->
+
+
+  
+
+  <!-- Modal Nueva Relación -->
 <div class="modal fade" id="modalNuevaRelacion" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <form class="modal-content" id="formNuevaRelacion">
@@ -139,6 +143,7 @@
     </form>
   </div>
 </div>
+
 <!-- Modal Editar Relación -->
 <div class="modal fade" id="modalEditarRelacion" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
@@ -173,206 +178,209 @@
     </form>
   </div>
 </div>
-  <footer>
-    <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
-    <div class="social-buttons">
-      <a href="#" class="btn btn-outline-light"><i class="bi bi-twitter"></i></a>
-      <a href="#" class="btn btn-outline-light"><i class="bi bi-facebook"></i></a>
-      <a href="#" class="btn btn-outline-light"><i class="bi bi-instagram"></i></a>
-      <a href="#" class="btn btn-outline-light"><i class="bi bi-youtube"></i></a>
-    </div>
-  </footer>
-  <!-- Librerías externas -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-  <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-  <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-  <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-  <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<footer>
+  <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
+  <div class="social-buttons">
+    <a href="#" class="btn btn-outline-light"><i class="bi bi-twitter"></i></a>
+    <a href="#" class="btn btn-outline-light"><i class="bi bi-facebook"></i></a>
+    <a href="#" class="btn btn-outline-light"><i class="bi bi-instagram"></i></a>
+    <a href="#" class="btn btn-outline-light"><i class="bi bi-youtube"></i></a>
+  </div>
+</footer>
 
-  
-   <script>
-    const API_BASE = "https://smartcampusunge.onrender.com";
+<!-- Librerías externas -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script>
+const API_BASE = "https://smartcampusunge.onrender.com";
 
-    // Inicializar DataTable
-    const tablaRelaciones = $('#tablaRelaciones').DataTable({
-      dom: 'Bfrtip',
-      buttons: [
-        { extend: 'excelHtml5', text: 'Exportar a Excel', className: 'btn btn-success' },
-        { extend: 'pdfHtml5', text: 'Exportar a PDF', className: 'btn btn-danger' },
-        { extend: 'print', text: 'Imprimir', className: 'btn btn-info' }
-      ],
-      language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' }
+// Inicializar DataTable
+const tablaRelaciones = $('#tablaRelaciones').DataTable({
+  dom: 'Bfrtip',
+  buttons: [
+    { extend: 'excelHtml5', text: 'Exportar a Excel', className: 'btn btn-success' },
+    { extend: 'pdfHtml5', text: 'Exportar a PDF', className: 'btn btn-danger' },
+    { extend: 'print', text: 'Imprimir', className: 'btn btn-info' }
+  ],
+  language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' }
+});
+
+// Cargar relaciones
+async function cargarRelaciones() {
+  try {
+    const res = await fetch(`${API_BASE}/api/relaciones`);
+    const data = await res.json();
+    tablaRelaciones.clear();
+    if (Array.isArray(data.data)) {
+      data.data.forEach(r => {
+        tablaRelaciones.row.add([
+          r.id_relacion,
+          r.profesor,
+          r.facultad,
+          r.departamento,
+          r.carrera,
+          r.asignatura,
+          `
+            <button class="btn btn-warning btn-sm me-1" onclick="editarRelacion(${r.id_relacion})">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="eliminarRelacion(${r.id_relacion})">
+              <i class="bi bi-trash"></i>
+            </button>
+          `
+        ]);
+      });
+    }
+    tablaRelaciones.draw();
+    document.getElementById('totalRelaciones').textContent = data.data.length;
+    if (data.data.length > 0) {
+      document.getElementById('ultimaRelacion').textContent = data.data[data.data.length - 1].profesor;
+    }
+    document.getElementById('profesoresVinculados').textContent = [...new Set(data.data.map(r => r.profesor))].length;
+  } catch (err) {
+    console.error("Error cargando relaciones:", err);
+  }
+}
+// Cargar opciones en los selects desde la BD
+async function cargarOpciones() {
+  try {
+    // Profesores
+    const resProf = await fetch(`${API_BASE}/api/profesores`);
+    const dataProf = await resProf.json();
+    const profesorSelect = document.getElementById('profesorSelect');
+    profesorSelect.innerHTML = '';
+    dataProf.data.forEach(p => {
+      profesorSelect.innerHTML += `<option value="${p.id_profesor}">${p.nombre}</option>`;
     });
 
-    // Cargar relaciones
-    async function cargarRelaciones() {
-      try {
-        const res = await fetch(`${API_BASE}/api/relaciones`);
-        const data = await res.json();
-        tablaRelaciones.clear();
-        if (Array.isArray(data.data)) {
-          data.data.forEach(r => {
-            tablaRelaciones.row.add([
-              r.id_relacion,
-              r.profesor,
-              r.facultad,
-              r.departamento,
-              r.carrera,
-              r.asignatura,
-              `
-                <button class="btn btn-warning btn-sm me-1" onclick="editarRelacion(${r.id_relacion})">
-                  <i class="bi bi-pencil"></i>
-                </button>
-                <button class="btn btn-danger btn-sm" onclick="eliminarRelacion(${r.id_relacion})">
-                  <i class="bi bi-trash"></i>
-                </button>
-              `
-            ]);
-          });
-        }
-        tablaRelaciones.draw();
-        document.getElementById('totalRelaciones').textContent = data.data.length;
-        if (data.data.length > 0) {
-          document.getElementById('ultimaRelacion').textContent = data.data[data.data.length - 1].profesor;
-        }
-        document.getElementById('profesoresVinculados').textContent = [...new Set(data.data.map(r => r.profesor))].length;
-      } catch (err) {
-        console.error("Error cargando relaciones:", err);
-      }
-    }
-
-    // Cargar opciones en los selects desde la BD
-    async function cargarOpciones() {
-      try {
-        // Profesores
-        const resProf = await fetch(`${API_BASE}/api/profesores`);
-        const dataProf = await resProf.json();
-        const profesorSelect = document.getElementById('profesorSelect');
-        profesorSelect.innerHTML = '';
-        dataProf.data.forEach(p => {
-          profesorSelect.innerHTML += `<option value="${p.id_profesor}">${p.nombre}</option>`;
-        });
-
-        // Facultades
-        const resFac = await fetch(`${API_BASE}/api/facultades`);
-        const dataFac = await resFac.json();
-        const facultadSelect = document.getElementById('facultadSelect');
-        facultadSelect.innerHTML = '';
-        dataFac.data.forEach(f => {
-          facultadSelect.innerHTML += `<option value="${f.id_facultad}">${f.nombre}</option>`;
-        });
-
-        // Departamentos
-        const resDep = await fetch(`${API_BASE}/api/departamentos`);
-        const dataDep = await resDep.json();
-        const departamentoSelect = document.getElementById('departamentoSelect');
-        departamentoSelect.innerHTML = '';
-        dataDep.data.forEach(d => {
-          departamentoSelect.innerHTML += `<option value="${d.id_departamento}">${d.nombre}</option>`;
-        });
-
-        // Carreras
-        const resCar = await fetch(`${API_BASE}/api/carreras`);
-        const dataCar = await resCar.json();
-        const carreraSelect = document.getElementById('carreraSelect');
-        carreraSelect.innerHTML = '';
-        dataCar.data.forEach(c => {
-          carreraSelect.innerHTML += `<option value="${c.id_carrera}">${c.nombre}</option>`;
-        });
-
-        // Asignaturas
-        const resAsig = await fetch(`${API_BASE}/api/asignaturas`);
-        const dataAsig = await resAsig.json();
-        const asignaturaSelect = document.getElementById('asignaturaSelect');
-        asignaturaSelect.innerHTML = '';
-        dataAsig.data.forEach(a => {
-          asignaturaSelect.innerHTML += `<option value="${a.id_asignatura}">${a.nombre}</option>`;
-        });
-
-      } catch (err) {
-        console.error("Error cargando opciones:", err);
-      }
-    }
-
-    // Funciones de acción
-    function editarRelacion(id) {
-      document.getElementById('editarIdRelacion').value = id;
-      const modal = new bootstrap.Modal(document.getElementById('modalEditarRelacion'));
-      modal.show();
-    }
-
-    async function eliminarRelacion(id) {
-      if (confirm(`¿Seguro que deseas eliminar la relación con ID ${id}?`)) {
-        try {
-          const res = await fetch(`${API_BASE}/api/relaciones/${id}`, { method: 'DELETE' });
-          if (res.ok) cargarRelaciones();
-        } catch (err) {
-          console.error("Error eliminando relación:", err);
-        }
-      }
-    }
-
-    // Botón Nueva Relación
-    document.getElementById('btnNuevaRelacion').addEventListener('click', () => {
-      cargarOpciones(); // 🔹 Cargar datos desde la BD
-      const modal = new bootstrap.Modal(document.getElementById('modalNuevaRelacion'));
-      modal.show();
+    // Facultades
+    const resFac = await fetch(`${API_BASE}/api/facultades`);
+    const dataFac = await resFac.json();
+    const facultadSelect = document.getElementById('facultadSelect');
+    facultadSelect.innerHTML = '';
+    dataFac.data.forEach(f => {
+      facultadSelect.innerHTML += `<option value="${f.id_facultad}">${f.nombre}</option>`;
     });
 
-    // Guardar nueva relación
-    document.getElementById('formNuevaRelacion').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const id_profesor = document.getElementById('profesorSelect').value;
-      const facultades = Array.from(document.getElementById('facultadSelect').selectedOptions).map(o => o.value);
-      const departamentos = Array.from(document.getElementById('departamentoSelect').selectedOptions).map(o => o.value);
-      const carreras = Array.from(document.getElementById('carreraSelect').selectedOptions).map(o => o.value);
-      const asignaturas = Array.from(document.getElementById('asignaturaSelect').selectedOptions).map(o => o.value);
-      try {
-        const res = await fetch(`${API_BASE}/api/relaciones`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id_profesor, facultades, departamentos, carreras, asignaturas })
-        });
-        if (res.ok) {
-          cargarRelaciones();
-          bootstrap.Modal.getInstance(document.getElementById('modalNuevaRelacion')).hide();
-        }
-      } catch (err) {
-        console.error("Error guardando relación:", err);
-      }
+    // Departamentos
+    const resDep = await fetch(`${API_BASE}/api/departamentos`);
+    const dataDep = await resDep.json();
+    const departamentoSelect = document.getElementById('departamentoSelect');
+    departamentoSelect.innerHTML = '';
+    dataDep.data.forEach(d => {
+      departamentoSelect.innerHTML += `<option value="${d.id_departamento}">${d.nombre}</option>`;
     });
 
-    // Guardar edición
-    document.getElementById('formEditarRelacion').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const id = document.getElementById('editarIdRelacion').value;
-      const facultades = Array.from(document.getElementById('editarFacultadSelect').selectedOptions).map(o => o.value);
-      const departamentos = Array.from(document.getElementById('editarDepartamentoSelect').selectedOptions).map(o => o.value);
-      const carreras = Array.from(document.getElementById('editarCarreraSelect').selectedOptions).map(o => o.value);
-      const asignaturas = Array.from(document.getElementById('editarAsignaturaSelect').selectedOptions).map(o => o.value);
-      try {
-        const res = await fetch(`${API_BASE}/api/relaciones/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ facultades, departamentos, carreras, asignaturas })
-        });
-        if (res.ok) {
-          cargarRelaciones();
-          bootstrap.Modal.getInstance(document.getElementById('modalEditarRelacion')).hide();
-        }
-      } catch (err) {
-        console.error("Error actualizando relación:", err);
-      }
+    // Carreras
+    const resCar = await fetch(`${API_BASE}/api/carreras`);
+    const dataCar = await resCar.json();
+    const carreraSelect = document.getElementById('carreraSelect');
+    carreraSelect.innerHTML = '';
+    dataCar.data.forEach(c => {
+      carreraSelect.innerHTML += `<option value="${c.id_carrera}">${c.nombre}</option>`;
     });
 
-    // Inicializar
-    cargarRelaciones();
-  </script>
+    // Asignaturas
+    const resAsig = await fetch(`${API_BASE}/api/asignaturas`);
+    const dataAsig = await resAsig.json();
+    const asignaturaSelect = document.getElementById('asignaturaSelect');
+    asignaturaSelect.innerHTML = '';
+    dataAsig.data.forEach(a => {
+      asignaturaSelect.innerHTML += `<option value="${a.id_asignatura}">${a.nombre}</option>`;
+    });
+
+  } catch (err) {
+    console.error("Error cargando opciones:", err);
+  }
+}
+// Funciones de acción
+function editarRelacion(id) {
+  document.getElementById('editarIdRelacion').value = id;
+  const modal = new bootstrap.Modal(document.getElementById('modalEditarRelacion'));
+  modal.show();
+}
+
+async function eliminarRelacion(id) {
+  if (confirm(`¿Seguro que deseas eliminar la relación con ID ${id}?`)) {
+    try {
+      const res = await fetch(`${API_BASE}/api/relaciones/${id}`, { method: 'DELETE' });
+      if (res.ok) cargarRelaciones();
+    } catch (err) {
+      console.error("Error eliminando relación:", err);
+    }
+  }
+}
+
+// Botón Nueva Relación
+document.getElementById('btnNuevaRelacion').addEventListener('click', () => {
+  cargarOpciones(); // 🔹 Cargar datos desde la BD
+  const modal = new bootstrap.Modal(document.getElementById('modalNuevaRelacion'));
+  modal.show();
+});
+
+// Guardar nueva relación
+document.getElementById('formNuevaRelacion').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id_profesor = document.getElementById('profesorSelect').value;
+  const facultades = Array.from(document.getElementById('facultadSelect').selectedOptions).map(o => o.value);
+  const departamentos = Array.from(document.getElementById('departamentoSelect').selectedOptions).map(o => o.value);
+  const carreras = Array.from(document.getElementById('carreraSelect').selectedOptions).map(o => o.value);
+  const asignaturas = Array.from(document.getElementById('asignaturaSelect').selectedOptions).map(o => o.value);
+  try {
+    const res = await fetch(`${API_BASE}/api/relaciones`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_profesor, facultades, departamentos, carreras, asignaturas })
+    });
+    if (res.ok) {
+      await cargarRelaciones();
+    } else {
+      alert("Error guardando relación");
+    }
+    bootstrap.Modal.getInstance(document.getElementById('modalNuevaRelacion')).hide();
+  } catch (err) {
+    console.error("Error guardando relación:", err);
+    bootstrap.Modal.getInstance(document.getElementById('modalNuevaRelacion')).hide();
+  }
+});
+
+// Guardar edición
+document.getElementById('formEditarRelacion').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('editarIdRelacion').value;
+  const facultades = Array.from(document.getElementById('editarFacultadSelect').selectedOptions).map(o => o.value);
+  const departamentos = Array.from(document.getElementById('editarDepartamentoSelect').selectedOptions).map(o => o.value);
+  const carreras = Array.from(document.getElementById('editarCarreraSelect').selectedOptions).map(o => o.value);
+  const asignaturas = Array.from(document.getElementById('editarAsignaturaSelect').selectedOptions).map(o => o.value);
+  try {
+    const res = await fetch(`${API_BASE}/api/relaciones/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ facultades, departamentos, carreras, asignaturas })
+    });
+    if (res.ok) {
+      await cargarRelaciones();
+    } else {
+      alert("Error actualizando relación");
+    }
+    bootstrap.Modal.getInstance(document.getElementById('modalEditarRelacion')).hide();
+  } catch (err) {
+    console.error("Error actualizando relación:", err);
+    bootstrap.Modal.getInstance(document.getElementById('modalEditarRelacion')).hide();
+  }
+}
+
+// Inicializar
+cargarRelaciones();
+</script>
 </body>
 </html>
