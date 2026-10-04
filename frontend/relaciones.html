@@ -262,7 +262,7 @@ async function cargarRelaciones() {
   }
 }
 
-// 👉 Función que faltaba
+// 👉 Función para cargar opciones en selects
 async function cargarOpciones() {
   try {
     // Profesores
@@ -313,6 +313,39 @@ async function cargarOpciones() {
     console.error("Error cargando opciones:", err);
   }
 }
+
+// Guardar nueva relación
+document.getElementById('formNuevaRelacion').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const id_profesor = document.getElementById('profesorSelect').value;
+  const facultades = Array.from(document.getElementById('facultadSelect').selectedOptions).map(o => o.value);
+  const departamentos = Array.from(document.getElementById('departamentoSelect').selectedOptions).map(o => o.value);
+  const carreras = Array.from(document.getElementById('carreraSelect').selectedOptions).map(o => o.value);
+  const asignaturas = Array.from(document.getElementById('asignaturaSelect').selectedOptions).map(o => o.value);
+
+  try {
+    const res = await fetch(`${API_BASE}/api/relaciones`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_profesor, facultades, departamentos, carreras, asignaturas })
+    });
+
+    if (res.ok) {
+      const result = await res.json();
+      console.log("Relación creada:", result); // 👈 log para verificar respuesta
+      await cargarRelaciones(); // refrescar tabla
+      bootstrap.Modal.getInstance(document.getElementById('modalNuevaRelacion')).hide();
+    } else {
+      const errorText = await res.text();
+      console.error("Error guardando relación:", errorText);
+      alert("Error guardando relación: " + errorText);
+    }
+  } catch (err) {
+    console.error("Error guardando relación:", err);
+    alert("Error guardando relación. Revisa la consola.");
+  }
+});
 
 // Guardar edición
 document.getElementById('formEditarRelacion').addEventListener('submit', async (e) => {
