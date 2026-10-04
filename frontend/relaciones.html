@@ -176,12 +176,6 @@
   </div>
 </div>
 
-
-
-
-
-
-
   <footer>
   <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
   <div class="social-buttons">
@@ -294,9 +288,22 @@ document.getElementById('formEditarRelacion').addEventListener('submit', async (
   }
 }); // 👈 cierre correcto del addEventListener
 
+// Botón Nueva Relación
+document.addEventListener('DOMContentLoaded', () => {
+  const btnNuevaRelacion = document.getElementById('btnNuevaRelacion');
+  if (btnNuevaRelacion) {
+    btnNuevaRelacion.addEventListener('click', () => {
+      cargarOpciones(); // cargar datos en selects
+      const modal = new bootstrap.Modal(document.getElementById('modalNuevaRelacion'));
+      modal.show();
+    });
+  } else {
+    console.error("No se encontró el botón #btnNuevaRelacion en el DOM");
+  }
+});
+
 // Inicializar
 cargarRelaciones();
 </script>
 </body>
 </html>
-
