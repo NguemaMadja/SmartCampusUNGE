@@ -222,8 +222,10 @@ async function cargarRelaciones() {
   try {
     const res = await fetch(`${API_BASE}/api/relaciones`);
     const data = await res.json();
+
     tablaRelaciones.clear();
-    if (Array.isArray(data.data)) {
+
+    if (data && Array.isArray(data.data)) {
       data.data.forEach(r => {
         tablaRelaciones.row.add([
           r.id_relacion,
@@ -242,13 +244,24 @@ async function cargarRelaciones() {
           `
         ]);
       });
+
+      tablaRelaciones.draw();
+
+      // Actualizar métricas
+      document.getElementById('totalRelaciones').textContent = data.data.length;
+      if (data.data.length > 0) {
+        document.getElementById('ultimaRelacion').textContent =
+          data.data[data.data.length - 1].profesor;
+      }
+      document.getElementById('profesoresVinculados').textContent =
+        [...new Set(data.data.map(r => r.profesor))].length;
+    } else {
+      // Si no hay datos, limpiar métricas
+      tablaRelaciones.draw();
+      document.getElementById('totalRelaciones').textContent = 0;
+      document.getElementById('ultimaRelacion').textContent = '-';
+      document.getElementById('profesoresVinculados').textContent = 0;
     }
-    tablaRelaciones.draw();
-    document.getElementById('totalRelaciones').textContent = data.data.length;
-    if (data.data.length > 0) {
-      document.getElementById('ultimaRelacion').textContent = data.data[data.data.length - 1].profesor;
-    }
-    document.getElementById('profesoresVinculados').textContent = [...new Set(data.data.map(r => r.profesor))].length;
   } catch (err) {
     console.error("Error cargando relaciones:", err);
   }
@@ -286,3 +299,4 @@ cargarRelaciones();
 </script>
 </body>
 </html>
+
