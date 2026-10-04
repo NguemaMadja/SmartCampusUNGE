@@ -34,19 +34,25 @@ router.get('/', async (req, res) => {
 // =======================
 router.post('/', async (req, res) => {
   try {
-    const { id_profesor, id_facultad, id_departamento, id_carrera, id_asignatura } = req.body;
+    const { id_profesor, facultades, departamentos, carreras, asignaturas } = req.body;
 
-    if (!id_profesor || !id_facultad || !id_departamento || !id_carrera || !id_asignatura) {
-      return res.status(400).json({ success: false, error: "Todos los campos son obligatorios" });
+    let inserted = [];
+    for (const f of facultades) {
+      for (const d of departamentos) {
+        for (const c of carreras) {
+          for (const a of asignaturas) {
+            const result = await pool.query(
+              `INSERT INTO relaciones (id_profesor, id_facultad, id_departamento, id_carrera, id_asignatura)
+               VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+              [id_profesor, f, d, c, a]
+            );
+            inserted.push(result.rows[0]);
+          }
+        }
+      }
     }
 
-    const result = await pool.query(
-      `INSERT INTO relaciones (id_profesor, id_facultad, id_departamento, id_carrera, id_asignatura)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [id_profesor, id_facultad, id_departamento, id_carrera, id_asignatura]
-    );
-
-    res.json({ success: true, data: result.rows[0] });
+    res.json({ success: true, data: inserted });
   } catch (err) {
     console.error("Error creando relación:", err);
     res.status(500).json({ success: false, error: "Error creando relación" });
@@ -59,7 +65,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { id_facultad, id_departamento, id_carrera, id_asignatura } = req.body;
+    const { facultades, departamentos, carreras, asignaturas } = req.body;
 
     const result = await pool.query(
       `UPDATE relaciones
@@ -68,7 +74,7 @@ router.put('/:id', async (req, res) => {
            id_carrera = $3,
            id_asignatura = $4
        WHERE id_relacion = $5 RETURNING *`,
-      [id_facultad, id_departamento, id_carrera, id_asignatura, id]
+      [facultades[0], departamentos[0], carreras[0], asignaturas[0], id]
     );
 
     res.json({ success: true, data: result.rows[0] });
