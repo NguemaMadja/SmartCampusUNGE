@@ -250,6 +250,8 @@ async function cargarRelaciones() {
     console.error("Error cargando relaciones:", err);
   }
 }
+
+  
 // Cargar opciones en los selects desde la BD
 async function cargarOpciones() {
   try {
@@ -335,6 +337,7 @@ document.getElementById('formNuevaRelacion').addEventListener('submit', async (e
   const departamentos = Array.from(document.getElementById('departamentoSelect').selectedOptions).map(o => o.value);
   const carreras = Array.from(document.getElementById('carreraSelect').selectedOptions).map(o => o.value);
   const asignaturas = Array.from(document.getElementById('asignaturaSelect').selectedOptions).map(o => o.value);
+
   try {
     const res = await fetch(`${API_BASE}/api/relaciones`, {
       method: 'POST',
@@ -361,6 +364,7 @@ document.getElementById('formEditarRelacion').addEventListener('submit', async (
   const departamentos = Array.from(document.getElementById('editarDepartamentoSelect').selectedOptions).map(o => o.value);
   const carreras = Array.from(document.getElementById('editarCarreraSelect').selectedOptions).map(o => o.value);
   const asignaturas = Array.from(document.getElementById('editarAsignaturaSelect').selectedOptions).map(o => o.value);
+
   try {
     const res = await fetch(`${API_BASE}/api/relaciones/${id}`, {
       method: 'PUT',
