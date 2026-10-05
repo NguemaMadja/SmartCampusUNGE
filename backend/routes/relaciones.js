@@ -34,6 +34,9 @@ router.get('/', async (req, res) => {
 // =======================
 router.post('/', async (req, res) => {
   try {
+    // 👇 Log para ver qué datos llegan desde el frontend
+    console.log("Datos recibidos en POST /relaciones:", req.body);
+
     const { id_profesor, id_facultad, id_departamento, id_carrera, id_asignatura } = req.body;
 
     const result = await pool.query(
