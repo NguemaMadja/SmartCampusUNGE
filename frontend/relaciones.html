@@ -197,6 +197,13 @@
 <script>
 const API_BASE = "https://smartcampusunge.onrender.com";
 
+// Inicializar DataTable
+const tablaRelaciones = $('#tablaRelaciones').DataTable({
+  responsive: true,
+  dom: 'Bfrtip',
+  buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+});
+
 // 👉 Función para cargar opciones en selects
 async function cargarOpciones() {
   try {
@@ -248,11 +255,7 @@ async function cargarOpciones() {
     console.error("Error cargando opciones:", err);
   }
 }
-
-
-
-
-  // Cargar relaciones
+// Cargar relaciones
 async function cargarRelaciones() {
   try {
     const res = await fetch(`${API_BASE}/api/relaciones`);
@@ -300,11 +303,6 @@ async function cargarRelaciones() {
   }
 }
 
-
-  
-
-
-  
 // Guardar nueva relación (value directo)
 document.getElementById('formNuevaRelacion').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -337,6 +335,7 @@ document.getElementById('formNuevaRelacion').addEventListener('submit', async (e
     alert("Error guardando relación. Revisa la consola.");
   }
 });
+
 // Guardar edición (value directo)
 document.getElementById('formEditarRelacion').addEventListener('submit', async (e) => {
   e.preventDefault();
