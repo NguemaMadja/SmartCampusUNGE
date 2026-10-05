@@ -117,19 +117,19 @@
         </div>
         <div class="mb-3">
           <label for="facultadSelect" class="form-label">Facultad</label>
-          <select id="facultadSelect" class="form-select" multiple></select>
+          <select id="facultadSelect" class="form-select"></select>
         </div>
         <div class="mb-3">
           <label for="departamentoSelect" class="form-label">Departamento</label>
-          <select id="departamentoSelect" class="form-select" multiple></select>
+          <select id="departamentoSelect" class="form-select"></select>
         </div>
         <div class="mb-3">
           <label for="carreraSelect" class="form-label">Carrera</label>
-          <select id="carreraSelect" class="form-select" multiple></select>
+          <select id="carreraSelect" class="form-select"></select>
         </div>
         <div class="mb-3">
           <label for="asignaturaSelect" class="form-label">Asignatura</label>
-          <select id="asignaturaSelect" class="form-select" multiple></select>
+          <select id="asignaturaSelect" class="form-select"></select>
         </div>
       </div>
       <div class="modal-footer">
@@ -139,9 +139,7 @@
     </form>
   </div>
 </div>
-
-
-  <!-- Modal Editar Relación -->
+<!-- Modal Editar Relación -->
 <div class="modal fade" id="modalEditarRelacion" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <form class="modal-content" id="formEditarRelacion">
@@ -153,19 +151,19 @@
         <input type="hidden" id="editarIdRelacion">
         <div class="mb-3">
           <label for="editarFacultadSelect" class="form-label">Facultad</label>
-          <select id="editarFacultadSelect" class="form-select" multiple></select>
+          <select id="editarFacultadSelect" class="form-select"></select>
         </div>
         <div class="mb-3">
           <label for="editarDepartamentoSelect" class="form-label">Departamento</label>
-          <select id="editarDepartamentoSelect" class="form-select" multiple></select>
+          <select id="editarDepartamentoSelect" class="form-select"></select>
         </div>
         <div class="mb-3">
           <label for="editarCarreraSelect" class="form-label">Carrera</label>
-          <select id="editarCarreraSelect" class="form-select" multiple></select>
+          <select id="editarCarreraSelect" class="form-select"></select>
         </div>
         <div class="mb-3">
           <label for="editarAsignaturaSelect" class="form-label">Asignatura</label>
-          <select id="editarAsignaturaSelect" class="form-select" multiple></select>
+          <select id="editarAsignaturaSelect" class="form-select"></select>
         </div>
       </div>
       <div class="modal-footer">
@@ -175,8 +173,7 @@
     </form>
   </div>
 </div>
-
-  <footer>
+<footer>
   <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
   <div class="social-buttons">
     <a href="#" class="btn btn-outline-light"><i class="bi bi-twitter"></i></a>
@@ -197,70 +194,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
-
-
-  
 <script>
 const API_BASE = "https://smartcampusunge.onrender.com";
-
-// Inicializar DataTable
-const tablaRelaciones = $('#tablaRelaciones').DataTable({
-  dom: 'Bfrtip',
-  buttons: [
-    { extend: 'excelHtml5', text: 'Exportar a Excel', className: 'btn btn-success' },
-    { extend: 'pdfHtml5', text: 'Exportar a PDF', className: 'btn btn-danger' },
-    { extend: 'print', text: 'Imprimir', className: 'btn btn-info' }
-  ],
-  language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' }
-});
-
-// Cargar relaciones
-async function cargarRelaciones() {
-  try {
-    const res = await fetch(`${API_BASE}/api/relaciones`);
-    const data = await res.json();
-
-    tablaRelaciones.clear();
-
-    if (data && Array.isArray(data.data)) {
-      data.data.forEach(r => {
-        tablaRelaciones.row.add([
-          r.id_relacion,
-          r.profesor,
-          r.facultad,
-          r.departamento,
-          r.carrera,
-          r.asignatura,
-          `
-            <button class='btn btn-warning btn-sm me-1' onclick='editarRelacion(${r.id_relacion})'>
-              <i class='bi bi-pencil'></i>
-            </button>
-            <button class='btn btn-danger btn-sm' onclick='eliminarRelacion(${r.id_relacion})'>
-              <i class='bi bi-trash'></i>
-            </button>
-          `
-        ]);
-      });
-
-      tablaRelaciones.draw();
-
-      document.getElementById('totalRelaciones').textContent = data.data.length;
-      if (data.data.length > 0) {
-        document.getElementById('ultimaRelacion').textContent =
-          data.data[data.data.length - 1].profesor;
-      }
-      document.getElementById('profesoresVinculados').textContent =
-        [...new Set(data.data.map(r => r.profesor))].length;
-    } else {
-      tablaRelaciones.draw();
-      document.getElementById('totalRelaciones').textContent = 0;
-      document.getElementById('ultimaRelacion').textContent = '-';
-      document.getElementById('profesoresVinculados').textContent = 0;
-    }
-  } catch (err) {
-    console.error("Error cargando relaciones:", err);
-  }
-}
 
 // 👉 Función para cargar opciones en selects
 async function cargarOpciones() {
@@ -314,27 +249,27 @@ async function cargarOpciones() {
   }
 }
 
-// Guardar nueva relación
+// Guardar nueva relación (value directo)
 document.getElementById('formNuevaRelacion').addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const id_profesor = document.getElementById('profesorSelect').value;
-  const facultades = Array.from(document.getElementById('facultadSelect').selectedOptions).map(o => o.value);
-  const departamentos = Array.from(document.getElementById('departamentoSelect').selectedOptions).map(o => o.value);
-  const carreras = Array.from(document.getElementById('carreraSelect').selectedOptions).map(o => o.value);
-  const asignaturas = Array.from(document.getElementById('asignaturaSelect').selectedOptions).map(o => o.value);
+  const id_facultad = document.getElementById('facultadSelect').value;
+  const id_departamento = document.getElementById('departamentoSelect').value;
+  const id_carrera = document.getElementById('carreraSelect').value;
+  const id_asignatura = document.getElementById('asignaturaSelect').value;
 
   try {
     const res = await fetch(`${API_BASE}/api/relaciones`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id_profesor, facultades, departamentos, carreras, asignaturas })
+      body: JSON.stringify({ id_profesor, id_facultad, id_departamento, id_carrera, id_asignatura })
     });
 
     if (res.ok) {
       const result = await res.json();
-      console.log("Relación creada:", result); // 👈 log para verificar respuesta
-      await cargarRelaciones(); // refrescar tabla
+      console.log("Relación creada:", result);
+      await cargarRelaciones();
       bootstrap.Modal.getInstance(document.getElementById('modalNuevaRelacion')).hide();
     } else {
       const errorText = await res.text();
@@ -346,21 +281,20 @@ document.getElementById('formNuevaRelacion').addEventListener('submit', async (e
     alert("Error guardando relación. Revisa la consola.");
   }
 });
-
-// Guardar edición
+// Guardar edición (value directo)
 document.getElementById('formEditarRelacion').addEventListener('submit', async (e) => {
   e.preventDefault();
   const id = document.getElementById('editarIdRelacion').value;
-  const facultades = Array.from(document.getElementById('editarFacultadSelect').selectedOptions).map(o => o.value);
-  const departamentos = Array.from(document.getElementById('editarDepartamentoSelect').selectedOptions).map(o => o.value);
-  const carreras = Array.from(document.getElementById('editarCarreraSelect').selectedOptions).map(o => o.value);
-  const asignaturas = Array.from(document.getElementById('editarAsignaturaSelect').selectedOptions).map(o => o.value);
+  const id_facultad = document.getElementById('editarFacultadSelect').value;
+  const id_departamento = document.getElementById('editarDepartamentoSelect').value;
+  const id_carrera = document.getElementById('editarCarreraSelect').value;
+  const id_asignatura = document.getElementById('editarAsignaturaSelect').value;
 
   try {
     const res = await fetch(`${API_BASE}/api/relaciones/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ facultades, departamentos, carreras, asignaturas })
+      body: JSON.stringify({ id_facultad, id_departamento, id_carrera, id_asignatura })
     });
     if (res.ok) {
       await cargarRelaciones();
