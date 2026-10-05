@@ -30,29 +30,19 @@ router.get('/', async (req, res) => {
 });
 
 // =======================
-// POST: Crear nueva relación
+// POST: Crear nueva relación (valores simples)
 // =======================
 router.post('/', async (req, res) => {
   try {
-    const { id_profesor, facultades, departamentos, carreras, asignaturas } = req.body;
+    const { id_profesor, id_facultad, id_departamento, id_carrera, id_asignatura } = req.body;
 
-    let inserted = [];
-    for (const f of facultades) {
-      for (const d of departamentos) {
-        for (const c of carreras) {
-          for (const a of asignaturas) {
-            const result = await pool.query(
-              `INSERT INTO relaciones (id_profesor, id_facultad, id_departamento, id_carrera, id_asignatura)
-               VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-              [id_profesor, f, d, c, a]
-            );
-            inserted.push(result.rows[0]);
-          }
-        }
-      }
-    }
+    const result = await pool.query(
+      `INSERT INTO relaciones (id_profesor, id_facultad, id_departamento, id_carrera, id_asignatura)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [id_profesor, id_facultad, id_departamento, id_carrera, id_asignatura]
+    );
 
-    res.json({ success: true, data: inserted });
+    res.json({ success: true, data: result.rows[0] });
   } catch (err) {
     console.error("Error creando relación:", err);
     res.status(500).json({ success: false, error: "Error creando relación" });
@@ -60,12 +50,12 @@ router.post('/', async (req, res) => {
 });
 
 // =======================
-// PUT: Actualizar relación existente
+// PUT: Actualizar relación existente (valores simples)
 // =======================
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { facultades, departamentos, carreras, asignaturas } = req.body;
+    const { id_facultad, id_departamento, id_carrera, id_asignatura } = req.body;
 
     const result = await pool.query(
       `UPDATE relaciones
@@ -74,7 +64,7 @@ router.put('/:id', async (req, res) => {
            id_carrera = $3,
            id_asignatura = $4
        WHERE id_relacion = $5 RETURNING *`,
-      [facultades[0], departamentos[0], carreras[0], asignaturas[0], id]
+      [id_facultad, id_departamento, id_carrera, id_asignatura, id]
     );
 
     res.json({ success: true, data: result.rows[0] });
