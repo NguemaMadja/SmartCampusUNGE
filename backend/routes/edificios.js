@@ -11,27 +11,26 @@ const Edificio = sequelize.define('Edificio', {
     autoIncrement: true,
     primaryKey: true
   },
-  nombre_lugar: {
+  nombre: {
     type: DataTypes.STRING(150),
     allowNull: false
   },
-  latitud: {
-    type: DataTypes.DOUBLE,
-    allowNull: false
+  ubicacion: {
+    type: DataTypes.STRING(150),
+    allowNull: true
   },
-  longitud: {
+  lat: {
     type: DataTypes.DOUBLE,
-    allowNull: false
+    allowNull: true
+  },
+  lng: {
+    type: DataTypes.DOUBLE,
+    allowNull: true
   }
 }, {
   tableName: 'edificios',
   timestamps: false
 });
-
-// 🔹 Sincronizar modelo (opcional, solo si quieres que Sequelize cree la tabla)
-Edificio.sync()
-  .then(() => console.log('Tabla edificios lista'))
-  .catch(err => console.error('Error al sincronizar tabla edificios:', err));
 
 // =======================
 // 📌 RUTAS CRUD
@@ -61,8 +60,8 @@ router.get('/:id', async (req, res) => {
 // POST crear edificio
 router.post('/', async (req, res) => {
   try {
-    const { nombre_lugar, latitud, longitud } = req.body;
-    const nuevo = await Edificio.create({ nombre_lugar, latitud, longitud });
+    const { nombre, ubicacion, lat, lng } = req.body;
+    const nuevo = await Edificio.create({ nombre, ubicacion, lat, lng });
     res.json({ data: nuevo });
   } catch (err) {
     res.status(500).json({ error: 'Error al crear edificio', details: err });
@@ -72,11 +71,11 @@ router.post('/', async (req, res) => {
 // PUT actualizar edificio
 router.put('/:id', async (req, res) => {
   try {
-    const { nombre_lugar, latitud, longitud } = req.body;
+    const { nombre, ubicacion, lat, lng } = req.body;
     const edificio = await Edificio.findByPk(req.params.id);
     if (!edificio) return res.status(404).json({ error: 'Edificio no encontrado' });
 
-    await edificio.update({ nombre_lugar, latitud, longitud });
+    await edificio.update({ nombre, ubicacion, lat, lng });
     res.json({ data: edificio });
   } catch (err) {
     res.status(500).json({ error: 'Error al actualizar edificio', details: err });
@@ -93,6 +92,22 @@ router.delete('/:id', async (req, res) => {
     res.json({ message: 'Edificio eliminado correctamente' });
   } catch (err) {
     res.status(500).json({ error: 'Error al eliminar edificio', details: err });
+  }
+});
+
+// 🔹 Endpoint de métricas
+router.get('/metricas', async (req, res) => {
+  try {
+    const [rows] = await sequelize.query(`
+      SELECT 
+        COUNT(*) AS total_edificios,
+        COALESCE(AVG(lat),0) AS lat_promedio,
+        COALESCE(AVG(lng),0) AS lng_promedio
+      FROM edificios
+    `);
+    res.json({ data: rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: 'Error al obtener métricas', details: err });
   }
 });
 
