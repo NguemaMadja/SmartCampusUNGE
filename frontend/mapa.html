@@ -21,55 +21,14 @@
     .card { color: black; transition: all 0.5s ease; }
     .scroll-msg { font-weight: bold; }
     .dark-mode { background: #121212; color: #e0e0e0; }
-    .info-card {
-      position: absolute;
-      top: 80px;
-      right: 20px;
-      background: white;
-      color: black;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-      z-index: 1000;
-      display: none;
-      animation: slideIn 0.5s forwards;
-    }
+    .info-card { position: absolute; top: 80px; right: 20px; background: white; color: black; padding: 15px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index: 1000; display: none; animation: slideIn 0.5s forwards; }
     @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
     .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 2000; }
-
-
-
-    .btn-gradient-blue {
-  background: linear-gradient(45deg, #007bff, #66b2ff);
-  color: white;
-  font-weight: bold;
-  transition: transform 0.3s, box-shadow 0.3s;
-  border-radius: 8px;
-}
-.btn-gradient-green {
-  background: linear-gradient(45deg, #28a745, #85e085);
-  color: white;
-  font-weight: bold;
-  transition: transform 0.3s, box-shadow 0.3s;
-  border-radius: 8px;
-}
-.btn-gradient-orange {
-  background: linear-gradient(45deg, #fd7e14, #ffb366);
-  color: white;
-  font-weight: bold;
-  transition: transform 0.3s, box-shadow 0.3s;
-  border-radius: 8px;
-}
-.btn-gradient-blue:hover,
-.btn-gradient-green:hover,
-.btn-gradient-orange:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 15px rgba(0,0,0,0.3);
-}
-
-
-    
+    .btn-gradient-blue { background: linear-gradient(45deg, #007bff, #66b2ff); color: white; font-weight: bold; border-radius: 8px; }
+    .btn-gradient-green { background: linear-gradient(45deg, #28a745, #85e085); color: white; font-weight: bold; border-radius: 8px; }
+    .btn-gradient-orange { background: linear-gradient(45deg, #fd7e14, #ffb366); color: white; font-weight: bold; border-radius: 8px; }
+    .btn-gradient-blue:hover, .btn-gradient-green:hover, .btn-gradient-orange:hover { transform: scale(1.1); box-shadow: 0 0 15px rgba(0,0,0,0.3); }
   </style>
 </head>
 <body>
@@ -84,23 +43,10 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-       <ul class="navbar-nav d-flex gap-2">
-
-    
-  <li class="nav-item">
-    <a href="panel_superadmin.html" class="btn btn-gradient-green shadow-sm">
-      🔙 Volver al Panel
-    </a>
-  </li>
-  <li class="nav-item">
-    <a href="/transporte" class="btn btn-gradient-orange shadow-sm">
-      🚍 Transporte
-    </a>
-  </li>
-</ul>
-
-
-        
+        <ul class="navbar-nav d-flex gap-2">
+          <li class="nav-item"><a href="panel_superadmin.html" class="btn btn-gradient-green shadow-sm">🔙 Volver al Panel</a></li>
+          <li class="nav-item"><a href="/transporte" class="btn btn-gradient-orange shadow-sm">🚍 Transporte</a></li>
+        </ul>
       </div>
     </div>
   </nav>
@@ -111,13 +57,10 @@
     <div class="d-flex gap-2">
       <button class="btn btn-secondary btn-sm" onclick="toggleDarkMode()">🌙/☀️</button>
       <select id="idiomaSelect" class="form-select form-select-sm" onchange="cambiarIdioma()">
-        <option value="es">ES</option>
-        <option value="en">EN</option>
+        <option value="es">ES</option><option value="en">EN</option>
       </select>
       <div class="dropdown">
-        <button class="btn btn-danger dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown">
-          Usuario
-        </button>
+        <button class="btn btn-danger dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown">Usuario</button>
         <ul class="dropdown-menu dropdown-menu-end">
           <li><a class="dropdown-item text-danger" href="#">Cerrar Sesión</a></li>
           <li><span class="dropdown-item-text">Rol: Superadmin</span></li>
@@ -133,6 +76,7 @@
       Bienvenido al SmartCampus UNGE – Localiza edificios, rutas y métricas en tiempo real
     </marquee>
   </div>
+
   <!-- Main -->
   <main class="container my-4">
     <!-- Buscador -->
@@ -155,7 +99,6 @@
       <div class="card-header bg-primary text-white">Mapa Interactivo del Campus</div>
       <div class="card-body">
         <div id="map"></div>
-        <!-- Tarjeta flotante de información -->
         <div id="infoCard" class="info-card">
           <p id="distancia">Distancia: --</p>
           <p id="tiempo">Tiempo estimado: --</p>
@@ -163,8 +106,10 @@
         </div>
       </div>
     </div>
+
     <!-- Toast container -->
     <div class="toast-container" id="toastContainer"></div>
+
     <!-- Tabla edificios -->
     <div class="card mb-4">
       <div class="card-header bg-primary text-white d-flex justify-content-between">
@@ -174,33 +119,50 @@
       <div class="card-body table-responsive">
         <table class="table table-striped">
           <thead class="table-dark">
-            <tr>
-              <th>ID</th><th>Nombre Lugar</th><th>Latitud</th><th>Longitud</th><th>Acciones</th>
-            </tr>
+            <tr><th>ID</th><th>Nombre</th><th>Ubicación</th><th>Latitud</th><th>Longitud</th><th>Acciones</th></tr>
           </thead>
           <tbody id="tablaEdificios"></tbody>
         </table>
       </div>
     </div>
-
     <!-- Modal nuevo edificio -->
     <div class="modal fade" id="modalEdificio" tabindex="-1">
       <div class="modal-dialog">
         <form id="formEdificio" class="modal-content">
           <div class="modal-header bg-primary text-white">
-            <h5 class="modal-title">Nuevo Edificio</h5>
+            <h5 class="modal-title">Registrar Nuevo Edificio</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
             <input type="hidden" id="idEdificio">
-            <div class="mb-3"><label class="form-label">Nombre del Lugar</label><input type="text" id="nombreLugar" class="form-control" required></div>
-            <div class="mb-3"><label class="form-label">Latitud</label><input type="text" id="latitudEdificio" class="form-control" required></div>
-            <div class="mb-3"><label class="form-label">Longitud</label><input type="text" id="longitudEdificio" class="form-control" required></div>
+            <div class="mb-3">
+              <label class="form-label">Nombre del Edificio</label>
+              <small class="text-muted d-block">Ejemplo: Biblioteca Central, Aula Magna</small>
+              <input type="text" id="nombreEdificio" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Ubicación</label>
+              <small class="text-muted d-block">Ejemplo: Sector Norte, junto al laboratorio</small>
+              <input type="text" id="ubicacionEdificio" class="form-control">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Latitud</label>
+              <small class="text-muted d-block">Ejemplo: 3.7166</small>
+              <input type="text" id="latEdificio" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Longitud</label>
+              <small class="text-muted d-block">Ejemplo: 8.6732</small>
+              <input type="text" id="lngEdificio" class="form-control" required>
+            </div>
           </div>
-          <div class="modal-footer"><button type="submit" class="btn btn-success">Guardar</button></div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">Guardar</button>
+          </div>
         </form>
       </div>
     </div>
+
     <!-- Panel de métricas -->
     <div class="card mb-4">
       <div class="card-header bg-primary text-white d-flex justify-content-between">
@@ -217,6 +179,7 @@
       </div>
     </div>
   </main>
+
   <!-- Footer -->
   <footer class="text-center py-3">
     <p>© 2026 Universidad Nacional de Guinea Ecuatorial – SmartCampus UNGE</p>
@@ -227,6 +190,7 @@
       <a href="#" class="btn btn-outline-light"><i class="bi bi-linkedin"></i></a>
     </div>
   </footer>
+
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -260,17 +224,18 @@
         tabla.innerHTML += `
           <tr>
             <td>${e.id_edificio}</td>
-            <td>${e.nombre_lugar}</td>
-            <td>${e.latitud}</td>
-            <td>${e.longitud}</td>
+            <td>${e.nombre}</td>
+            <td>${e.ubicacion || ''}</td>
+            <td>${e.lat}</td>
+            <td>${e.lng}</td>
             <td>
               <button class="btn btn-warning btn-sm" onclick="editarEdificio(${e.id_edificio})">Editar</button>
               <button class="btn btn-danger btn-sm" onclick="eliminarEdificio(${e.id_edificio})">Eliminar</button>
             </td>
           </tr>`;
-        const marker = L.marker([e.latitud, e.longitud]).addTo(map)
-          .bindPopup(`<b>${e.nombre_lugar}</b>`);
-        markers[e.nombre_lugar.toLowerCase()] = { marker, data: e };
+        const marker = L.marker([e.lat, e.lng]).addTo(map)
+          .bindPopup(`<b>${e.nombre}</b><br>${e.ubicacion || ''}`);
+        markers[e.nombre.toLowerCase()] = { marker, data: e };
       });
     }
 
@@ -286,9 +251,9 @@
           if (nombre.includes(query)) {
             const item = document.createElement("button");
             item.className = "list-group-item list-group-item-action";
-            item.textContent = markers[nombre].data.nombre_lugar;
+            item.textContent = markers[nombre].data.nombre;
             item.onclick = () => {
-              document.getElementById("buscadorLugar").value = markers[nombre].data.nombre_lugar;
+              document.getElementById("buscadorLugar").value = markers[nombre].data.nombre;
               sugerenciasDiv.innerHTML = "";
               buscarLugar();
             };
@@ -306,17 +271,17 @@
       if (!nombre) return;
       if (markers[nombre]) {
         const { marker, data } = markers[nombre];
-        map.setView([data.latitud, data.longitud], 18);
+        map.setView([data.lat, data.lng], 18);
         marker.openPopup();
         document.getElementById("mensajeBienvenida").innerText =
-          `Bienvenido al lugar de interés: ${data.nombre_lugar}`;
+          `Bienvenido al lugar de interés: ${data.nombre}`;
 
         if (userLocation) {
           if (routingControl) map.removeControl(routingControl);
           routingControl = L.Routing.control({
             waypoints: [
               L.latLng(userLocation.lat, userLocation.lng),
-              L.latLng(data.latitud, data.longitud)
+              L.latLng(data.lat, data.lng)
             ],
             routeWhileDragging: false,
             show: false,
@@ -344,7 +309,7 @@
     }
 
     // ============================
-    // 📌 Cerrar tarjeta flotante con animación
+    // 📌 Cerrar tarjeta flotante
     // ============================
     function cerrarInfo() {
       const card = document.getElementById("infoCard");
@@ -367,13 +332,13 @@
         });
       }
     }
+
     // ============================
     // 📌 Favoritos
     // ============================
     function mostrarFavoritos() {
       mostrarToast("⭐ Tus favoritos: " + favoritos.join(", "));
     }
-
     // ============================
     // 📌 Métricas con Chart.js
     // ============================
@@ -384,8 +349,8 @@
       new Chart(document.getElementById("graficoConsultas"), {
         type: 'bar',
         data: {
-          labels: data.labels,
-          datasets: [{ label: 'Consultas', data: data.consultas, backgroundColor: 'blue' }]
+          labels: ['Total de Edificios'],
+          datasets: [{ label: 'Edificios', data: [data.total_edificios], backgroundColor: 'blue' }]
         },
         options: { animation: { duration: 800, easing: 'easeOutQuart' } }
       });
@@ -393,8 +358,8 @@
       new Chart(document.getElementById("graficoVisitas"), {
         type: 'line',
         data: {
-          labels: data.fechas,
-          datasets: [{ label: 'Visitas', data: data.visitas, borderColor: 'green' }]
+          labels: ['Lat Promedio', 'Lng Promedio'],
+          datasets: [{ label: 'Coordenadas promedio', data: [data.lat_promedio, data.lng_promedio], borderColor: 'green' }]
         },
         options: { animation: { duration: 800, easing: 'easeOutQuart' } }
       });
@@ -441,7 +406,7 @@
     }
 
     // ============================
-    // 📌 Notificaciones visuales (toasts)
+    // 📌 Notificaciones visuales
     // ============================
     function mostrarToast(mensaje) {
       const container = document.getElementById("toastContainer");
@@ -462,6 +427,87 @@
       mostrarToast("🔔 Evento: " + e.data);
     };
 
+
+
+        // ============================
+    // 📌 Editar edificio
+    // ============================
+    async function editarEdificio(id) {
+      try {
+        const res = await fetch(`/api/edificios/${id}`);
+        const data = (await res.json()).data;
+
+        // Rellenar el modal con los datos del edificio
+        document.getElementById("idEdificio").value = data.id_edificio;
+        document.getElementById("nombreEdificio").value = data.nombre;
+        document.getElementById("ubicacionEdificio").value = data.ubicacion || '';
+        document.getElementById("latEdificio").value = data.lat;
+        document.getElementById("lngEdificio").value = data.lng;
+
+        // Mostrar el modal
+        new bootstrap.Modal(document.getElementById("modalEdificio")).show();
+      } catch (err) {
+        mostrarToast("❌ Error al cargar edificio para edición");
+        console.error(err);
+      }
+    }
+
+    // ============================
+    // 📌 Guardar cambios (crear o actualizar)
+    // ============================
+    document.getElementById("formEdificio").addEventListener("submit", async e => {
+      e.preventDefault();
+      const id = document.getElementById("idEdificio").value;
+      const body = {
+        nombre: document.getElementById("nombreEdificio").value,
+        ubicacion: document.getElementById("ubicacionEdificio").value,
+        lat: document.getElementById("latEdificio").value,
+        lng: document.getElementById("lngEdificio").value
+      };
+
+      try {
+        const res = await fetch(id ? `/api/edificios/${id}` : `/api/edificios`, {
+          method: id ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        if (res.ok) {
+          bootstrap.Modal.getInstance(document.getElementById("modalEdificio")).hide();
+          cargarEdificios();
+          mostrarToast(id ? "✅ Edificio actualizado" : "✅ Edificio creado");
+        } else {
+          mostrarToast("❌ Error al guardar edificio");
+        }
+      } catch (err) {
+        mostrarToast("❌ Error de conexión al guardar edificio");
+        console.error(err);
+      }
+    });
+
+    // ============================
+    // 📌 Eliminar edificio
+    // ============================
+    async function eliminarEdificio(id) {
+      if (!confirm("¿Eliminar este edificio?")) return;
+      try {
+        const res = await fetch(`/api/edificios/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+          cargarEdificios();
+          mostrarToast("🗑️ Edificio eliminado");
+        } else {
+          mostrarToast("❌ Error al eliminar edificio");
+        }
+      } catch (err) {
+        mostrarToast("❌ Error de conexión al eliminar edificio");
+        console.error(err);
+      }
+    }
+
+
+
+
+    
     // ============================
     // 📌 Inicializar
     // ============================
