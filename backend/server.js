@@ -14,12 +14,13 @@ sequelize.authenticate()
   .then(() => console.log('Conexión a BD establecida'))
   .catch(err => console.error('Error de conexión:', err));
 
-// 🔹 Rutas API
+// 🔹 Rutas API (académicas y generales)
 app.use('/api/usuarios', require('./routes/usuarios'));
 app.use('/api/sensores', require('./routes/sensores'));
-app.use('/api/asistencia', require('./routes/asistencia'));              // estudiantes
-app.use('/api/asistencia_profesor', require('./routes/asistencia_profesor')); // profesores
-app.use('/api/asistencia/manual', require('./routes/asistencia_manual'));     // asistencia manual admin
+app.use('/api/lecturas_sensores', require('./routes/lecturas_sensores')); // 🔹 NUEVO
+app.use('/api/asistencia', require('./routes/asistencia'));              
+app.use('/api/asistencia_profesor', require('./routes/asistencia_profesor')); 
+app.use('/api/asistencia/manual', require('./routes/asistencia_manual'));     
 app.use('/api/qr', require('./routes/qr'));
 app.use('/api/configuracion', require('./routes/configuracion'));
 app.use('/api/transporte', require('./routes/transporte'));
@@ -32,9 +33,15 @@ app.use('/api/facultades', require('./routes/facultades'));
 app.use('/api/departamentos', require('./routes/departamentos'));
 app.use('/api/carreras', require('./routes/carreras'));
 app.use('/api/asignaturas', require('./routes/asignaturas'));
-app.use('/api/aulas', require('./routes/aulas'));                        // aulas
-app.use('/api/profesores', require('./routes/profesores'));              // profesores
-app.use('/api/relaciones', require('./routes/relaciones'));              // 🔹 NUEVO: vínculos académicos
+app.use('/api/aulas', require('./routes/aulas'));                        
+app.use('/api/profesores', require('./routes/profesores'));              
+app.use('/api/relaciones', require('./routes/relaciones'));              
+
+// 🔹 Rutas API (Gestión Energética)
+app.use('/api/aulas_sensores', require('./routes/aulas_sensores'));              // 🔹 NUEVO
+app.use('/api/estado_aulas_sensores', require('./routes/estado_aulas_sensores')); // 🔹 NUEVO
+app.use('/api/consumo_energia_sensores', require('./routes/consumo_energia_sensores')); // 🔹 NUEVO
+app.use('/api/eventos_energia_sensores', require('./routes/eventos_energia_sensores')); // 🔹 NUEVO
 
 // 🔹 Servir frontend estático
 app.use(express.static(path.join(__dirname, '../frontend')));
@@ -82,7 +89,12 @@ app.get('/profesores', (req, res) => {
 });
 
 app.get('/relaciones', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/relaciones.html'));     // 🔹 NUEVO: página vínculos académicos
+  res.sendFile(path.join(__dirname, '../frontend/relaciones.html'));     
+});
+
+// 🔹 Página Gestión Energética
+app.get('/gestion_energetica', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/gestion_energetica.html')); // 🔹 NUEVO
 });
 
 // 🔹 Puerto
