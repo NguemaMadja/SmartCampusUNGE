@@ -17,10 +17,10 @@ sequelize.authenticate()
 // 🔹 Rutas API (académicas y generales)
 app.use('/api/usuarios', require('./routes/usuarios'));
 app.use('/api/sensores', require('./routes/sensores'));
-app.use('/api/lecturas_sensores', require('./routes/lecturas_sensores')); // 🔹 NUEVO
-app.use('/api/asistencia', require('./routes/asistencia'));              
-app.use('/api/asistencia_profesor', require('./routes/asistencia_profesor')); 
-app.use('/api/asistencia/manual', require('./routes/asistencia_manual'));     
+app.use('/api/lecturas_sensores', require('./routes/lecturas_sensores'));
+app.use('/api/asistencia', require('./routes/asistencia'));
+app.use('/api/asistencia_profesor', require('./routes/asistencia_profesor'));
+app.use('/api/asistencia/manual', require('./routes/asistencia_manual'));
 app.use('/api/qr', require('./routes/qr'));
 app.use('/api/configuracion', require('./routes/configuracion'));
 app.use('/api/transporte', require('./routes/transporte'));
@@ -28,25 +28,26 @@ app.use('/api/vehiculos', require('./routes/vehiculos'));
 app.use('/api/paradas', require('./routes/paradas'));
 app.use('/api/rutas', require('./routes/rutas'));
 app.use('/api/posiciones', require('./routes/posiciones'));
-app.use('/api/edificios', require('./routes/edificios'));
+
+// ✅ Ruta edificios API
+const edificiosRouter = require('./routes/edificios');
+app.use('/api/edificios', edificiosRouter);
+
 app.use('/api/facultades', require('./routes/facultades'));
 app.use('/api/departamentos', require('./routes/departamentos'));
 app.use('/api/carreras', require('./routes/carreras'));
 app.use('/api/asignaturas', require('./routes/asignaturas'));
-app.use('/api/aulas', require('./routes/aulas'));                        
-app.use('/api/profesores', require('./routes/profesores'));              
-app.use('/api/relaciones', require('./routes/relaciones'));   
-
+app.use('/api/aulas', require('./routes/aulas'));
+app.use('/api/profesores', require('./routes/profesores'));
+app.use('/api/relaciones', require('./routes/relaciones'));
 
 // 🔹 Rutas API (Gestión Energética)
-app.use('/api/aulas_sensores', require('./routes/aulas_sensores'));              // 🔹 NUEVO
-app.use('/api/estado_aulas_sensores', require('./routes/estado_aulas_sensores')); // 🔹 NUEVO
-app.use('/api/consumo_energia_sensores', require('./routes/consumo_energia_sensores')); // 🔹 NUEVO
-app.use('/api/eventos_energia_sensores', require('./routes/eventos_energia_sensores')); // 🔹 NUEVO
-app.use('/api/lecturas_sensores', require('./routes/lecturas_sensores'));
-app.use('/api/aulas_medicion', require('./routes/aulas_medicion'));       // NUEVO
-app.use('/api/sensores_medicion', require('./routes/sensores_medicion')); // NUEVO
-
+app.use('/api/aulas_sensores', require('./routes/aulas_sensores'));
+app.use('/api/estado_aulas_sensores', require('./routes/estado_aulas_sensores'));
+app.use('/api/consumo_energia_sensores', require('./routes/consumo_energia_sensores'));
+app.use('/api/eventos_energia_sensores', require('./routes/eventos_energia_sensores'));
+app.use('/api/aulas_medicion', require('./routes/aulas_medicion'));
+app.use('/api/sensores_medicion', require('./routes/sensores_medicion'));
 
 // 🔹 Servir frontend estático
 app.use(express.static(path.join(__dirname, '../frontend')));
@@ -60,7 +61,8 @@ app.get('/smarttransit', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/smarttransit.html'));
 });
 
-app.get('/edificios', (req, res) => {
+// ⚠️ Cambiado para evitar conflicto con la API
+app.get('/edificios.html', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/edificios.html'));
 });
 
@@ -94,12 +96,12 @@ app.get('/profesores', (req, res) => {
 });
 
 app.get('/relaciones', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/relaciones.html'));     
+  res.sendFile(path.join(__dirname, '../frontend/relaciones.html'));
 });
 
 // 🔹 Página Gestión Energética
 app.get('/gestion_energetica', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/gestion_energetica.html')); // 🔹 NUEVO
+  res.sendFile(path.join(__dirname, '../frontend/gestion_energetica.html'));
 });
 
 // 🔹 Puerto
