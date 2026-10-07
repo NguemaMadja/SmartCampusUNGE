@@ -71,38 +71,50 @@
       </div>
     </div>
   </div>
+
+  
+
+
   <!-- Modal Insertar Sensor -->
-  <div class="modal fade" id="modalSensor" tabindex="-1">
-    <div class="modal-dialog">
-      <form id="formSensor" class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Nuevo Sensor de Medición</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div class="modal fade" id="modalSensor" tabindex="-1">
+  <div class="modal-dialog">
+    <form id="formSensor" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Registrar Nuevo Sensor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Tipo de Sensor</label>
+          <small class="text-muted d-block">Ejemplo: ESP32, ESP8266</small>
+          <input type="text" class="form-control" name="tipo_sensor" required>
         </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label">Tipo de Sensor (ej: ESP32, ESP8266)</label>
-            <input type="text" class="form-control" name="tipo_sensor" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Parámetro que mide (ej: Temperatura, CO₂, Humedad)</label>
-            <input type="text" class="form-control" name="parametro" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">ID del Aula de Medición</label>
-            <input type="number" class="form-control" name="aula_medicion_id" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Ubicación física (ej: pared norte, techo)</label>
-            <input type="text" class="form-control" name="ubicacion">
-          </div>
+        <div class="mb-3">
+          <label class="form-label">Parámetro que mide</label>
+          <small class="text-muted d-block">Ejemplo: Temperatura, CO₂, Humedad</small>
+          <input type="text" class="form-control" name="parametro" required>
         </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Guardar</button>
+        <div class="mb-3">
+          <label class="form-label">ID del Aula de Medición</label>
+          <small class="text-muted d-block">Número de aula ya registrada en BD</small>
+          <input type="number" class="form-control" name="aula_medicion_id" required>
         </div>
-      </form>
-    </div>
+        <div class="mb-3">
+          <label class="form-label">Ubicación física</label>
+          <small class="text-muted d-block">Ejemplo: pared norte, techo</small>
+          <input type="text" class="form-control" name="ubicacion">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Guardar</button>
+      </div>
+    </form>
   </div>
+</div>
+
+  
+
+  
 
   <!-- Modal Editar Sensor -->
   <div class="modal fade" id="modalEditarSensor" tabindex="-1">
