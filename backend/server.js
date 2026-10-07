@@ -43,6 +43,8 @@ app.use('/api/estado_aulas_sensores', require('./routes/estado_aulas_sensores'))
 app.use('/api/consumo_energia_sensores', require('./routes/consumo_energia_sensores')); // 🔹 NUEVO
 app.use('/api/eventos_energia_sensores', require('./routes/eventos_energia_sensores')); // 🔹 NUEVO
 app.use('/api/lecturas_sensores', require('./routes/lecturas_sensores'));
+app.use('/api/aulas_medicion', require('./routes/aulas_medicion'));       // NUEVO
+app.use('/api/sensores_medicion', require('./routes/sensores_medicion')); // NUEVO
 
 
 // 🔹 Servir frontend estático
