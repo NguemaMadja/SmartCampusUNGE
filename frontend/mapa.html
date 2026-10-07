@@ -212,31 +212,35 @@
     let userLocation = null;
     let routingControl = null;
 
-    // ============================
+        // ============================
     // 📌 Cargar edificios
     // ============================
     async function cargarEdificios() {
-      const res = await fetch("/api/edificios");
-      const edificios = (await res.json()).data;
-      const tabla = document.getElementById("tablaEdificios");
-      tabla.innerHTML = "";
-      edificios.forEach(e => {
-        tabla.innerHTML += `
-          <tr>
-            <td>${e.id_edificio}</td>
-            <td>${e.nombre}</td>
-            <td>${e.ubicacion || ''}</td>
-            <td>${e.lat}</td>
-            <td>${e.lng}</td>
-            <td>
-              <button class="btn btn-warning btn-sm" onclick="editarEdificio(${e.id_edificio})">Editar</button>
-              <button class="btn btn-danger btn-sm" onclick="eliminarEdificio(${e.id_edificio})">Eliminar</button>
-            </td>
-          </tr>`;
-        const marker = L.marker([e.lat, e.lng]).addTo(map)
-          .bindPopup(`<b>${e.nombre}</b><br>${e.ubicacion || ''}`);
-        markers[e.nombre.toLowerCase()] = { marker, data: e };
-      });
+      try {
+        const res = await fetch("/api/edificios");
+        const edificios = (await res.json()).data;
+        const tabla = document.getElementById("tablaEdificios");
+        tabla.innerHTML = "";
+        edificios.forEach(e => {
+          tabla.innerHTML += `
+            <tr>
+              <td>${e.id_edificio}</td>
+              <td>${e.nombre_lugar}</td>
+              <td>${e.latitud}</td>
+              <td>${e.longitud}</td>
+              <td>
+                <button class="btn btn-warning btn-sm" onclick="editarEdificio(${e.id_edificio})">Editar</button>
+                <button class="btn btn-danger btn-sm" onclick="eliminarEdificio(${e.id_edificio})">Eliminar</button>
+              </td>
+            </tr>`;
+          const marker = L.marker([e.latitud, e.longitud]).addTo(map)
+            .bindPopup(`<b>${e.nombre_lugar}</b>`);
+          markers[e.nombre_lugar.toLowerCase()] = { marker, data: e };
+        });
+      } catch (err) {
+        console.error("Error cargando edificios:", err);
+        mostrarToast("❌ Error cargando edificios");
+      }
     }
 
     // ============================
@@ -251,9 +255,9 @@
           if (nombre.includes(query)) {
             const item = document.createElement("button");
             item.className = "list-group-item list-group-item-action";
-            item.textContent = markers[nombre].data.nombre;
+            item.textContent = markers[nombre].data.nombre_lugar;
             item.onclick = () => {
-              document.getElementById("buscadorLugar").value = markers[nombre].data.nombre;
+              document.getElementById("buscadorLugar").value = markers[nombre].data.nombre_lugar;
               sugerenciasDiv.innerHTML = "";
               buscarLugar();
             };
@@ -271,17 +275,17 @@
       if (!nombre) return;
       if (markers[nombre]) {
         const { marker, data } = markers[nombre];
-        map.setView([data.lat, data.lng], 18);
+        map.setView([data.latitud, data.longitud], 18);
         marker.openPopup();
         document.getElementById("mensajeBienvenida").innerText =
-          `Bienvenido al lugar de interés: ${data.nombre}`;
+          `Bienvenido al lugar de interés: ${data.nombre_lugar}`;
 
         if (userLocation) {
           if (routingControl) map.removeControl(routingControl);
           routingControl = L.Routing.control({
             waypoints: [
               L.latLng(userLocation.lat, userLocation.lng),
-              L.latLng(data.lat, data.lng)
+              L.latLng(data.latitud, data.longitud)
             ],
             routeWhileDragging: false,
             show: false,
