@@ -35,7 +35,8 @@ app.use('/api/carreras', require('./routes/carreras'));
 app.use('/api/asignaturas', require('./routes/asignaturas'));
 app.use('/api/aulas', require('./routes/aulas'));                        
 app.use('/api/profesores', require('./routes/profesores'));              
-app.use('/api/relaciones', require('./routes/relaciones'));              
+app.use('/api/relaciones', require('./routes/relaciones'));   
+
 
 // 🔹 Rutas API (Gestión Energética)
 app.use('/api/aulas_sensores', require('./routes/aulas_sensores'));              // 🔹 NUEVO
