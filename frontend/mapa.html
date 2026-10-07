@@ -125,43 +125,41 @@
         </table>
       </div>
     </div>
-    <!-- Modal nuevo edificio -->
-    <div class="modal fade" id="modalEdificio" tabindex="-1">
-      <div class="modal-dialog">
-        <form id="formEdificio" class="modal-content">
-          <div class="modal-header bg-primary text-white">
-            <h5 class="modal-title">Registrar Nuevo Edificio</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <input type="hidden" id="idEdificio">
-            <div class="mb-3">
-              <label class="form-label">Nombre del Edificio</label>
-              <small class="text-muted d-block">Ejemplo: Biblioteca Central, Aula Magna</small>
-              <input type="text" id="nombreEdificio" class="form-control" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Ubicación</label>
-              <small class="text-muted d-block">Ejemplo: Sector Norte, junto al laboratorio</small>
-              <input type="text" id="ubicacionEdificio" class="form-control">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Latitud</label>
-              <small class="text-muted d-block">Ejemplo: 3.7166</small>
-              <input type="text" id="latEdificio" class="form-control" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Longitud</label>
-              <small class="text-muted d-block">Ejemplo: 8.6732</small>
-              <input type="text" id="lngEdificio" class="form-control" required>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-success">Guardar</button>
-          </div>
-        </form>
+
+    
+    <!-- Modal nuevo lugar -->
+<div class="modal fade" id="modalEdificio" tabindex="-1">
+  <div class="modal-dialog">
+    <form id="formEdificio" class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Registrar Nuevo Lugar</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-    </div>
+      <div class="modal-body">
+        <input type="hidden" id="idEdificio">
+        <div class="mb-3">
+          <label class="form-label">Nombre del lugar</label>
+          <small class="text-muted d-block">Ejemplo: Biblioteca Central, Aula Magna</small>
+          <input type="text" id="nombre_lugar" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Latitud</label>
+          <small class="text-muted d-block">Ejemplo: 3.7166</small>
+          <input type="number" step="any" id="latitud" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Longitud</label>
+          <small class="text-muted d-block">Ejemplo: 8.6732</small>
+          <input type="number" step="any" id="longitud" class="form-control" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 
     <!-- Panel de métricas -->
     <div class="card mb-4">
@@ -343,31 +341,50 @@
     function mostrarFavoritos() {
       mostrarToast("⭐ Tus favoritos: " + favoritos.join(", "));
     }
-    // ============================
+
+
+
+
+        // ============================
     // 📌 Métricas con Chart.js
     // ============================
     async function cargarMetricas() {
-      const res = await fetch("/api/edificios/metricas");
-      const data = (await res.json()).data;
+      try {
+        const res = await fetch("/api/edificios/metricas");
+        const json = await res.json();
+        if (!json.data) throw new Error("Respuesta inválida de métricas");
 
-      new Chart(document.getElementById("graficoConsultas"), {
-        type: 'bar',
-        data: {
-          labels: ['Total de Edificios'],
-          datasets: [{ label: 'Edificios', data: [data.total_edificios], backgroundColor: 'blue' }]
-        },
-        options: { animation: { duration: 800, easing: 'easeOutQuart' } }
-      });
+        const data = json.data;
 
-      new Chart(document.getElementById("graficoVisitas"), {
-        type: 'line',
-        data: {
-          labels: ['Lat Promedio', 'Lng Promedio'],
-          datasets: [{ label: 'Coordenadas promedio', data: [data.lat_promedio, data.lng_promedio], borderColor: 'green' }]
-        },
-        options: { animation: { duration: 800, easing: 'easeOutQuart' } }
-      });
+        new Chart(document.getElementById("graficoConsultas"), {
+          type: 'bar',
+          data: {
+            labels: ['Total de Edificios'],
+            datasets: [{ label: 'Edificios', data: [data.total_edificios], backgroundColor: 'blue' }]
+          },
+          options: { animation: { duration: 800, easing: 'easeOutQuart' } }
+        });
+
+        new Chart(document.getElementById("graficoVisitas"), {
+          type: 'line',
+          data: {
+            labels: ['Lat Promedio', 'Lng Promedio'],
+            datasets: [{ label: 'Coordenadas promedio', data: [data.lat_promedio, data.lng_promedio], borderColor: 'green' }]
+          },
+          options: { animation: { duration: 800, easing: 'easeOutQuart' } }
+        });
+      } catch (err) {
+        console.error("Error cargando métricas:", err);
+        mostrarToast("❌ Error cargando métricas");
+      }
     }
+
+    
+
+
+    
+
+    
 
     // ============================
     // 📌 Exportación CSV/PDF
@@ -456,38 +473,45 @@
       }
     }
 
-    // ============================
-    // 📌 Guardar cambios (crear o actualizar)
-    // ============================
-    document.getElementById("formEdificio").addEventListener("submit", async e => {
-      e.preventDefault();
-      const id = document.getElementById("idEdificio").value;
-      const body = {
-        nombre: document.getElementById("nombreEdificio").value,
-        ubicacion: document.getElementById("ubicacionEdificio").value,
-        lat: document.getElementById("latEdificio").value,
-        lng: document.getElementById("lngEdificio").value
-      };
 
-      try {
-        const res = await fetch(id ? `/api/edificios/${id}` : `/api/edificios`, {
-          method: id ? 'PUT' : 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
 
-        if (res.ok) {
-          bootstrap.Modal.getInstance(document.getElementById("modalEdificio")).hide();
-          cargarEdificios();
-          mostrarToast(id ? "✅ Edificio actualizado" : "✅ Edificio creado");
-        } else {
-          mostrarToast("❌ Error al guardar edificio");
-        }
-      } catch (err) {
-        mostrarToast("❌ Error de conexión al guardar edificio");
-        console.error(err);
-      }
+
+    // ============================
+// 📌 Guardar cambios (crear o actualizar)
+// ============================
+document.getElementById("formEdificio").addEventListener("submit", async e => {
+  e.preventDefault();
+  const id = document.getElementById("idEdificio").value;
+  const body = {
+    nombre_lugar: document.getElementById("nombre_lugar").value,
+    latitud: document.getElementById("latitud").value,
+    longitud: document.getElementById("longitud").value
+  };
+
+  try {
+    const res = await fetch(id ? `/api/edificios/${id}` : `/api/edificios`, {
+      method: id ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
     });
+
+    if (res.ok) {
+      bootstrap.Modal.getInstance(document.getElementById("modalEdificio")).hide();
+      cargarEdificios();
+      mostrarToast(id ? "✅ Lugar actualizado" : "✅ Lugar creado");
+    } else {
+      mostrarToast("❌ Error al guardar lugar");
+    }
+  } catch (err) {
+    mostrarToast("❌ Error de conexión al guardar lugar");
+    console.error(err);
+  }
+});
+
+
+    
+
+    
 
     // ============================
     // 📌 Eliminar edificio
