@@ -1,4 +1,3 @@
-// backend/routes/aulas_sensores.js
 const express = require('express');
 const router = express.Router();
 const sequelize = require('../db');
@@ -21,11 +20,11 @@ router.get('/', async (req, res) => {
 // 🔹 Insertar nueva aula con sensor
 router.post('/', async (req, res) => {
   try {
-    const { nombre, id_edificio } = req.body;
+    const { nombre_aula, id_edificio, capacidad, ubicacion } = req.body;
     const [result] = await sequelize.query(
-      `INSERT INTO aulas_sensores (nombre, id_edificio) 
-       VALUES ($1,$2) RETURNING *`,
-      { bind: [nombre, id_edificio] }
+      `INSERT INTO aulas_sensores (nombre_aula, id_edificio, capacidad, ubicacion)
+       VALUES ($1,$2,$3,$4) RETURNING *`,
+      { bind: [nombre_aula, id_edificio, capacidad, ubicacion] }
     );
     res.json(result[0]);
   } catch (err) {
@@ -36,12 +35,12 @@ router.post('/', async (req, res) => {
 // 🔹 Actualizar aula con sensor
 router.put('/:id', async (req, res) => {
   try {
-    const { nombre, id_edificio } = req.body;
+    const { nombre_aula, id_edificio, capacidad, ubicacion } = req.body;
     const [result] = await sequelize.query(
-      `UPDATE aulas_sensores 
-       SET nombre=$1, id_edificio=$2
-       WHERE id_aula_sensor=$3 RETURNING *`,
-      { bind: [nombre, id_edificio, req.params.id] }
+      `UPDATE aulas_sensores
+       SET nombre_aula=$1, id_edificio=$2, capacidad=$3, ubicacion=$4
+       WHERE id_aula_sensor=$5 RETURNING *`,
+      { bind: [nombre_aula, id_edificio, capacidad, ubicacion, req.params.id] }
     );
     if (result.length === 0) return res.status(404).json({ error: 'Aula no encontrada' });
     res.json(result[0]);
