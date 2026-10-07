@@ -42,7 +42,8 @@ router.get('/', async (req, res) => {
     const edificios = await Edificio.findAll();
     res.json({ data: edificios });
   } catch (err) {
-    res.status(500).json({ error: 'Error al obtener edificios', details: err });
+    console.error("Error al obtener edificios:", err);
+    res.status(500).json({ error: 'Error al obtener edificios' });
   }
 });
 
@@ -53,7 +54,8 @@ router.get('/:id', async (req, res) => {
     if (!edificio) return res.status(404).json({ error: 'Edificio no encontrado' });
     res.json({ data: edificio });
   } catch (err) {
-    res.status(500).json({ error: 'Error al obtener edificio', details: err });
+    console.error("Error al obtener edificio:", err);
+    res.status(500).json({ error: 'Error al obtener edificio' });
   }
 });
 
@@ -64,7 +66,8 @@ router.post('/', async (req, res) => {
     const nuevo = await Edificio.create({ nombre, ubicacion, lat, lng });
     res.json({ data: nuevo });
   } catch (err) {
-    res.status(500).json({ error: 'Error al crear edificio', details: err });
+    console.error("Error al crear edificio:", err);
+    res.status(500).json({ error: 'Error al crear edificio' });
   }
 });
 
@@ -78,7 +81,8 @@ router.put('/:id', async (req, res) => {
     await edificio.update({ nombre, ubicacion, lat, lng });
     res.json({ data: edificio });
   } catch (err) {
-    res.status(500).json({ error: 'Error al actualizar edificio', details: err });
+    console.error("Error al actualizar edificio:", err);
+    res.status(500).json({ error: 'Error al actualizar edificio' });
   }
 });
 
@@ -91,7 +95,8 @@ router.delete('/:id', async (req, res) => {
     await edificio.destroy();
     res.json({ message: 'Edificio eliminado correctamente' });
   } catch (err) {
-    res.status(500).json({ error: 'Error al eliminar edificio', details: err });
+    console.error("Error al eliminar edificio:", err);
+    res.status(500).json({ error: 'Error al eliminar edificio' });
   }
 });
 
@@ -100,14 +105,15 @@ router.get('/metricas', async (req, res) => {
   try {
     const [rows] = await sequelize.query(`
       SELECT 
-        COUNT(*) AS total_edificios,
+        COUNT(*)::int AS total_edificios,
         COALESCE(AVG(lat),0) AS lat_promedio,
         COALESCE(AVG(lng),0) AS lng_promedio
       FROM edificios
     `);
     res.json({ data: rows[0] });
   } catch (err) {
-    res.status(500).json({ error: 'Error al obtener métricas', details: err });
+    console.error("Error al obtener métricas:", err);
+    res.status(500).json({ error: 'Error al obtener métricas' });
   }
 });
 
