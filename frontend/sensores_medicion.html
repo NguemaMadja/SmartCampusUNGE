@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Sensores de Medición - SmartCampusUNGE</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <style>
+    body { background: linear-gradient(135deg, #003366, #004080); color: white; min-height: 100vh; display: flex; flex-direction: column; }
+    .navbar { background-color: #004080; height: 60px; display: flex; align-items: center; }
+    .container-main { flex: 1; padding: 20px; }
+    footer { background-color: #004080; color: white; padding: 15px; text-align: center; margin-top: auto; }
+    .btn-nav { background-color: #006400; color: #fff; border-radius: 8px; padding: 8px 20px; margin: 5px; transition: 0.3s; }
+    .btn-nav:hover { background-color: #004d26; transform: scale(1.05); }
+  </style>
+</head>
+<body>
+  <!-- Cabecera -->
+  <nav class="navbar navbar-dark">
+    <a class="navbar-brand d-flex align-items-center ms-3" href="index.html">
+      <img src="logo/LOGO-UNGE-1.png" alt="Logo UNGE" class="img-fluid me-2" style="max-height:50px;">
+      <span>SmartCampusUNGE</span>
+    </a>
+  </nav>
+
+  <!-- Contenido principal -->
+  <div class="container-main container">
+    <h2 class="text-center text-white mb-4">Sensores de Medición</h2>
+
+    <div class="mb-3 text-end">
+      <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalSensor">
+        <i class="bi bi-plus-circle"></i> Añadir Sensor
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="card-header bg-primary text-white">Listado de Sensores</div>
+      <div class="card-body">
+        <table class="table table-striped table-hover text-dark" id="tablaSensores">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Tipo</th>
+              <th>Parámetro</th>
+              <th>Aula</th>
+              <th>Ubicación</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!-- Modal Insertar Sensor -->
+  <div class="modal fade" id="modalSensor" tabindex="-1">
+    <div class="modal-dialog">
+      <form id="formSensor" class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Nuevo Sensor de Medición</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Tipo de Sensor</label>
+            <input type="text" class="form-control" name="tipo_sensor" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Parámetro</label>
+            <input type="text" class="form-control" name="parametro" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Aula</label>
+            <input type="number" class="form-control" name="aula_medicion_id" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Ubicación</label>
+            <input type="text" class="form-control" name="ubicacion">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
+  </footer>
+  <!-- Librerías externas -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+  <!-- Script principal -->
+  <script>
+    const API_BASE = "https://smartcampusunge.onrender.com";
+
+    const tabla = $('#tablaSensores').DataTable({
+      language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' }
+    });
+
+    async function cargarSensores() {
+      const res = await fetch(`${API_BASE}/api/sensores_medicion`);
+      const data = await res.json();
+      tabla.clear();
+      data.data.forEach(s => {
+        tabla.row.add([
+          s.id_sensor,
+          s.tipo_sensor,
+          s.parametro,
+          s.nombre_aula || s.aula_medicion_id,
+          s.ubicacion,
+          `<button class="btn btn-danger btn-sm" onclick="eliminarSensor(${s.id_sensor})"><i class="bi bi-trash"></i></button>`
+        ]);
+      });
+      tabla.draw();
+    }
+
+    document.getElementById('formSensor').addEventListener('submit', async e => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const body = {
+        tipo_sensor: formData.get('tipo_sensor'),
+        parametro: formData.get('parametro'),
+        aula_medicion_id: formData.get('aula_medicion_id'),
+        ubicacion: formData.get('ubicacion')
+      };
+      const res = await fetch(`${API_BASE}/api/sensores_medicion`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) {
+        e.target.reset();
+        bootstrap.Modal.getInstance(document.getElementById('modalSensor')).hide();
+        cargarSensores();
+      }
+    });
+
+    async function eliminarSensor(id) {
+      if (!confirm("¿Eliminar sensor?")) return;
+      await fetch(`${API_BASE}/api/sensores_medicion/${id}`, { method: 'DELETE' });
+      cargarSensores();
+    }
+
+    $(document).ready(() => cargarSensores());
+  </script>
+</body>
+</html>
