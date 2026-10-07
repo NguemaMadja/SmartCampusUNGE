@@ -9,8 +9,11 @@
   <style>
     body { background: linear-gradient(135deg, #003366, #004080); color: white; min-height: 100vh; display: flex; flex-direction: column; }
     .navbar { background-color: #004080; height: 60px; display: flex; align-items: center; }
+    .scroll-msg { background-color: #008000; color: #fff; font-weight: bold; padding: 5px; flex: 1; margin: 0 60px; }
+    .scroll-msg marquee { font-size: 1.1em; }
     .container-main { flex: 1; padding: 20px; }
     footer { background-color: #004080; color: white; padding: 15px; text-align: center; margin-top: auto; }
+    .social-buttons .btn { margin: 5px; border-radius: 50%; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; }
     .btn-nav { background-color: #006400; color: #fff; border-radius: 8px; padding: 8px 20px; margin: 5px; transition: 0.3s; }
     .btn-nav:hover { background-color: #004d26; transform: scale(1.05); }
   </style>
@@ -22,11 +25,26 @@
       <img src="logo/LOGO-UNGE-1.png" alt="Logo UNGE" class="img-fluid me-2" style="max-height:50px;">
       <span>SmartCampusUNGE</span>
     </a>
+    <div class="scroll-msg text-center">
+      <marquee behavior="scroll" direction="left" scrollamount="6">
+        Gestión de Sensores de Medición: administración y control inteligente
+      </marquee>
+    </div>
   </nav>
 
   <!-- Contenido principal -->
   <div class="container-main container">
     <h2 class="text-center text-white mb-4">Sensores de Medición</h2>
+
+    <!-- Botones de navegación -->
+    <div class="text-center mb-4">
+      <button class="btn-nav" onclick="window.location.href='gestion_energetica.html'">
+        <i class="bi bi-arrow-left-circle"></i> Atrás
+      </button>
+      <button class="btn-nav" onclick="window.location.href='aulas_medicion.html'">
+        <i class="bi bi-arrow-right-circle"></i> Ir a Aulas
+      </button>
+    </div>
 
     <div class="mb-3 text-end">
       <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalSensor">
@@ -63,19 +81,19 @@
         </div>
         <div class="modal-body">
           <div class="mb-3">
-            <label class="form-label">Tipo de Sensor</label>
+            <label class="form-label">Tipo de Sensor (ej: ESP32, ESP8266)</label>
             <input type="text" class="form-control" name="tipo_sensor" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Parámetro</label>
+            <label class="form-label">Parámetro que mide (ej: Temperatura, CO₂, Humedad)</label>
             <input type="text" class="form-control" name="parametro" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Aula</label>
+            <label class="form-label">ID del Aula de Medición</label>
             <input type="number" class="form-control" name="aula_medicion_id" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Ubicación</label>
+            <label class="form-label">Ubicación física (ej: pared norte, techo)</label>
             <input type="text" class="form-control" name="ubicacion">
           </div>
         </div>
@@ -86,40 +104,93 @@
     </div>
   </div>
 
+  <!-- Modal Editar Sensor -->
+  <div class="modal fade" id="modalEditarSensor" tabindex="-1">
+    <div class="modal-dialog">
+      <form id="formEditarSensor" class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Sensor</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="edit_id_sensor">
+          <div class="mb-3">
+            <label class="form-label">Tipo de Sensor</label>
+            <input type="text" class="form-control" id="edit_tipo_sensor" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Parámetro</label>
+            <input type="text" class="form-control" id="edit_parametro" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">ID Aula</label>
+            <input type="number" class="form-control" id="edit_aula_medicion_id" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Ubicación</label>
+            <input type="text" class="form-control" id="edit_ubicacion">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Actualizar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer>
     <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
+    <div class="social-buttons">
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-twitter"></i></a>
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-facebook"></i></a>
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-instagram"></i></a>
+      <a href="#" class="btn btn-outline-light"><i class="bi bi-youtube"></i></a>
+    </div>
   </footer>
   <!-- Librerías externas -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
   <!-- Script principal -->
   <script>
     const API_BASE = "https://smartcampusunge.onrender.com";
 
+    // Inicializar DataTable
     const tabla = $('#tablaSensores').DataTable({
       language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' }
     });
 
+    // Cargar sensores desde la API
     async function cargarSensores() {
-      const res = await fetch(`${API_BASE}/api/sensores_medicion`);
-      const data = await res.json();
-      tabla.clear();
-      data.data.forEach(s => {
-        tabla.row.add([
-          s.id_sensor,
-          s.tipo_sensor,
-          s.parametro,
-          s.nombre_aula || s.aula_medicion_id,
-          s.ubicacion,
-          `<button class="btn btn-danger btn-sm" onclick="eliminarSensor(${s.id_sensor})"><i class="bi bi-trash"></i></button>`
-        ]);
-      });
-      tabla.draw();
+      try {
+        const res = await fetch(`${API_BASE}/api/sensores_medicion`);
+        if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+        const data = await res.json();
+
+        tabla.clear();
+        if (Array.isArray(data.data)) {
+          data.data.forEach(s => {
+            tabla.row.add([
+              s.id_sensor,
+              s.tipo_sensor,
+              s.parametro,
+              s.nombre_aula || s.aula_medicion_id,
+              s.ubicacion,
+              `<button class="btn btn-primary btn-sm me-2" onclick='abrirEditarSensor(${JSON.stringify(s)})'><i class="bi bi-pencil"></i></button>
+               <button class="btn btn-danger btn-sm" onclick="eliminarSensor(${s.id_sensor})"><i class="bi bi-trash"></i></button>`
+            ]);
+          });
+        }
+        tabla.draw();
+      } catch (err) {
+        console.error("Error cargando sensores:", err);
+      }
     }
 
+    // Insertar sensor desde el modal
     document.getElementById('formSensor').addEventListener('submit', async e => {
       e.preventDefault();
       const formData = new FormData(e.target);
@@ -129,24 +200,77 @@
         aula_medicion_id: formData.get('aula_medicion_id'),
         ubicacion: formData.get('ubicacion')
       };
-      const res = await fetch(`${API_BASE}/api/sensores_medicion`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      if (res.ok) {
-        e.target.reset();
-        bootstrap.Modal.getInstance(document.getElementById('modalSensor')).hide();
-        cargarSensores();
+      try {
+        const res = await fetch(`${API_BASE}/api/sensores_medicion`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (res.ok) {
+          e.target.reset();
+          bootstrap.Modal.getInstance(document.getElementById('modalSensor')).hide();
+          cargarSensores();
+        } else {
+          console.error("Error al insertar sensor:", res.status);
+        }
+      } catch (err) {
+        console.error("Error al insertar sensor:", err);
       }
     });
 
-    async function eliminarSensor(id) {
-      if (!confirm("¿Eliminar sensor?")) return;
-      await fetch(`${API_BASE}/api/sensores_medicion/${id}`, { method: 'DELETE' });
-      cargarSensores();
+    // Abrir modal de edición con datos
+    function abrirEditarSensor(sensor) {
+      document.getElementById('edit_id_sensor').value = sensor.id_sensor;
+      document.getElementById('edit_tipo_sensor').value = sensor.tipo_sensor;
+      document.getElementById('edit_parametro').value = sensor.parametro;
+      document.getElementById('edit_aula_medicion_id').value = sensor.aula_medicion_id;
+      document.getElementById('edit_ubicacion').value = sensor.ubicacion;
+      new bootstrap.Modal(document.getElementById('modalEditarSensor')).show();
     }
 
+    // Guardar cambios en sensor
+    document.getElementById('formEditarSensor').addEventListener('submit', async e => {
+      e.preventDefault();
+      const id = document.getElementById('edit_id_sensor').value;
+      const body = {
+        tipo_sensor: document.getElementById('edit_tipo_sensor').value,
+        parametro: document.getElementById('edit_parametro').value,
+        aula_medicion_id: document.getElementById('edit_aula_medicion_id').value,
+        ubicacion: document.getElementById('edit_ubicacion').value
+      };
+      try {
+        const res = await fetch(`${API_BASE}/api/sensores_medicion/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (res.ok) {
+          bootstrap.Modal.getInstance(document.getElementById('modalEditarSensor')).hide();
+          cargarSensores();
+        } else {
+          console.error("Error al actualizar sensor:", res.status);
+        }
+      } catch (err) {
+        console.error("Error al actualizar sensor:", err);
+      }
+    });
+
+    // Eliminar sensor
+    async function eliminarSensor(id) {
+      if (!confirm("¿Eliminar sensor?")) return;
+      try {
+        const res = await fetch(`${API_BASE}/api/sensores_medicion/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+          cargarSensores();
+        } else {
+          console.error("Error al eliminar sensor:", res.status);
+        }
+      } catch (err) {
+        console.error("Error al eliminar sensor:", err);
+      }
+    }
+
+    // Inicializar al cargar la página
     $(document).ready(() => cargarSensores());
   </script>
 </body>
