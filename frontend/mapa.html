@@ -16,7 +16,9 @@
 
 
 
- 
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.awesome-markers/2.0.4/leaflet.awesome-markers.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.awesome-markers/2.0.4/leaflet.awesome-markers.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> 
 
 
   
@@ -255,31 +257,16 @@ function cargarMapaCalor() {
                 <button class="btn btn-danger btn-sm" onclick="eliminarEdificio(${e.id_edificio})">Eliminar</button>
               </td>
             </tr>`;
-
-
-
-
-          const iconoPersonalizado = L.AwesomeMarkers.icon({
-  icon: 'university',   // puedes cambiar por 'book', 'home', 'building', etc.
-  markerColor: 'blue',  // colores disponibles: red, green, orange, purple, darkblue, cadetblue
-  prefix: 'fa'          // usa FontAwesome
-});
-
-const marker = L.marker([e.latitud, e.longitud], { icon: iconoPersonalizado }).addTo(map)
-  .bindPopup(`<b>${e.nombre_lugar}</b>`);
-
-markers[e.nombre_lugar.toLowerCase()] = { marker, data: e };
-});
-} catch (err) {
-  console.error("Error cargando edificios:", err);
-  mostrarToast("❌ Error cargando edificios");
-}
-}
-
-
-
-          
-
+const marker = L.marker([e.latitud, e.longitud]).addTo(map)
+            .bindPopup(`<b>${e.nombre_lugar}</b>`);
+          markers[e.nombre_lugar.toLowerCase()] = { marker, data: e };
+        });
+      } catch (err) {
+        console.error("Error cargando edificios:", err);
+        mostrarToast("❌ Error cargando edificios");
+      }
+    }
+    
     // ============================
     // 📌 Búsqueda predictiva
     // ============================
