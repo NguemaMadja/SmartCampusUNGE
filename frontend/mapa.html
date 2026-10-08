@@ -210,6 +210,34 @@
     let userLocation = null;
     let routingControl = null;
 
+
+
+    
+
+    // ============================
+// 📌 Mapa de calor simulado
+// ============================
+function cargarMapaCalor() {
+  // Datos simulados de afluencia (lat, lng, intensidad)
+  const puntos = [
+    [3.7166, 8.6732, 0.8],
+    [3.7170, 8.6740, 0.6],
+    [3.7155, 8.6725, 0.9]
+  ];
+
+  const heat = L.heatLayer(puntos, {
+    radius: 25,
+    blur: 15,
+    maxZoom: 17,
+    gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'}
+  }).addTo(map);
+}
+
+
+    
+
+    
+
         // ============================
     // 📌 Cargar edificios
     // ============================
