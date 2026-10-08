@@ -119,7 +119,7 @@
       <div class="card-body table-responsive">
         <table class="table table-striped">
           <thead class="table-dark">
-            <tr><th>ID</th><th>Nombre</th><th>Ubicación</th><th>Latitud</th><th>Longitud</th><th>Acciones</th></tr>
+            <tr><th>ID</th><th>Nombre</th>   <th>Latitud</th><th>Longitud</th><th>Acciones</th></tr>
           </thead>
           <tbody id="tablaEdificios"></tbody>
         </table>
@@ -342,9 +342,6 @@
       mostrarToast("⭐ Tus favoritos: " + favoritos.join(", "));
     }
 
-
-
-
         // ============================
     // 📌 Métricas con Chart.js
     // ============================
@@ -439,9 +436,6 @@
     evtSource.onmessage = function(e) {
       mostrarToast("🔔 Evento: " + e.data);
     };
-
-
-
     // ============================
 // 📌 Editar lugar
 // ============================
@@ -463,10 +457,6 @@ async function editarEdificio(id) {
     console.error(err);
   }
 }
-
-
-
-    
     // ============================
 // 📌 Guardar cambios (crear o actualizar)
 // ============================
@@ -498,12 +488,6 @@ document.getElementById("formEdificio").addEventListener("submit", async e => {
     console.error(err);
   }
 });
-
-
-    
-
-    
-
     // ============================
     // 📌 Eliminar edificio
     // ============================
@@ -521,12 +505,7 @@ document.getElementById("formEdificio").addEventListener("submit", async e => {
         mostrarToast("❌ Error de conexión al eliminar edificio");
         console.error(err);
       }
-    }
-
-
-
-
-    
+    } 
     // ============================
     // 📌 Inicializar
     // ============================
