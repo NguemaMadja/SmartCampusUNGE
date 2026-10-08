@@ -378,14 +378,6 @@
         mostrarToast("❌ Error cargando métricas");
       }
     }
-
-    
-
-
-    
-
-    
-
     // ============================
     // 📌 Exportación CSV/PDF
     // ============================
@@ -450,32 +442,31 @@
 
 
 
-        // ============================
-    // 📌 Editar edificio
     // ============================
-    async function editarEdificio(id) {
-      try {
-        const res = await fetch(`/api/edificios/${id}`);
-        const data = (await res.json()).data;
+// 📌 Editar lugar
+// ============================
+async function editarEdificio(id) {
+  try {
+    const res = await fetch(`/api/edificios/${id}`);
+    const data = (await res.json()).data;
 
-        // Rellenar el modal con los datos del edificio
-        document.getElementById("idEdificio").value = data.id_edificio;
-        document.getElementById("nombreEdificio").value = data.nombre;
-        document.getElementById("ubicacionEdificio").value = data.ubicacion || '';
-        document.getElementById("latEdificio").value = data.lat;
-        document.getElementById("lngEdificio").value = data.lng;
+    // Rellenar el modal con los datos del lugar
+    document.getElementById("idEdificio").value = data.id_edificio;
+    document.getElementById("nombre_lugar").value = data.nombre_lugar;
+    document.getElementById("latitud").value = data.latitud;
+    document.getElementById("longitud").value = data.longitud;
 
-        // Mostrar el modal
-        new bootstrap.Modal(document.getElementById("modalEdificio")).show();
-      } catch (err) {
-        mostrarToast("❌ Error al cargar edificio para edición");
-        console.error(err);
-      }
-    }
-
+    // Mostrar el modal
+    new bootstrap.Modal(document.getElementById("modalEdificio")).show();
+  } catch (err) {
+    mostrarToast("❌ Error al cargar lugar para edición");
+    console.error(err);
+  }
+}
 
 
 
+    
     // ============================
 // 📌 Guardar cambios (crear o actualizar)
 // ============================
