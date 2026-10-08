@@ -236,36 +236,53 @@ function cargarMapaCalor() {
     gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'}
   }).addTo(map);
 }
-        // ============================
-    // 📌 Cargar edificios
-    // ============================
-    async function cargarEdificios() {
-      try {
-        const res = await fetch("/api/edificios");
-        const edificios = (await res.json()).data;
-        const tabla = document.getElementById("tablaEdificios");
-        tabla.innerHTML = "";
-        edificios.forEach(e => {
-          tabla.innerHTML += `
-            <tr>
-              <td>${e.id_edificio}</td>
-              <td>${e.nombre_lugar}</td>
-              <td>${e.latitud}</td>
-              <td>${e.longitud}</td>
-              <td>
-                <button class="btn btn-warning btn-sm" onclick="editarEdificio(${e.id_edificio})">Editar</button>
-                <button class="btn btn-danger btn-sm" onclick="eliminarEdificio(${e.id_edificio})">Eliminar</button>
-              </td>
-            </tr>`;
-const marker = L.marker([e.latitud, e.longitud]).addTo(map)
-            .bindPopup(`<b>${e.nombre_lugar}</b>`);
-          markers[e.nombre_lugar.toLowerCase()] = { marker, data: e };
-        });
-      } catch (err) {
-        console.error("Error cargando edificios:", err);
-        mostrarToast("❌ Error cargando edificios");
-      }
-    }
+
+
+
+// ============================
+// 📌 Cargar edificios
+// ============================
+async function cargarEdificios() {
+  try {
+    const res = await fetch("/api/edificios");
+    const edificios = (await res.json()).data;
+    const tabla = document.getElementById("tablaEdificios");
+    tabla.innerHTML = "";
+    edificios.forEach(e => {
+      tabla.innerHTML += `
+        <tr>
+          <td>${e.id_edificio}</td>
+          <td>${e.nombre_lugar}</td>
+          <td>${e.latitud}</td>
+          <td>${e.longitud}</td>
+          <td>
+            <button class="btn btn-warning btn-sm" onclick="editarEdificio(${e.id_edificio})">Editar</button>
+            <button class="btn btn-danger btn-sm" onclick="eliminarEdificio(${e.id_edificio})">Eliminar</button>
+          </td>
+        </tr>`;
+
+      // Icono personalizado con Leaflet Awesome Markers
+      const iconoPersonalizado = L.AwesomeMarkers.icon({
+        icon: 'university',   // puedes cambiar por 'book', 'home', 'building', etc.
+        markerColor: 'blue',  // colores: red, green, orange, purple, darkblue, cadetblue
+        prefix: 'fa'          // usa FontAwesome
+      });
+
+      const marker = L.marker([e.latitud, e.longitud], { icon: iconoPersonalizado }).addTo(map)
+        .bindPopup(`<b>${e.nombre_lugar}</b>`);
+
+      markers[e.nombre_lugar.toLowerCase()] = { marker, data: e };
+    });
+  } catch (err) {
+    console.error("Error cargando edificios:", err);
+    mostrarToast("❌ Error cargando edificios");
+  }
+}
+
+    
+    
+
+    
     
     // ============================
     // 📌 Búsqueda predictiva
