@@ -1,3 +1,4 @@
+<!-- FRAGMENTO 1: ESTRUCTURA HTML Y DEPENDENCIAS (VERIFICADO) -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -70,6 +71,11 @@
     </div>
   </header>
 
+
+
+
+  
+  <!-- FRAGMENTO 2: ESTRUCTURA PRINCIPAL E INTERFAZ DEL MAPA (ACTUALIZADO) -->
   <!-- Scroll message -->
   <div class="scroll-msg text-center bg-success text-white py-2">
     <marquee behavior="scroll" direction="left" scrollamount="6">
@@ -99,10 +105,19 @@
       <div class="card-header bg-primary text-white">Mapa Interactivo del Campus</div>
       <div class="card-body">
         <div id="map"></div>
-        <div id="infoCard" class="info-card">
-          <p id="distancia">Distancia: --</p>
-          <p id="tiempo">Tiempo estimado: --</p>
-          <button class="btn btn-sm btn-primary" onclick="cerrarInfo()">Aceptar</button>
+        
+        <!-- Tarjeta de Información actualizada para navegación reactiva -->
+        <div id="infoCard" class="info-card" style="display: none; border-left: 5px solid #007bff;">
+          <h6 class="fw-bold mb-2 text-primary" id="destinoNombre">Ruta al Destino</h6>
+          <p id="distancia" class="mb-1 fw-bold">Distancia: --</p>
+          <p id="tiempo" class="mb-3">Tiempo estimado: --</p>
+          <div class="d-flex gap-2">
+            <!-- Botón para iniciar el seguimiento GPS en tiempo real -->
+            <button id="btnNavegacion" class="btn btn-sm btn-gradient-blue" onclick="conmutarNavegacionEnVivo()">
+              <i class="bi bi-navigation-fill"></i> Iniciar Ruta
+            </button>
+            <button class="btn btn-sm btn-secondary" onclick="cerrarInfo()">Cerrar</button>
+          </div>
         </div>
       </div>
     </div>
@@ -161,7 +176,8 @@
 </div>
 
 
-    <!-- Panel de métricas -->
+
+  <!-- Panel de métricas -->
     <div class="card mb-4">
       <div class="card-header bg-primary text-white d-flex justify-content-between">
         <span>Métricas de Uso</span>
@@ -261,206 +277,315 @@ const marker = L.marker([e.latitud, e.longitud]).addTo(map)
     }
 
     
+
+    
     
 
     
     
-    // ============================
-    // 📌 Búsqueda predictiva
-    // ============================
-    document.getElementById("buscadorLugar").addEventListener("input", function() {
-      const query = this.value.toLowerCase();
-      const sugerenciasDiv = document.getElementById("sugerencias");
-      sugerenciasDiv.innerHTML = "";
-      if (query.length > 1) {
-        Object.keys(markers).forEach(nombre => {
-          if (nombre.includes(query)) {
-            const item = document.createElement("button");
-            item.className = "list-group-item list-group-item-action";
-            item.textContent = markers[nombre].data.nombre_lugar;
-            item.onclick = () => {
-              document.getElementById("buscadorLugar").value = markers[nombre].data.nombre_lugar;
-              sugerenciasDiv.innerHTML = "";
-              buscarLugar();
-            };
-            sugerenciasDiv.appendChild(item);
-          }
-        });
+   // FRAGMENTO 4: BÚSQUEDA PREDICTIVA Y RUTAS REACTIVAS (ACTUALIZADO)
+
+// ============================
+// 📌 Búsqueda predictiva
+// ============================
+document.getElementById("buscadorLugar").addEventListener("input", function() {
+  const query = this.value.toLowerCase();
+  const sugerenciasDiv = document.getElementById("sugerencias");
+  sugerenciasDiv.innerHTML = "";
+  if (query.length > 1) {
+    Object.keys(markers).forEach(nombre => {
+      if (nombre.includes(query)) {
+        const item = document.createElement("button");
+        item.className = "list-group-item list-group-item-action";
+        item.textContent = markers[nombre].data.nombre_lugar;
+        item.onclick = () => {
+          document.getElementById("buscadorLugar").value = markers[nombre].data.nombre_lugar;
+          sugerenciasDiv.innerHTML = "";
+          buscarLugar();
+        };
+        sugerenciasDiv.appendChild(item);
       }
     });
+  }
+});
 
-    // ============================
-    // 📌 Buscar edificio y rutas alternativas
-    // ============================
-    function buscarLugar() {
-      const nombre = document.getElementById("buscadorLugar").value.trim().toLowerCase();
-      if (!nombre) return;
-      if (markers[nombre]) {
-        const { marker, data } = markers[nombre];
-        map.setView([data.latitud, data.longitud], 18);
-        marker.openPopup();
-        document.getElementById("mensajeBienvenida").innerText =
-          `Bienvenido al lugar de interés: ${data.nombre_lugar}`;
+// ============================
+// 📌 Buscar edificio y rutas alternativas
+// ============================
+function buscarLugar() {
+  const nombre = document.getElementById("buscadorLugar").value.trim().toLowerCase();
+  if (!nombre) return;
+  if (markers[nombre]) {
+    const { marker, data } = markers[nombre];
+    map.setView([data.latitud, data.longitud], 18);
+    marker.openPopup();
+    
+    // Guardar información del destino para cálculo dinámico persistente
+    destinoActual = { lat: data.latitud, lng: data.longitud, nombre: data.nombre_lugar };
+    
+    document.getElementById("mensajeBienvenida").innerText =
+      `Bienvenido al lugar de interés: ${data.nombre_lugar}`;
+      
+    if (document.getElementById("destinoNombre")) {
+      document.getElementById("destinoNombre").innerText = `Ruta hacia: ${data.nombre_lugar}`;
+    }
 
-        if (userLocation) {
-          if (routingControl) map.removeControl(routingControl);
-          routingControl = L.Routing.control({
-            waypoints: [
-              L.latLng(userLocation.lat, userLocation.lng),
-              L.latLng(data.latitud, data.longitud)
-            ],
-            routeWhileDragging: false,
-            show: false,
-            addWaypoints: false,
-            draggableWaypoints: false,
-            createMarker: () => null,
-            router: new L.Routing.OSRMv1({ serviceUrl: 'https://router.project-osrm.org/route/v1' }),
-            alternatives: true
-          }).addTo(map);
+    if (userLocation) {
+      if (routingControl) map.removeControl(routingControl);
+      routingControl = L.Routing.control({
+        waypoints: [
+          L.latLng(userLocation.lat, userLocation.lng),
+          L.latLng(data.latitud, data.longitud)
+        ],
+        routeWhileDragging: false,
+        show: false,
+        addWaypoints: false,
+        draggableWaypoints: false,
+        createMarker: () => null,
+        router: new L.Routing.OSRMv1({ serviceUrl: 'https://router.project-osrm.org/route/v1' }),
+        alternatives: true
+      }).addTo(map);
 
-          routingControl.on('routesfound', function(e) {
-            const route = e.routes[0];
-            const distanciaKm = (route.summary.totalDistance / 1000).toFixed(2);
-            const tiempoMin = (route.summary.totalTime / 60).toFixed(0);
-            const tiempoPie = ((distanciaKm / 5) * 60).toFixed(0);
+      routingControl.on('routesfound', function(e) {
+        const route = e.routes[0];
+        const distanciaKm = (route.summary.totalDistance / 1000).toFixed(2);
+        const tiempoMin = (route.summary.totalTime / 60).toFixed(0);
+        const tiempoPie = ((distanciaKm / 5) * 60).toFixed(0);
 
-            document.getElementById("distancia").innerText = `Distancia: ${distanciaKm} km`;
-            document.getElementById("tiempo").innerText = `Tiempo estimado: 🚶 ${tiempoPie} min | 🚗 ${tiempoMin} min`;
-            document.getElementById("infoCard").style.display = "block";
-          });
+        document.getElementById("distancia").innerText = `Distancia: ${distanciaKm} km`;
+        document.getElementById("tiempo").innerText = `Tiempo estimado: 🚶 ${tiempoPie} min | 🚗 ${tiempoMin} min`;
+        document.getElementById("infoCard").style.display = "block";
+      });
+    }
+  } else {
+    document.getElementById("mensajeBienvenida").innerText = "Lugar no encontrado en la base de datos.";
+  }
+}
+
+// ========================================================
+// 📌 NUEVO: Controlador e Inversor de Navegación Activa
+// ========================================================
+function conmutarNavegacionEnVivo() {
+  const btn = document.getElementById("btnNavegacion");
+  
+  if (modoNavegacionActivo) {
+    // Si ya estaba activo, apagar el rastreador GPS
+    if (idRastreoGps !== null) {
+      navigator.geolocation.clearWatch(idRastreoGps);
+      idRastreoGps = null;
+    }
+    modoNavegacionActivo = false;
+    btn.className = "btn btn-sm btn-gradient-blue";
+    btn.innerHTML = '<i class="bi bi-navigation-fill"></i> Iniciar Ruta';
+    if (typeof mostrarToast === 'function') mostrarToast("🧭 Navegación en tiempo real pausada.");
+  } else {
+    // Activar rastreo continuo de alta precisión
+    if (!navigator.geolocation) {
+      alert("Tu dispositivo o navegador no soporta geolocalización continua.");
+      return;
+    }
+    
+    if (!destinoActual) {
+      alert("Por favor selecciona primero un destino válido en el buscador.");
+      return;
+    }
+
+    modoNavegacionActivo = true;
+    btn.className = "btn btn-sm btn-danger";
+    btn.innerHTML = '<i class="bi bi-stop-fill"></i> Detener Guía';
+    if (typeof mostrarToast === 'function') mostrarToast("📡 GPS Activado. Caminando por el campus...");
+
+    idRastreoGps = navigator.geolocation.watchPosition(
+      (pos) => {
+        const miLat = pos.coords.latitude;
+        const miLng = pos.coords.longitude;
+        userLocation = { lat: miLat, lng: miLng };
+
+        // 1. Mover o crear el marcador interactivo del usuario caminante
+        if (!marcadorUsuarioGps) {
+          marcadorUsuarioGps = L.marker([miLat, miLng], {
+            icon: L.divIcon({
+              className: 'custom-user-icon',
+              html: '<div style="background-color: #007bff; width: 14px; height: 14px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>',
+              iconSize: [14, 14]
+            })
+          }).addTo(map).bindPopup("🚶 Te estás moviendo aquí");
+        } else {
+          marcadorUsuarioGps.setLatLng([miLat, miLng]);
         }
+
+        // Centrar suavemente la vista en la persona conforme avanza
+        map.panTo([miLat, miLng]);
+
+        // 2. Actualizar dinámicamente la polilínea de ruta OSRM en tiempo real
+        if (routingControl && destinoActual) {
+          routingControl.setWaypoints([
+            L.latLng(miLat, miLng),
+            L.latLng(destinoActual.lat, destinoActual.lng)
+          ]);
+        }
+      },
+      (error) => {
+        console.error("Fallo de lectura GPS:", error.message);
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+    );
+  }
+}
+
+// ============================
+// 📌 Cerrar tarjeta flotante
+// ============================
+function cerrarInfo() {
+  // Apagar GPS automáticamente al cerrar la tarjeta para no agotar la batería del usuario
+  if (idRastreoGps !== null) {
+    navigator.geolocation.clearWatch(idRastreoGps);
+    idRastreoGps = null;
+  }
+  modoNavegacionActivo = false;
+  const btn = document.getElementById("btnNavegacion");
+  if (btn) {
+    btn.className = "btn btn-sm btn-gradient-blue";
+    btn.innerHTML = '<i class="bi bi-navigation-fill"></i> Iniciar Ruta';
+  }
+
+  const card = document.getElementById("infoCard");
+  card.style.animation = "fadeOut 0.5s forwards";
+  setTimeout(() => { card.style.display = "none"; card.style.animation = "slideIn 0.5s forwards"; }, 500);
+}
+
+// ============================
+// 📌 Geolocalización (Consulta inicial única)
+// ============================
+function miUbicacion() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      
+      if (marcadorUsuarioGps) {
+        marcadorUsuarioGps.setLatLng([userLocation.lat, userLocation.lng]);
       } else {
-        document.getElementById("mensajeBienvenida").innerText = "Lugar no encontrado en la base de datos.";
+        marcadorUsuarioGps = L.marker([userLocation.lat, userLocation.lng], {
+          icon: L.divIcon({
+            className: 'custom-user-icon',
+            html: '<div style="background-color: #28a745; width: 14px; height: 14px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>',
+            iconSize: [14, 14]
+          })
+        }).addTo(map).bindPopup("📍 Ubicación Inicial").openPopup();
       }
-    }
+      map.setView([userLocation.lat, userLocation.lng], 17);
+    }, (error) => {
+      alert("Asegúrate de conceder permisos de ubicación a la aplicación.");
+    });
+  }
+}
 
-    // ============================
-    // 📌 Cerrar tarjeta flotante
-    // ============================
-    function cerrarInfo() {
-      const card = document.getElementById("infoCard");
-      card.style.animation = "fadeOut 0.5s forwards";
-      setTimeout(() => { card.style.display = "none"; card.style.animation = "slideIn 0.5s forwards"; }, 500);
-    }
+    // FRAGMENTO 5: MÉTRICAS, OPERACIONES CRUD Y CIERRE DEL MÓDULO (ACTUALIZADO)
 
-    // ============================
-    // 📌 Geolocalización
-    // ============================
-    function miUbicacion() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(pos => {
-          userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          L.marker([userLocation.lat, userLocation.lng], { color: 'red' })
-            .addTo(map)
-            .bindPopup("📍 Estás aquí")
-            .openPopup();
-          map.setView([userLocation.lat, userLocation.lng], 17);
-        });
-      }
-    }
+// ============================
+// 📌 Favoritos
+// ============================
+function mostrarFavoritos() {
+  mostrarToast("⭐ Tus favoritos: " + favoritos.join(", "));
+}
 
-    // ============================
-    // 📌 Favoritos
-    // ============================
-    function mostrarFavoritos() {
-      mostrarToast("⭐ Tus favoritos: " + favoritos.join(", "));
-    }
+// ============================
+// 📌 Métricas con Chart.js
+// ============================
+async function cargarMetricas() {
+  try {
+    const res = await fetch("/api/edificios/metricas");
+    const json = await res.json();
+    if (!json.data) throw new Error("Respuesta inválida de métricas");
 
-        // ============================
-    // 📌 Métricas con Chart.js
-    // ============================
-    async function cargarMetricas() {
-      try {
-        const res = await fetch("/api/edificios/metricas");
-        const json = await res.json();
-        if (!json.data) throw new Error("Respuesta inválida de métricas");
+    const data = json.data;
 
-        const data = json.data;
+    new Chart(document.getElementById("graficoConsultas"), {
+      type: 'bar',
+      data: {
+        labels: ['Total de Edificios'],
+        datasets: [{ label: 'Edificios', data: [data.total_edificios], backgroundColor: 'blue' }]
+      },
+      options: { animation: { duration: 800, easing: 'easeOutQuart' } }
+    });
 
-        new Chart(document.getElementById("graficoConsultas"), {
-          type: 'bar',
-          data: {
-            labels: ['Total de Edificios'],
-            datasets: [{ label: 'Edificios', data: [data.total_edificios], backgroundColor: 'blue' }]
-          },
-          options: { animation: { duration: 800, easing: 'easeOutQuart' } }
-        });
+    new Chart(document.getElementById("graficoVisitas"), {
+      type: 'line',
+      data: {
+        labels: ['Lat Promedio', 'Lng Promedio'],
+        datasets: [{ label: 'Coordenadas promedio', data: [data.lat_promedio, data.lng_promedio], borderColor: 'green' }]
+      },
+      options: { animation: { duration: 800, easing: 'easeOutQuart' } }
+    });
+  } catch (err) {
+    console.error("Error cargando métricas:", err);
+    mostrarToast("❌ Error cargando métricas");
+  }
+}
 
-        new Chart(document.getElementById("graficoVisitas"), {
-          type: 'line',
-          data: {
-            labels: ['Lat Promedio', 'Lng Promedio'],
-            datasets: [{ label: 'Coordenadas promedio', data: [data.lat_promedio, data.lng_promedio], borderColor: 'green' }]
-          },
-          options: { animation: { duration: 800, easing: 'easeOutQuart' } }
-        });
-      } catch (err) {
-        console.error("Error cargando métricas:", err);
-        mostrarToast("❌ Error cargando métricas");
-      }
-    }
-    // ============================
-    // 📌 Exportación CSV/PDF
-    // ============================
-    function exportarCSV() {
-      const blob = new Blob([JSON.stringify(favoritos)], { type: "text/csv;charset=utf-8" });
-      saveAs(blob, "favoritos.csv");
-      mostrarToast("📂 Exportación CSV completada");
-    }
+// ============================
+// 📌 Exportación CSV/PDF
+// ============================
+function exportarCSV() {
+  const blob = new Blob([JSON.stringify(favoritos)], { type: "text/csv;charset=utf-8" });
+  saveAs(blob, "favoritos.csv");
+  mostrarToast("📂 Exportación CSV completada");
+}
 
-    function exportarPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      doc.text("Reporte de Favoritos", 10, 10);
-      doc.text(favoritos.join(", "), 10, 20);
-      doc.save("favoritos.pdf");
-      mostrarToast("📄 Exportación PDF completada");
-    }
+function exportarPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.text("Reporte de Favoritos", 10, 10);
+  doc.text(favoritos.join(", "), 10, 20);
+  doc.save("favoritos.pdf");
+  mostrarToast("📄 Exportación PDF completada");
+}
 
-    // ============================
-    // 📌 Modo presentación
-    // ============================
-    function modoPresentacion() {
-      document.documentElement.requestFullscreen();
-      mostrarToast("🖥️ Modo presentación activado");
-    }
+// ============================
+// 📌 Modo presentación
+// ============================
+function modoPresentacion() {
+  document.documentElement.requestFullscreen();
+  mostrarToast("🖥️ Modo presentación activado");
+}
 
-    // ============================
-    // 📌 QR
-    // ============================
-    function escanearQR() {
-      const qr = new Html5Qrcode("reader");
-      qr.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
-        decodedText => {
-          document.getElementById("buscadorLugar").value = decodedText;
-          buscarLugar();
-          qr.stop();
-          mostrarToast("📷 QR escaneado: " + decodedText);
-        });
-    }
+// ============================
+// 📌 QR
+// ============================
+function escanearQR() {
+  const qr = new Html5Qrcode("reader");
+  qr.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
+    decodedText => {
+      document.getElementById("buscadorLugar").value = decodedText;
+      buscarLugar();
+      qr.stop();
+      mostrarToast("📷 QR escaneado: " + decodedText);
+    });
+}
 
-    // ============================
-    // 📌 Notificaciones visuales
-    // ============================
-    function mostrarToast(mensaje) {
-      const container = document.getElementById("toastContainer");
-      const toast = document.createElement("div");
-      toast.className = "toast align-items-center text-bg-primary border-0 show mb-2";
-      toast.role = "alert";
-      toast.innerHTML = `<div class="d-flex"><div class="toast-body">${mensaje}</div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.parentElement.parentElement.remove()"></button></div>`;
-      container.appendChild(toast);
-      setTimeout(() => { toast.remove(); }, 4000);
-    }
+// ============================
+// 📌 Notificaciones visuales
+// ============================
+function mostrarToast(mensaje) {
+  const container = document.getElementById("toastContainer");
+  const toast = document.createElement("div");
+  toast.className = "toast align-items-center text-bg-primary border-0 show mb-2";
+  toast.role = "alert";
+  toast.innerHTML = `<div class="d-flex"><div class="toast-body">${mensaje}</div>
+    <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.parentElement.parentElement.remove()"></button></div>`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.remove(); }, 4000);
+}
 
-    // ============================
-    // 📌 Notificaciones en tiempo real
-    // ============================
-    const evtSource = new EventSource("/api/eventos");
-    evtSource.onmessage = function(e) {
-      mostrarToast("🔔 Evento: " + e.data);
-    };
-    // ============================
+// ============================
+// 📌 Notificaciones en tiempo real
+// ============================
+const evtSource = new EventSource("/api/eventos");
+evtSource.onmessage = function(e) {
+  mostrarToast("🔔 Evento: " + e.data);
+};
+
+// ============================
 // 📌 Editar lugar
 // ============================
 async function editarEdificio(id) {
@@ -481,7 +606,8 @@ async function editarEdificio(id) {
     console.error(err);
   }
 }
-    // ============================
+
+// ============================
 // 📌 Guardar cambios (crear o actualizar)
 // ============================
 document.getElementById("formEdificio").addEventListener("submit", async e => {
@@ -512,29 +638,40 @@ document.getElementById("formEdificio").addEventListener("submit", async e => {
     console.error(err);
   }
 });
-    // ============================
-    // 📌 Eliminar edificio
-    // ============================
-    async function eliminarEdificio(id) {
-      if (!confirm("¿Eliminar este edificio?")) return;
-      try {
-        const res = await fetch(`/api/edificios/${id}`, { method: 'DELETE' });
-        if (res.ok) {
-          cargarEdificios();
-          mostrarToast("🗑️ Edificio eliminado");
-        } else {
-          mostrarToast("❌ Error al eliminar edificio");
-        }
-      } catch (err) {
-        mostrarToast("❌ Error de conexión al eliminar edificio");
-        console.error(err);
-      }
-    } 
-    // ============================
-    // 📌 Inicializar
-    // ============================
-    cargarEdificios();
-    cargarMetricas();
-  </script>
+
+// ============================
+// 📌 Eliminar edificio
+// ============================
+async function eliminarEdificio(id) {
+  if (!confirm("¿Eliminar este edificio?")) return;
+  try {
+    const res = await fetch(`/api/edificios/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      cargarEdificios();
+      mostrarToast("🗑️ Edificio eliminado");
+    } else {
+      mostrarToast("❌ Error al eliminar edificio");
+    }
+  } catch (err) {
+    mostrarToast("❌ Error de conexión al eliminar edificio");
+    console.error(err);
+  }
+} 
+
+// ========================================================
+// 📌 NUEVO: Garbage Collector para Geoposicionamiento Activo
+// ========================================================
+window.addEventListener('beforeunload', () => {
+  if (idRastreoGps !== null) {
+    navigator.geolocation.clearWatch(idRastreoGps);
+  }
+});
+
+// ============================
+// 📌 Inicializar
+// ============================
+cargarEdificios();
+cargarMetricas();
+</script>
 </body>
 </html>
