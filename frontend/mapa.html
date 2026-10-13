@@ -214,6 +214,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
   <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+
+
   <script>
     // Inicializar mapa Leaflet
     const map = L.map('map').setView([3.7166, 8.6732], 16);
@@ -221,31 +223,40 @@
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
+    // ============================
+    // 📌 VARIABLES GLOBALES
+    // ============================
     let markers = {};
     let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
     let userLocation = null;
     let routingControl = null;
+
+    // Variables de control de navegación en tiempo real añadidas con alcance global correcto
+    let idRastreoGps = null;
+    let marcadorUsuarioGps = null;
+    let destinoActual = null;
+    let modoNavegacionActivo = false;
+
     // ============================
-// 📌 Mapa de calor simulado
-// ============================
-function cargarMapaCalor() {
-  // Datos simulados de afluencia (lat, lng, intensidad)
-  const puntos = [
-    [3.7166, 8.6732, 0.8],
-    [3.7170, 8.6740, 0.6],
-    [3.7155, 8.6725, 0.9]
-  ];
+    // 📌 Mapa de calor simulado
+    // ============================
+    function cargarMapaCalor() {
+      // Datos simulados de afluencia (lat, lng, intensidad)
+      const puntos = [
+        [3.7166, 8.6732, 0.8],
+        [3.7170, 8.6740, 0.6],
+        [3.7155, 8.6725, 0.9]
+      ];
 
-  const heat = L.heatLayer(puntos, {
-    radius: 25,
-    blur: 15,
-    maxZoom: 17,
-    gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'}
-  }).addTo(map);
-}
+      const heat = L.heatLayer(puntos, {
+        radius: 25,
+        blur: 15,
+        maxZoom: 17,
+        gradient: {0.4: 'blue', 0.65: 'lime', 1: 'red'}
+      }).addTo(map);
+    }
 
-
-// ============================
+    // ============================
     // 📌 Cargar edificios
     // ============================
     async function cargarEdificios() {
@@ -266,102 +277,93 @@ function cargarMapaCalor() {
                 <button class="btn btn-danger btn-sm" onclick="eliminarEdificio(${e.id_edificio})">Eliminar</button>
               </td>
             </tr>`;
-const marker = L.marker([e.latitud, e.longitud]).addTo(map)
+          const marker = L.marker([e.latitud, e.longitud]).addTo(map)
             .bindPopup(`<b>${e.nombre_lugar}</b>`);
           markers[e.nombre_lugar.toLowerCase()] = { marker, data: e };
         });
       } catch (err) {
         console.error("Error cargando edificios:", err);
-        mostrarToast("❌ Error cargando edificios");
+        if (typeof mostrarToast === 'function') mostrarToast("❌ Error cargando edificios");
       }
     }
 
-    
-
-    
-    
-
-    
-    
-   // FRAGMENTO 4: BÚSQUEDA PREDICTIVA Y RUTAS REACTIVAS (ACTUALIZADO)
-
-// ============================
-// 📌 Búsqueda predictiva
-// ============================
-document.getElementById("buscadorLugar").addEventListener("input", function() {
-  const query = this.value.toLowerCase();
-  const sugerenciasDiv = document.getElementById("sugerencias");
-  sugerenciasDiv.innerHTML = "";
-  if (query.length > 1) {
-    Object.keys(markers).forEach(nombre => {
-      if (nombre.includes(query)) {
-        const item = document.createElement("button");
-        item.className = "list-group-item list-group-item-action";
-        item.textContent = markers[nombre].data.nombre_lugar;
-        item.onclick = () => {
-          document.getElementById("buscadorLugar").value = markers[nombre].data.nombre_lugar;
-          sugerenciasDiv.innerHTML = "";
-          buscarLugar();
-        };
-        sugerenciasDiv.appendChild(item);
+    // ============================
+    // 📌 Búsqueda predictiva
+    // ============================
+    document.getElementById("buscadorLugar").addEventListener("input", function() {
+      const query = this.value.toLowerCase();
+      const sugerenciasDiv = document.getElementById("sugerencias");
+      sugerenciasDiv.innerHTML = "";
+      if (query.length > 1) {
+        Object.keys(markers).forEach(nombre => {
+          if (nombre.includes(query)) {
+            const item = document.createElement("button");
+            item.className = "list-group-item list-group-item-action";
+            item.textContent = markers[nombre].data.nombre_lugar;
+            item.onclick = () => {
+              document.getElementById("buscadorLugar").value = markers[nombre].data.nombre_lugar;
+              sugerenciasDiv.innerHTML = "";
+              buscarLugar();
+            };
+            sugerenciasDiv.appendChild(item);
+          }
+        });
       }
     });
-  }
-});
 
-// ============================
-// 📌 Buscar edificio y rutas alternativas
-// ============================
-function buscarLugar() {
-  const nombre = document.getElementById("buscadorLugar").value.trim().toLowerCase();
-  if (!nombre) return;
-  if (markers[nombre]) {
-    const { marker, data } = markers[nombre];
-    map.setView([data.latitud, data.longitud], 18);
-    marker.openPopup();
-    
-    // Guardar información del destino para cálculo dinámico persistente
-    destinoActual = { lat: data.latitud, lng: data.longitud, nombre: data.nombre_lugar };
-    
-    document.getElementById("mensajeBienvenida").innerText =
-      `Bienvenido al lugar de interés: ${data.nombre_lugar}`;
-      
-    if (document.getElementById("destinoNombre")) {
-      document.getElementById("destinoNombre").innerText = `Ruta hacia: ${data.nombre_lugar}`;
+    // ============================
+    // 📌 Buscar edificio y rutas alternativas
+    // ============================
+    function buscarLugar() {
+      const nombre = document.getElementById("buscadorLugar").value.trim().toLowerCase();
+      if (!nombre) return;
+      if (markers[nombre]) {
+        const { marker, data } = markers[nombre];
+        map.setView([data.latitud, data.longitud], 18);
+        marker.openPopup();
+        
+        // Guardar información del destino para cálculo dinámico persistente
+        destinoActual = { lat: data.latitud, lng: data.longitud, nombre: data.nombre_lugar };
+        
+        document.getElementById("mensajeBienvenida").innerText =
+          `Bienvenido al lugar de interés: ${data.nombre_lugar}`;
+          
+        if (document.getElementById("destinoNombre")) {
+          document.getElementById("destinoNombre").innerText = `Ruta hacia: ${data.nombre_lugar}`;
+        }
+
+        if (userLocation) {
+          if (routingControl) map.removeControl(routingControl);
+          routingControl = L.Routing.control({
+            waypoints: [
+              L.latLng(userLocation.lat, userLocation.lng),
+              L.latLng(data.latitud, data.longitud)
+            ],
+            routeWhileDragging: false,
+            show: false,
+            addWaypoints: false,
+            draggableWaypoints: false,
+            createMarker: () => null,
+            router: new L.Routing.OSRMv1({ serviceUrl: 'https://router.project-osrm.org/route/v1' }),
+            alternatives: true
+          }).addTo(map);
+
+          routingControl.on('routesfound', function(e) {
+            const route = e.routes[0];
+            const distanciaKm = (route.summary.totalDistance / 1000).toFixed(2);
+            const tiempoMin = (route.summary.totalTime / 60).toFixed(0);
+            const tiempoPie = ((distanciaKm / 5) * 60).toFixed(0);
+
+            document.getElementById("distancia").innerText = `Distancia: ${distanciaKm} km`;
+            document.getElementById("tiempo").innerText = `Tiempo estimado: 🚶 ${tiempoPie} min | 🚗 ${tiempoMin} min`;
+            document.getElementById("infoCard").style.display = "block";
+          });
+        }
+      } else {
+        document.getElementById("mensajeBienvenida").innerText = "Lugar no encontrado en la base de datos.";
+      }
     }
-
-    if (userLocation) {
-      if (routingControl) map.removeControl(routingControl);
-      routingControl = L.Routing.control({
-        waypoints: [
-          L.latLng(userLocation.lat, userLocation.lng),
-          L.latLng(data.latitud, data.longitud)
-        ],
-        routeWhileDragging: false,
-        show: false,
-        addWaypoints: false,
-        draggableWaypoints: false,
-        createMarker: () => null,
-        router: new L.Routing.OSRMv1({ serviceUrl: 'https://router.project-osrm.org/route/v1' }),
-        alternatives: true
-      }).addTo(map);
-
-      routingControl.on('routesfound', function(e) {
-        const route = e.routes[0];
-        const distanciaKm = (route.summary.totalDistance / 1000).toFixed(2);
-        const tiempoMin = (route.summary.totalTime / 60).toFixed(0);
-        const tiempoPie = ((distanciaKm / 5) * 60).toFixed(0);
-
-        document.getElementById("distancia").innerText = `Distancia: ${distanciaKm} km`;
-        document.getElementById("tiempo").innerText = `Tiempo estimado: 🚶 ${tiempoPie} min | 🚗 ${tiempoMin} min`;
-        document.getElementById("infoCard").style.display = "block";
-      });
-    }
-  } else {
-    document.getElementById("mensajeBienvenida").innerText = "Lugar no encontrado en la base de datos.";
-  }
-}
-
+  
 // ========================================================
 // 📌 NUEVO: Controlador e Inversor de Navegación Activa
 // ========================================================
@@ -524,43 +526,55 @@ async function cargarMetricas() {
 }
 
 // ============================
-// 📌 Exportación CSV/PDF
+// 📌 Exportación CSV/PDF (VERIFICADO)
 // ============================
 function exportarCSV() {
   const blob = new Blob([JSON.stringify(favoritos)], { type: "text/csv;charset=utf-8" });
-  saveAs(blob, "favoritos.csv");
-  mostrarToast("📂 Exportación CSV completada");
+  if (typeof saveAs === 'function') {
+    saveAs(blob, "favoritos.csv");
+    mostrarToast("📂 Exportación CSV completada");
+  } else {
+    console.error("Librería FileSaver.js no detectada.");
+  }
 }
 
 function exportarPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  doc.text("Reporte de Favoritos", 10, 10);
-  doc.text(favoritos.join(", "), 10, 20);
-  doc.save("favoritos.pdf");
-  mostrarToast("📄 Exportación PDF completada");
+  if (window.jspdf) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.text("Reporte de Favoritos", 10, 10);
+    doc.text(favoritos.join(", "), 10, 20);
+    doc.save("favoritos.pdf");
+    mostrarToast("📄 Exportación PDF completada");
+  } else {
+    console.error("Librería jsPDF no detectada.");
+  }
 }
 
 // ============================
 // 📌 Modo presentación
 // ============================
 function modoPresentacion() {
-  document.documentElement.requestFullscreen();
-  mostrarToast("🖥️ Modo presentación activado");
+  if (document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen();
+    mostrarToast("🖥️ Modo presentación activado");
+  }
 }
 
 // ============================
 // 📌 QR
 // ============================
 function escanearQR() {
-  const qr = new Html5Qrcode("reader");
-  qr.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
-    decodedText => {
-      document.getElementById("buscadorLugar").value = decodedText;
-      buscarLugar();
-      qr.stop();
-      mostrarToast("📷 QR escaneado: " + decodedText);
-    });
+  if (typeof Html5Qrcode === 'function') {
+    const qr = new Html5Qrcode("reader");
+    qr.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
+      decodedText => {
+        document.getElementById("buscadorLugar").value = decodedText;
+        buscarLugar();
+        qr.stop();
+        mostrarToast("📷 QR escaneado: " + decodedText);
+      }).catch(err => console.error("Error al iniciar lector QR:", err));
+  }
 }
 
 // ============================
@@ -568,13 +582,14 @@ function escanearQR() {
 // ============================
 function mostrarToast(mensaje) {
   const container = document.getElementById("toastContainer");
+  if (!container) return;
   const toast = document.createElement("div");
   toast.className = "toast align-items-center text-bg-primary border-0 show mb-2";
   toast.role = "alert";
   toast.innerHTML = `<div class="d-flex"><div class="toast-body">${mensaje}</div>
     <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.parentElement.parentElement.remove()"></button></div>`;
   container.appendChild(toast);
-  setTimeout(() => { toast.remove(); }, 4000);
+  setTimeout(() => { if(toast) toast.remove(); }, 4000);
 }
 
 // ============================
@@ -627,7 +642,9 @@ document.getElementById("formEdificio").addEventListener("submit", async e => {
     });
 
     if (res.ok) {
-      bootstrap.Modal.getInstance(document.getElementById("modalEdificio")).hide();
+      const modalElement = document.getElementById("modalEdificio");
+      const modalInstance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+      modalInstance.hide();
       cargarEdificios();
       mostrarToast(id ? "✅ Lugar actualizado" : "✅ Lugar creado");
     } else {
@@ -659,16 +676,16 @@ async function eliminarEdificio(id) {
 } 
 
 // ========================================================
-// 📌 NUEVO: Garbage Collector para Geoposicionamiento Activo
+// 📌 Garbage Collector para Geoposicionamiento Activo
 // ========================================================
 window.addEventListener('beforeunload', () => {
-  if (idRastreoGps !== null) {
+  if (typeof idRastreoGps !== 'undefined' && idRastreoGps !== null) {
     navigator.geolocation.clearWatch(idRastreoGps);
   }
 });
 
 // ============================
-// 📌 Inicializar
+// 📌 Inicializar aplicación
 // ============================
 cargarEdificios();
 cargarMetricas();
