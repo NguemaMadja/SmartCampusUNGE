@@ -205,50 +205,55 @@
     </div>
   </footer>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-  <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
 
 
-  <script>
+  <!-- FRAGMENTO SCRIPT 1: PERMISOS GLOBALES Y BÚSQUEDA DEL CAMPUS (ACTUALIZADO) -->
+<script>
     // Inicializar mapa Leaflet
     const map = L.map('map').setView([3.7166, 8.6732], 16);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // ============================
-    // 📌 VARIABLES GLOBALES
-    // ============================
+    // ========================================================
+    // 📌 CONTROL DE ACCESO BASADO EN ROLES REAL (SINCRO LOGIN)
+    // ========================================================
+    function obtenerRolReal() {
+      const rolIdentificado = localStorage.getItem("rol");
+      return rolIdentificado ? rolIdentificado.toLowerCase().trim() : "estudiante";
+    }
+
+    // ========================================================
+    // 📌 VARIABLES GLOBALES UNIFICADAS
+    // ========================================================
     let markers = {};
     let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
     let userLocation = null;
     let routingControl = null;
 
-    // Variables de control de navegación en tiempo real añadidas con alcance global correcto
+    // Variables de control de navegación asistida por GPS
     let idRastreoGps = null;
     let marcadorUsuarioGps = null;
     let destinoActual = null;
     let modoNavegacionActivo = false;
 
+    // Estado del usuario activo unificado con la base de datos
+    const USUARIO_SESION = {
+      rol: obtenerRolReal(),
+      token: localStorage.getItem("token") || null
+    };
+
     // ============================
     // 📌 Mapa de calor simulado
     // ============================
     function cargarMapaCalor() {
-      // Datos simulados de afluencia (lat, lng, intensidad)
       const puntos = [
         [3.7166, 8.6732, 0.8],
         [3.7170, 8.6740, 0.6],
         [3.7155, 8.6725, 0.9]
       ];
 
-      const heat = L.heatLayer(puntos, {
+      L.heatLayer(puntos, {
         radius: 25,
         blur: 15,
         maxZoom: 17,
@@ -256,33 +261,84 @@
       }).addTo(map);
     }
 
-    // ============================
-    // 📌 Cargar edificios
-    // ============================
+    // ========================================================
+    // 📌 Ocultar o Mostrar Componentes Según el Rol (RBAC)
+    // ========================================================
+    function aplicarPermisosPorRol() {
+      const esSuperadmin = (USUARIO_SESION.rol === "superadmin");
+
+      // A. Controlar botón flotante de creación "Añadir Edificio"
+      const btnAnadir = document.querySelector('[data-bs-target="#modalEdificio"]');
+      if (btnAnadir) {
+        btnAnadir.style.setProperty("display", esSuperadmin ? "block" : "none", "important");
+      }
+
+      // B. Ocultar el Panel de Métricas/Gráficos de Chart.js para la comunidad general
+      const panelMetricas = document.getElementById("graficoConsultas")?.closest(".card");
+      if (panelMetricas) {
+        panelMetricas.style.setProperty("display", esSuperadmin ? "block" : "none", "important");
+      }
+
+      // C. Ocultar la columna estructural de "Acciones" en la cabecera de la tabla
+      const tablaEdificios = document.getElementById("tablaEdificios")?.closest("table");
+      if (tablaEdificios) {
+        const thAcciones = tablaEdificios.querySelector("thead th:last-child");
+        if (thAcciones) {
+          thAcciones.style.setProperty("display", esSuperadmin ? "table-cell" : "none", "important");
+        }
+      }
+
+      // D. Actualizar los identificadores visuales del perfil en el Header
+      const userMenuBtn = document.getElementById("userMenu");
+      if (userMenuBtn) {
+        userMenuBtn.innerText = USUARIO_SESION.rol.toUpperCase();
+      }
+      
+      const dropdownText = document.querySelector('.dropdown-item-text');
+      if (dropdownText) {
+        dropdownText.innerText = `Rol: ${USUARIO_SESION.rol}`;
+      }
+    }
+
+    // ========================================================
+    // 📌 Cargar Edificios en Tabla y Mapa respetando Roles
+    // ========================================================
     async function cargarEdificios() {
       try {
         const res = await fetch("/api/edificios");
         const edificios = (await res.json()).data;
         const tabla = document.getElementById("tablaEdificios");
+        if (!tabla) return;
+        
         tabla.innerHTML = "";
+        const esSuperadmin = (USUARIO_SESION.rol === "superadmin");
+
         edificios.forEach(e => {
+          // Si el rol es estudiante o profesor, la celda de botones de control se inyecta vacía
+          const celdaAcciones = esSuperadmin ? `
+            <td>
+              <button class="btn btn-warning btn-sm" onclick="editarEdificio(${e.id_edificio})">Editar</button>
+              <button class="btn btn-danger btn-sm" onclick="eliminarEdificio(${e.id_edificio})">Eliminar</button>
+            </td>` : "";
+
           tabla.innerHTML += `
             <tr>
               <td>${e.id_edificio}</td>
               <td>${e.nombre_lugar}</td>
               <td>${e.latitud}</td>
               <td>${e.longitud}</td>
-              <td>
-                <button class="btn btn-warning btn-sm" onclick="editarEdificio(${e.id_edificio})">Editar</button>
-                <button class="btn btn-danger btn-sm" onclick="eliminarEdificio(${e.id_edificio})">Eliminar</button>
-              </td>
+              ${esSuperadmin ? celdaAcciones : '<td style="display:none;"></td>'}
             </tr>`;
-          const marker = L.marker([e.latitud, e.longitud]).addTo(map)
-            .bindPopup(`<b>${e.nombre_lugar}</b>`);
-          markers[e.nombre_lugar.toLowerCase()] = { marker, data: e };
+
+          // El mapa sigue pintando los marcadores para consulta de todos los usuarios
+          if (!markers[e.nombre_lugar.toLowerCase()]) {
+            const marker = L.marker([e.latitud, e.longitud]).addTo(map)
+              .bindPopup(`<b>${e.nombre_lugar}</b>`);
+            markers[e.nombre_lugar.toLowerCase()] = { marker, data: e };
+          }
         });
       } catch (err) {
-        console.error("Error cargando edificios:", err);
+        console.error("Error cargando infraestructura del campus:", err);
         if (typeof mostrarToast === 'function') mostrarToast("❌ Error cargando edificios");
       }
     }
@@ -311,9 +367,9 @@
       }
     });
 
-    // ============================
-    // 📌 Buscar edificio y rutas alternativas
-    // ============================
+    // ========================================================
+    // 📌 Buscar Edificio y Trazar Ruta Inicial Asistida
+    // ========================================================
     function buscarLugar() {
       const nombre = document.getElementById("buscadorLugar").value.trim().toLowerCase();
       if (!nombre) return;
@@ -322,7 +378,7 @@
         map.setView([data.latitud, data.longitud], 18);
         marker.openPopup();
         
-        // Guardar información del destino para cálculo dinámico persistente
+        // Guardar información del destino para cálculo dinámico del watchPosition
         destinoActual = { lat: data.latitud, lng: data.longitud, nombre: data.nombre_lugar };
         
         document.getElementById("mensajeBienvenida").innerText =
@@ -363,25 +419,30 @@
         document.getElementById("mensajeBienvenida").innerText = "Lugar no encontrado en la base de datos.";
       }
     }
-  
+
+
+  // FRAGMENTO SCRIPT 2: MOTOR GPS INTERACTIVO EN TIEMPO REAL (ACTUALIZADO)
+
 // ========================================================
-// 📌 NUEVO: Controlador e Inversor de Navegación Activa
+// 📌 Controlador de Navegación Activa en Vivo (GPS Persistente)
 // ========================================================
 function conmutarNavegacionEnVivo() {
   const btn = document.getElementById("btnNavegacion");
   
   if (modoNavegacionActivo) {
-    // Si ya estaba activo, apagar el rastreador GPS
+    // Si ya estaba activo, apagar el rastreador continuo GPS
     if (idRastreoGps !== null) {
       navigator.geolocation.clearWatch(idRastreoGps);
       idRastreoGps = null;
     }
     modoNavegacionActivo = false;
-    btn.className = "btn btn-sm btn-gradient-blue";
-    btn.innerHTML = '<i class="bi bi-navigation-fill"></i> Iniciar Ruta';
+    if (btn) {
+      btn.className = "btn btn-sm btn-gradient-blue";
+      btn.innerHTML = '<i class="bi bi-navigation-fill"></i> Iniciar Ruta';
+    }
     if (typeof mostrarToast === 'function') mostrarToast("🧭 Navegación en tiempo real pausada.");
   } else {
-    // Activar rastreo continuo de alta precisión
+    // Activar rastreo continuo de alta precisión para el campus
     if (!navigator.geolocation) {
       alert("Tu dispositivo o navegador no soporta geolocalización continua.");
       return;
@@ -393,8 +454,10 @@ function conmutarNavegacionEnVivo() {
     }
 
     modoNavegacionActivo = true;
-    btn.className = "btn btn-sm btn-danger";
-    btn.innerHTML = '<i class="bi bi-stop-fill"></i> Detener Guía';
+    if (btn) {
+      btn.className = "btn btn-sm btn-danger";
+      btn.innerHTML = '<i class="bi bi-stop-fill"></i> Detener Guía';
+    }
     if (typeof mostrarToast === 'function') mostrarToast("📡 GPS Activado. Caminando por el campus...");
 
     idRastreoGps = navigator.geolocation.watchPosition(
@@ -416,7 +479,7 @@ function conmutarNavegacionEnVivo() {
           marcadorUsuarioGps.setLatLng([miLat, miLng]);
         }
 
-        // Centrar suavemente la vista en la persona conforme avanza
+        // Centrar suavemente la vista en la persona conforme avanza por los caminos
         map.panTo([miLat, miLng]);
 
         // 2. Actualizar dinámicamente la polilínea de ruta OSRM en tiempo real
@@ -428,7 +491,7 @@ function conmutarNavegacionEnVivo() {
         }
       },
       (error) => {
-        console.error("Fallo de lectura GPS:", error.message);
+        console.error("Fallo de lectura de coordenadas GPS:", error.message);
       },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
     );
@@ -436,7 +499,7 @@ function conmutarNavegacionEnVivo() {
 }
 
 // ============================
-// 📌 Cerrar tarjeta flotante
+// 📌 Cerrar tarjeta flotante e interrupción segura de hardware
 // ============================
 function cerrarInfo() {
   // Apagar GPS automáticamente al cerrar la tarjeta para no agotar la batería del usuario
@@ -452,8 +515,13 @@ function cerrarInfo() {
   }
 
   const card = document.getElementById("infoCard");
-  card.style.animation = "fadeOut 0.5s forwards";
-  setTimeout(() => { card.style.display = "none"; card.style.animation = "slideIn 0.5s forwards"; }, 500);
+  if (card) {
+    card.style.animation = "fadeOut 0.5s forwards";
+    setTimeout(() => { 
+      card.style.display = "none"; 
+      card.style.animation = "slideIn 0.5s forwards"; 
+    }, 500);
+  }
 }
 
 // ============================
@@ -477,23 +545,27 @@ function miUbicacion() {
       }
       map.setView([userLocation.lat, userLocation.lng], 17);
     }, (error) => {
-      alert("Asegúrate de conceder permisos de ubicación a la aplicación.");
+      alert("Asegúrate de conceder permisos de ubicación a la aplicación en tu dispositivo.");
     });
   }
 }
-
-    // FRAGMENTO 5: MÉTRICAS, OPERACIONES CRUD Y CIERRE DEL MÓDULO (ACTUALIZADO)
 
 // ============================
 // 📌 Favoritos
 // ============================
 function mostrarFavoritos() {
-  mostrarToast("⭐ Tus favoritos: " + favoritos.join(", "));
+  if (typeof mostrarToast === 'function') {
+    mostrarToast("⭐ Tus favoritos: " + favoritos.join(", "));
+  }
 }
+  
+  
 
-// ============================
-// 📌 Métricas con Chart.js
-// ============================
+// FRAGMENTO SCRIPT 3: OPERACIONES CRUD, NOTIFICACIONES Y INICIALIZACIÓN POR ROL (ACTUALIZADO)
+
+// ========================================================
+// 📌 Métricas con Chart.js (Filtrado por Rol)
+// ========================================================
 async function cargarMetricas() {
   try {
     const res = await fetch("/api/edificios/metricas");
@@ -521,12 +593,12 @@ async function cargarMetricas() {
     });
   } catch (err) {
     console.error("Error cargando métricas:", err);
-    mostrarToast("❌ Error cargando métricas");
+    if (typeof mostrarToast === 'function') mostrarToast("❌ Error cargando métricas");
   }
 }
 
 // ============================
-// 📌 Exportación CSV/PDF (VERIFICADO)
+// 📌 Exportación CSV/PDF
 // ============================
 function exportarCSV() {
   const blob = new Blob([JSON.stringify(favoritos)], { type: "text/csv;charset=utf-8" });
@@ -600,21 +672,23 @@ evtSource.onmessage = function(e) {
   mostrarToast("🔔 Evento: " + e.data);
 };
 
-// ============================
-// 📌 Editar lugar
-// ============================
+// ========================================================
+// 📌 Editar lugar (Seguridad Frontend integrada)
+// ========================================================
 async function editarEdificio(id) {
+  if (USUARIO_SESION.rol !== "superadmin") {
+    mostrarToast("⛔ Acción restringida: Permisos insuficientes.");
+    return;
+  }
   try {
     const res = await fetch(`/api/edificios/${id}`);
     const data = (await res.json()).data;
 
-    // Rellenar el modal con los datos del lugar
     document.getElementById("idEdificio").value = data.id_edificio;
     document.getElementById("nombre_lugar").value = data.nombre_lugar;
     document.getElementById("latitud").value = data.latitud;
     document.getElementById("longitud").value = data.longitud;
 
-    // Mostrar el modal
     new bootstrap.Modal(document.getElementById("modalEdificio")).show();
   } catch (err) {
     mostrarToast("❌ Error al cargar lugar para edición");
@@ -627,6 +701,10 @@ async function editarEdificio(id) {
 // ============================
 document.getElementById("formEdificio").addEventListener("submit", async e => {
   e.preventDefault();
+  if (USUARIO_SESION.rol !== "superadmin") {
+    mostrarToast("⛔ Acción denegada: Tu perfil no tiene permisos de escritura.");
+    return;
+  }
   const id = document.getElementById("idEdificio").value;
   const body = {
     nombre_lugar: document.getElementById("nombre_lugar").value,
@@ -656,11 +734,15 @@ document.getElementById("formEdificio").addEventListener("submit", async e => {
   }
 });
 
-// ============================
-// 📌 Eliminar edificio
-// ============================
+// ========================================================
+// 📌 Eliminar edificio (Seguridad Frontend integrada)
+// ========================================================
 async function eliminarEdificio(id) {
-  if (!confirm("¿Eliminar este edificio?")) return;
+  if (USUARIO_SESION.rol !== "superadmin") {
+    mostrarToast("⛔ Acción restringida: No puedes alterar la infraestructura.");
+    return;
+  }
+  if (!confirm("¿Eliminar este edificio de la base de datos?")) return;
   try {
     const res = await fetch(`/api/edificios/${id}`, { method: 'DELETE' });
     if (res.ok) {
@@ -684,11 +766,16 @@ window.addEventListener('beforeunload', () => {
   }
 });
 
-// ============================
-// 📌 Inicializar aplicación
-// ============================
-cargarEdificios();
-cargarMetricas();
+// ========================================================
+// 📌 ARRANQUE INTERACTIVO CONTROLADO POR ROL
+// ========================================================
+aplicarPermisosPorRol(); // Oculta o muestra contenedores según LocalStorage
+cargarEdificios();       // Rellena la tabla y distribuye marcadores de Leaflet
+
+// Ejecutar métricas analíticas complejas únicamente para el rol autorizado
+if (USUARIO_SESION.rol === "superadmin") {
+  cargarMetricas();
+}
 </script>
 </body>
 </html>
