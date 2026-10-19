@@ -56,8 +56,14 @@
   <div class="radio-card text-center">
     <h3>Radio UNGE en vivo</h3>
     
-    <!-- Elemento de audio invisible / Sin controles nativos conflictivos en móvil -->
-    <audio id="playerRadio" preload="none"></audio>
+    <!-- CORRECCIÓN UNIVERSAL: Atributos crossorigin y playsinline para romper el bloqueo en otros dispositivos y móviles -->
+    <audio 
+      id="playerRadio" 
+      preload="none" 
+      crossorigin="anonymous" 
+      playsinline="true" 
+      webkit-playsinline="true">
+    </audio>
     
     <!-- Botón interactivo obligatorio para la directiva de reproducción móvil -->
     <button id="btnControlRadio" class="btn btn-success w-100 btn-audio-control my-3">
@@ -74,8 +80,6 @@
   </footer>
 
   <!-- Script optimizado para evadir restricciones móviles y saltar ngrok -->
-
-  
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       const audioPlayer = document.getElementById("playerRadio");
@@ -87,8 +91,11 @@
       const streamUrl = baseUrl + "?ngrok-skip-browser-warning=true";
 
       btnControl.addEventListener("click", function() {
-        if (audioPlayer.paused || audioPlayer.src === "") {
+        if (audioPlayer.paused || audioPlayer.src === "" || audioPlayer.src === window.location.href) {
           
+          btnControl.innerHTML = "⏳ Conectando...";
+          btnControl.disabled = true;
+
           // 1. Asignamos la URL limpia con el bypass directamente en el click del usuario
           audioPlayer.src = streamUrl;
           audioPlayer.load();
@@ -96,19 +103,25 @@
           // 2. Ejecutamos la reproducción protegida por promesas (requerido por iOS/Android)
           audioPlayer.play()
             .then(() => {
+              btnControl.disabled = false;
               btnControl.classList.remove("btn-success");
               btnControl.classList.add("btn-danger");
               btnControl.innerHTML = "⏸️ Pausar Radio";
             })
             .catch(error => {
-              console.error("Error al reproducir en dispositivo móvil:", error);
-              alert("Error de conexión. Por favor toca el botón de reproducción nuevamente.");
+              btnControl.disabled = false;
+              btnControl.classList.remove("btn-danger");
+              btnControl.classList.add("btn-success");
+              btnControl.innerHTML = "▶️ Escuchar Radio en Vivo";
+              console.error("Error al reproducir en el dispositivo:", error);
+              alert("Error de conexión con el flujo de audio. Por favor, inténtalo de nuevo.");
             });
             
         } else {
-          // 3. Pausamos y limpiamos el buffer para evitar que siga descargando datos móviles en segundo plano
+          // 3. Pausamos y limpiamos el buffer de manera segura para evitar consumo de datos en segundo plano
           audioPlayer.pause();
           audioPlayer.src = ""; 
+          audioPlayer.load();
           
           btnControl.classList.remove("btn-danger");
           btnControl.classList.add("btn-success");
