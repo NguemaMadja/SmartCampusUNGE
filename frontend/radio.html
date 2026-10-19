@@ -46,22 +46,39 @@
     </nav>
   </header>
 
-<!-- Reproductor de radio -->
-<div class="radio-card text-center">
-  <h3>Radio UNGE en vivo</h3>
-  <audio id="playerRadio" controls autoplay>
-    <!-- URL CORREGIDA CON EL PARÁMETRO DE SALTO PARA MÓVILES -->
-    <source src="https://ngrok-free.dev" type="audio/mpeg">
-    Tu navegador no soporta audio HTML5.
-  </audio>
-  <!-- Botón de regreso al login -->
-  <a href="login.html" target="_blank" class="btn btn-primary w-100">Ir al Login</a>
-</div>
+  <!-- Reproductor de radio -->
+  <div class="radio-card text-center">
+    <h3>Radio UNGE en vivo</h3>
+    <audio id="playerRadio" controls autoplay>
+      <source src="https://diagnosis-shorty-privatize.ngrok-free.dev/radiounge" type="audio/mpeg">
+      Tu navegador no soporta audio HTML5.
+    </audio>
+    <!-- Botón de regreso al login -->
+    <a href="login.html" target="_blank" class="btn btn-primary w-100">Ir al Login</a>
+  </div>
 
   <!-- Pie de página -->
   <footer>
     <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
   </footer>
+
+  <!-- Script para solucionar la reproducción en teléfonos móviles con Ngrok -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      var audioPlayer = document.getElementById("playerRadio");
+      if (audioPlayer) {
+        var sourceElement = audioPlayer.querySelector("source");
+        if (sourceElement) {
+          var currentSrc = sourceElement.src;
+          // Inyecta dinámicamente el parámetro para evadir la pantalla intermedia de ngrok
+          if (!currentSrc.includes("ngrok-skip-browser-warning")) {
+            sourceElement.src = currentSrc + "?ngrok-skip-browser-warning=true";
+            audioPlayer.load(); // Fuerza al reproductor a refrescar la ruta en móviles
+          }
+        }
+      }
+    });
+  </script>
 
 </body>
 </html>
