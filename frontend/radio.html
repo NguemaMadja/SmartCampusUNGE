@@ -46,16 +46,17 @@
     </nav>
   </header>
 
-  <!-- Reproductor de radio -->
-  <div class="radio-card text-center">
-    <h3>Radio UNGE en vivo</h3>
-    <audio id="playerRadio" controls autoplay>
-      <source src="https://diagnosis-shorty-privatize.ngrok-free.dev/radiounge" type="audio/mpeg">
-      Tu navegador no soporta audio HTML5.
-    </audio>
-    <!-- Botón de regreso al login -->
-    <a href="login.html" target="_blank" class="btn btn-primary w-100">Ir al Login</a>
-  </div>
+ <!-- Reproductor de radio -->
+<div class="radio-card text-center">
+  <h3>Radio UNGE en vivo</h3>
+  <audio id="playerRadio" controls autoplay>
+    <!-- SE LE AÑADE EL PARÁMETRO AL FINAL DE LA URL -->
+    <source src="https://ngrok-free.dev" type="audio/mpeg">
+    Tu navegador no soporta audio HTML5.
+  </audio>
+  <!-- Botón de regreso al login -->
+  <a href="login.html" target="_blank" class="btn btn-primary w-100">Ir al Login</a>
+</div>
 
   <!-- Pie de página -->
   <footer>
