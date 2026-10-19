@@ -29,7 +29,13 @@
       color: white;
       padding: 15px;
       text-align: center;
-      margin-top: auto; /* empuja el footer al fondo */
+      margin-top: auto;
+    }
+    /* Estilo personalizado para nuestro botón de control */
+    .btn-audio-control {
+      font-size: 1.25rem;
+      padding: 12px;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -49,10 +55,15 @@
   <!-- Reproductor de radio -->
   <div class="radio-card text-center">
     <h3>Radio UNGE en vivo</h3>
-    <audio id="playerRadio" controls autoplay>
-      <source src="https://diagnosis-shorty-privatize.ngrok-free.dev/radiounge" type="audio/mpeg">
-      Tu navegador no soporta audio HTML5.
-    </audio>
+    
+    <!-- Elemento de audio invisible / Sin controles nativos conflictivos en móvil -->
+    <audio id="playerRadio" preload="none"></audio>
+    
+    <!-- Botón interactivo obligatorio para la directiva de reproducción móvil -->
+    <button id="btnControlRadio" class="btn btn-success w-100 btn-audio-control my-3">
+      ▶️ Escuchar Radio en Vivo
+    </button>
+
     <!-- Botón de regreso al login -->
     <a href="login.html" target="_blank" class="btn btn-primary w-100">Ir al Login</a>
   </div>
@@ -62,21 +73,46 @@
     <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
   </footer>
 
-  <!-- Script para solucionar la reproducción en teléfonos móviles con Ngrok -->
+  <!-- Script optimizado para evadir restricciones móviles y saltar ngrok -->
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-      var audioPlayer = document.getElementById("playerRadio");
-      if (audioPlayer) {
-        var sourceElement = audioPlayer.querySelector("source");
-        if (sourceElement) {
-          var currentSrc = sourceElement.src;
-          // Inyecta dinámicamente el parámetro para evadir la pantalla intermedia de ngrok
-          if (!currentSrc.includes("ngrok-skip-browser-warning")) {
-            sourceElement.src = currentSrc + "?ngrok-skip-browser-warning=true";
-            audioPlayer.load(); // Fuerza al reproductor a refrescar la ruta en móviles
-          }
+      const audioPlayer = document.getElementById("playerRadio");
+      const btnControl = document.getElementById("btnControlRadio");
+      
+      // La URL base generada por tu tunel ngrok
+      const baseUrl = "https://diagnosis-shorty-privatize.ngrok-free.dev/radiounge";
+      // Agregamos el bypass de ngrok directamente desde el inicio
+      const streamUrl = baseUrl + "?ngrok-skip-browser-warning=true";
+
+      btnControl.addEventListener("click", function() {
+        if (audioPlayer.paused || audioPlayer.src === "") {
+          
+          // 1. Asignamos la URL limpia con el bypass directamente en el click del usuario
+          audioPlayer.src = streamUrl;
+          audioPlayer.load();
+          
+          // 2. Ejecutamos la reproducción protegida por promesas (requerido por iOS/Android)
+          audioPlayer.play()
+            .then(() => {
+              btnControl.classList.remove("btn-success");
+              btnControl.classList.add("btn-danger");
+              btnControl.innerHTML = "⏸️ Pausar Radio";
+            })
+            .catch(error => {
+              console.error("Error al reproducir en dispositivo móvil:", error);
+              alert("Error de conexión. Por favor toca el botón de reproducción nuevamente.");
+            });
+            
+        } else {
+          // 3. Pausamos y limpiamos el buffer para evitar que siga descargando datos móviles en segundo plano
+          audioPlayer.pause();
+          audioPlayer.src = ""; 
+          
+          btnControl.classList.remove("btn-danger");
+          btnControl.classList.add("btn-success");
+          btnControl.innerHTML = "▶️ Escuchar Radio en Vivo";
         }
-      }
+      });
     });
   </script>
 
