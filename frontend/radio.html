@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Radio UNGE</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://jsdelivr.net" rel="stylesheet">
   <style>
     body {
       background: url("image/imge-unge5.jpg") no-repeat center center fixed;
@@ -31,7 +31,6 @@
       text-align: center;
       margin-top: auto;
     }
-    /* Estilo personalizado para nuestro botón de control */
     .btn-audio-control {
       font-size: 1.25rem;
       padding: 12px;
@@ -57,16 +56,15 @@
   <div class="radio-card text-center">
     <h3>Radio UNGE en vivo</h3>
     
-    <!-- Elemento de audio con parámetros universales embebidos de manera fija -->
+    <!-- Elemento de audio con parámetros de compatibilidad nativa para iOS y Android -->
     <audio 
       id="playerRadio" 
       preload="none" 
       playsinline="true" 
-      webkit-playsinline="true"
-      src="https://ngrok-free.dev">
+      webkit-playsinline="true">
     </audio>
     
-    <!-- Botón interactivo compatible con las directivas de seguridad móvil -->
+    <!-- Botón interactivo que cumple con las directivas de seguridad móvil -->
     <button id="btnControlRadio" class="btn btn-success w-100 btn-audio-control my-3">
       ▶️ Escuchar Radio en Vivo
     </button>
@@ -80,29 +78,58 @@
     <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
   </footer>
 
-  <!-- Script Universal de Compatibilidad Multimedia Móvil -->
+  <!-- Script de Inyección e Interceptación de Tráfico Universal -->
   <script>
+    // 1. AUTO-INSTALACIÓN DEL SERVICE WORKER
+    // Este bloque genera un interceptor en caliente para inyectar las cabeceras requeridas por Ngrok.
+    if ('serviceWorker' in navigator) {
+      const swCode = `
+        self.addEventListener('fetch', event => {
+          if (event.request.url.includes('ngrok-free.dev')) {
+            // Clonamos la petición original para poder alterar sus cabeceras
+            const modifiedHeaders = new Headers(event.request.headers);
+            modifiedHeaders.set('ngrok-skip-browser-warning', 'true');
+            
+            const modifiedRequest = new Request(event.request, {
+              headers: modifiedHeaders,
+              mode: 'cors', // Forzar modo CORS para transmisiones multimedia cruzadas
+              credentials: 'omit'
+            });
+            event.respondWith(fetch(modifiedRequest));
+          }
+        });
+        self.addEventListener('activate', event => event.waitUntil(clients.claim()));
+      `;
+      
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      const swUrl = URL.createObjectURL(blob);
+      
+      navigator.serviceWorker.register(swUrl, { scope: './' })
+        .then(reg => console.log('Controlador de tráfico activado con éxito.'))
+        .catch(err => console.error('Error al inicializar compatibilidad:', err));
+    }
+
+    // 2. CONTROL DEL REPRODUCTOR MULTIMEDIA
     document.addEventListener("DOMContentLoaded", function() {
       const audioPlayer = document.getElementById("playerRadio");
       const btnControl = document.getElementById("btnControlRadio");
       
-      // Conservamos la URL limpia para re-conexiones estables en móviles
+      // La dirección IP del túnel Ngrok activa
       const streamUrl = "https://ngrok-free.dev";
 
       btnControl.addEventListener("click", function() {
-        // Verificamos si está pausado o si se necesita inicializar el origen
         if (audioPlayer.paused || !audioPlayer.src || audioPlayer.src === window.location.href) {
           
           btnControl.innerHTML = "⏳ Conectando...";
           btnControl.disabled = true;
 
-          // Aseguramos que la URL del streaming sea la correcta antes de la carga
+          // Asignamos la ruta limpia. El Service Worker se encargará de validar las credenciales de ngrok.
           audioPlayer.src = streamUrl;
           
-          // Solución para iPhone: Forzar la lectura atómica del flujo de audio en vivo
+          // Obligar al motor WebKit (Safari/iPhone) y Blink (Chrome/Android) a refrescar los códecs de audio
           audioPlayer.load();
           
-          // Ejecución del hilo de reproducción controlado por promesas estándar
+          // Disparo de la transmisión protegido por promesas estándar
           audioPlayer.play()
             .then(() => {
               btnControl.disabled = false;
@@ -115,17 +142,15 @@
               btnControl.classList.remove("btn-danger");
               btnControl.classList.add("btn-success");
               btnControl.innerHTML = "▶️ Escuchar Radio en Vivo";
-              console.error("Fallo de reproducción en dispositivo:", error);
-              alert("Asegúrate de que el servidor de la radio esté encendido y vuelve a intentarlo.");
+              console.error("Fallo técnico de hardware:", error);
+              alert("Error de flujo. Por favor, asegúrate de que la transmisión esté activa en tu consola e inténtalo de nuevo.");
             });
             
         } else {
-          // Pausa limpia: detenemos el reproductor de forma nativa
+          // Detención segura: pausamos y reiniciamos el búfer sin destruir el elemento en iOS
           audioPlayer.pause();
-          
-          // En streams continuos de móviles, en lugar de vaciar la URL (lo que rompe iOS),
-          // forzamos un rebobinado lógico cargando un estado nulo controlado.
           audioPlayer.src = "";
+          audioPlayer.load();
           
           btnControl.classList.remove("btn-danger");
           btnControl.classList.add("btn-success");
