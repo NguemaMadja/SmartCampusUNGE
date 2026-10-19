@@ -74,47 +74,65 @@
   </footer>
 
   <!-- Script optimizado para evadir restricciones móviles y saltar ngrok -->
+
+  
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      const audioPlayer = document.getElementById("playerRadio");
-      const btnControl = document.getElementById("btnControlRadio");
-      
-      // La URL base generada por tu tunel ngrok
-      const baseUrl = "https://diagnosis-shorty-privatize.ngrok-free.dev/radiounge";
-      // Agregamos el bypass de ngrok directamente desde el inicio
-      const streamUrl = baseUrl + "?ngrok-skip-browser-warning=true";
+  document.addEventListener("DOMContentLoaded", function() {
+    const audioPlayer = document.getElementById("playerRadio");
+    const btnControl = document.getElementById("btnControlRadio");
+    
+    const baseUrl = "https://ngrok-free.dev";
+    const streamUrl = baseUrl + "?ngrok-skip-browser-warning=true";
 
-      btnControl.addEventListener("click", function() {
-        if (audioPlayer.paused || audioPlayer.src === "") {
-          
-          // 1. Asignamos la URL limpia con el bypass directamente en el click del usuario
-          audioPlayer.src = streamUrl;
-          audioPlayer.load();
-          
-          // 2. Ejecutamos la reproducción protegida por promesas (requerido por iOS/Android)
-          audioPlayer.play()
-            .then(() => {
-              btnControl.classList.remove("btn-success");
-              btnControl.classList.add("btn-danger");
-              btnControl.innerHTML = "⏸️ Pausar Radio";
-            })
-            .catch(error => {
-              console.error("Error al reproducir en dispositivo móvil:", error);
-              alert("Error de conexión. Por favor toca el botón de reproducción nuevamente.");
-            });
+    // Atributos universales para máxima compatibilidad móvil (Android e iOS)
+    audioPlayer.setAttribute("playsinline", "true");
+    audioPlayer.setAttribute("webkit-playsinline", "true");
+    audioPlayer.preload = "none";
+
+    btnControl.addEventListener("click", function() {
+      if (audioPlayer.paused || audioPlayer.src === "") {
+        
+        btnControl.innerHTML = "⏳ Conectando a Radio UNGE...";
+        btnControl.disabled = true;
+
+        // Asignamos la ruta con el bypass de ngrok
+        audioPlayer.src = streamUrl;
+        audioPlayer.load();
+        
+        // Intento de reproducción estándar universal protegido por promesas
+        audioPlayer.play()
+          .then(() => {
+            // FUNCIONA EN CUALQUIER DISPOSITIVO (Android, PC, o iOS con cookie activa)
+            btnControl.disabled = false;
+            btnControl.classList.remove("btn-success");
+            btnControl.classList.add("btn-danger");
+            btnControl.innerHTML = "⏸️ Pausar Radio";
+          })
+          .catch(error => {
+            // SI FALLA (Principalmente en iPhones o navegadores hiper-seguros debido a Ngrok)
+            btnControl.disabled = false;
+            btnControl.classList.remove("btn-danger");
+            btnControl.classList.add("btn-success");
+            btnControl.innerHTML = "▶️ Escuchar Radio en Vivo";
             
-        } else {
-          // 3. Pausamos y limpiamos el buffer para evitar que siga descargando datos móviles en segundo plano
-          audioPlayer.pause();
-          audioPlayer.src = ""; 
-          
-          btnControl.classList.remove("btn-danger");
-          btnControl.classList.add("btn-success");
-          btnControl.innerHTML = "▶️ Escuchar Radio en Vivo";
-        }
-      });
-    });
-  </script>
+            console.error("Error de reproducción multimedia:", error);
 
-</body>
-</html>
+            // Plan de contingencia universal para el bloqueo de Ngrok
+            if (confirm("Para escuchar la radio en este dispositivo, el servidor de pruebas (Ngrok) requiere una validación rápida. ¿Deseas activarla ahora?")) {
+              window.open(streamUrl, '_blank');
+            }
+          });
+          
+      } else {
+        // Pausa limpia y universal (libera memoria y datos en cualquier móvil)
+        audioPlayer.pause();
+        audioPlayer.src = "";
+        audioPlayer.load(); 
+        
+        btnControl.classList.remove("btn-danger");
+        btnControl.classList.add("btn-success");
+        btnControl.innerHTML = "▶️ Escuchar Radio en Vivo";
+      }
+    });
+  });
+</script>
