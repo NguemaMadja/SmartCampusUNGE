@@ -56,13 +56,13 @@
   <div class="radio-card text-center">
     <h3>Radio UNGE en vivo</h3>
     
-    <!-- Elemento de audio preparado para recibir el flujo universal convertido -->
+    <!-- Elemento de audio nativo con soporte estricto para políticas móviles -->
     <audio 
       id="playerRadio" 
       preload="none" 
-      crossorigin="anonymous"
       playsinline="true" 
-      webkit-playsinline="true">
+      webkit-playsinline="true"
+      crossorigin="anonymous">
     </audio>
     
     <!-- Botón interactivo obligatorio para la directiva de reproducción móvil -->
@@ -79,86 +79,46 @@
     <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
   </footer>
 
-  <!-- Script con bypass HTTP de bajo nivel para compatibilidad total -->
+  <!-- Script Universal Corregido -->
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       const audioPlayer = document.getElementById("playerRadio");
       const btnControl = document.getElementById("btnControlRadio");
       
+      // NOTA: Reemplaza esta URL por tu nueva URL limpia (Ej: de LocalTunnel o tu IP de red local)
       const streamUrl = "https://ngrok-free.dev";
-      let objectURL = null;
-      let abortController = null;
 
-      btnControl.addEventListener("click", async function() {
-        if (audioPlayer.paused || btnControl.classList.contains("btn-success")) {
+      btnControl.addEventListener("click", function() {
+        if (audioPlayer.paused || !audioPlayer.src || audioPlayer.src === window.location.href) {
           
           btnControl.innerHTML = "⏳ Conectando...";
           btnControl.disabled = true;
 
-          // Cancelamos cualquier petición previa colgada
-          if (abortController) abortController.abort();
-          abortController = new AbortController();
-
-          try {
-            // SOLUCIÓN ATÓMICA: Forzamos la descarga del audio inyectando la cabecera directamente por código
-            const response = await fetch(streamUrl, {
-              headers: { 'ngrok-skip-browser-warning': 'true' },
-              signal: abortController.signal
+          // Asignación directa e inmediata del flujo
+          audioPlayer.src = streamUrl;
+          audioPlayer.load();
+          
+          audioPlayer.play()
+            .then(() => {
+              btnControl.disabled = false;
+              btnControl.classList.remove("btn-success");
+              btnControl.classList.add("btn-danger");
+              btnControl.innerHTML = "⏸️ Pausar Radio";
+            })
+            .catch(error => {
+              btnControl.disabled = false;
+              btnControl.classList.remove("btn-danger");
+              btnControl.classList.add("btn-success");
+              btnControl.innerHTML = "▶️ Escuchar Radio en Vivo";
+              console.error("Error de reproducción:", error);
+              alert("Error de conexión. Asegúrate de que el servidor de la radio esté emitiendo.");
             });
-
-            if (!response.ok) throw new Error("Servidor fuera de línea");
-
-            // Convertimos la respuesta continua de ngrok en un objeto URL nativo que cualquier móvil acepta
-            const reader = response.body.getReader();
-            const stream = new ReadableStream({
-              start(controller) {
-                function push() {
-                  reader.read().then(({ done, value }) => {
-                    if (done) {
-                      controller.close();
-                      return;
-                    }
-                    controller.enqueue(value);
-                    push();
-                  });
-                }
-                push();
-              }
-            });
-
-            const responseStream = new Response(stream, { headers: { "Content-Type": "audio/mpeg" } });
-            const blob = await responseStream.blob();
-            
-            // Creamos una URL local temporal que burla las restricciones CORS del iPhone y Android
-            if (objectURL) URL.revokeObjectURL(objectURL);
-            objectURL = URL.createObjectURL(blob);
-            
-            audioPlayer.src = objectURL;
-            audioPlayer.load();
-
-            await audioPlayer.play();
-            
-            btnControl.disabled = false;
-            btnControl.classList.remove("btn-success");
-            btnControl.classList.add("btn-danger");
-            btnControl.innerHTML = "⏸️ Pausar Radio";
-
-          } catch (error) {
-            btnControl.disabled = false;
-            btnControl.classList.remove("btn-danger");
-            btnControl.classList.add("btn-success");
-            btnControl.innerHTML = "▶️ Escuchar Radio en Vivo";
-            console.error("Error de Red / CORS bypass:", error);
-            alert("Error de conexión. Por favor, asegúrate de que el streaming esté activo en tu consola.");
-          }
             
         } else {
-          // Detención e higienización completa del búfer de datos
-          if (abortController) abortController.abort();
+          // Detención segura para no consumir datos móviles en segundo plano
           audioPlayer.pause();
-          audioPlayer.src = "";
+          audioPlayer.src = ""; 
           audioPlayer.load();
-          if (objectURL) URL.revokeObjectURL(objectURL);
           
           btnControl.classList.remove("btn-danger");
           btnControl.classList.add("btn-success");
