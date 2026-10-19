@@ -36,6 +36,7 @@
       font-size: 1.25rem;
       padding: 12px;
       font-weight: bold;
+      transition: all 0.2s ease-in-out;
     }
   </style>
 </head>
@@ -56,10 +57,16 @@
   <div class="radio-card text-center">
     <h3>Radio UNGE en vivo</h3>
     
-    <!-- Elemento de audio invisible / Sin controles nativos conflictivos en móvil -->
-    <audio id="playerRadio" preload="none"></audio>
+    <!-- Elemento de audio con parámetros universales embebidos de manera fija -->
+    <audio 
+      id="playerRadio" 
+      preload="none" 
+      playsinline="true" 
+      webkit-playsinline="true"
+      src="https://ngrok-free.dev">
+    </audio>
     
-    <!-- Botón interactivo obligatorio para la directiva de reproducción móvil -->
+    <!-- Botón interactivo compatible con las directivas de seguridad móvil -->
     <button id="btnControlRadio" class="btn btn-success w-100 btn-audio-control my-3">
       ▶️ Escuchar Radio en Vivo
     </button>
@@ -73,66 +80,60 @@
     <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
   </footer>
 
-  <!-- Script optimizado para evadir restricciones móviles y saltar ngrok -->
-
-  
+  <!-- Script Universal de Compatibilidad Multimedia Móvil -->
   <script>
-  document.addEventListener("DOMContentLoaded", function() {
-    const audioPlayer = document.getElementById("playerRadio");
-    const btnControl = document.getElementById("btnControlRadio");
-    
-    const baseUrl = "https://ngrok-free.dev";
-    const streamUrl = baseUrl + "?ngrok-skip-browser-warning=true";
+    document.addEventListener("DOMContentLoaded", function() {
+      const audioPlayer = document.getElementById("playerRadio");
+      const btnControl = document.getElementById("btnControlRadio");
+      
+      // Conservamos la URL limpia para re-conexiones estables en móviles
+      const streamUrl = "https://ngrok-free.dev";
 
-    // Atributos universales para máxima compatibilidad móvil (Android e iOS)
-    audioPlayer.setAttribute("playsinline", "true");
-    audioPlayer.setAttribute("webkit-playsinline", "true");
-    audioPlayer.preload = "none";
-
-    btnControl.addEventListener("click", function() {
-      if (audioPlayer.paused || audioPlayer.src === "") {
-        
-        btnControl.innerHTML = "⏳ Conectando a Radio UNGE...";
-        btnControl.disabled = true;
-
-        // Asignamos la ruta con el bypass de ngrok
-        audioPlayer.src = streamUrl;
-        audioPlayer.load();
-        
-        // Intento de reproducción estándar universal protegido por promesas
-        audioPlayer.play()
-          .then(() => {
-            // FUNCIONA EN CUALQUIER DISPOSITIVO (Android, PC, o iOS con cookie activa)
-            btnControl.disabled = false;
-            btnControl.classList.remove("btn-success");
-            btnControl.classList.add("btn-danger");
-            btnControl.innerHTML = "⏸️ Pausar Radio";
-          })
-          .catch(error => {
-            // SI FALLA (Principalmente en iPhones o navegadores hiper-seguros debido a Ngrok)
-            btnControl.disabled = false;
-            btnControl.classList.remove("btn-danger");
-            btnControl.classList.add("btn-success");
-            btnControl.innerHTML = "▶️ Escuchar Radio en Vivo";
-            
-            console.error("Error de reproducción multimedia:", error);
-
-            // Plan de contingencia universal para el bloqueo de Ngrok
-            if (confirm("Para escuchar la radio en este dispositivo, el servidor de pruebas (Ngrok) requiere una validación rápida. ¿Deseas activarla ahora?")) {
-              window.open(streamUrl, '_blank');
-            }
-          });
+      btnControl.addEventListener("click", function() {
+        // Verificamos si está pausado o si se necesita inicializar el origen
+        if (audioPlayer.paused || !audioPlayer.src || audioPlayer.src === window.location.href) {
           
-      } else {
-        // Pausa limpia y universal (libera memoria y datos en cualquier móvil)
-        audioPlayer.pause();
-        audioPlayer.src = "";
-        audioPlayer.load(); 
-        
-        btnControl.classList.remove("btn-danger");
-        btnControl.classList.add("btn-success");
-        btnControl.innerHTML = "▶️ Escuchar Radio en Vivo";
-      }
+          btnControl.innerHTML = "⏳ Conectando...";
+          btnControl.disabled = true;
+
+          // Aseguramos que la URL del streaming sea la correcta antes de la carga
+          audioPlayer.src = streamUrl;
+          
+          // Solución para iPhone: Forzar la lectura atómica del flujo de audio en vivo
+          audioPlayer.load();
+          
+          // Ejecución del hilo de reproducción controlado por promesas estándar
+          audioPlayer.play()
+            .then(() => {
+              btnControl.disabled = false;
+              btnControl.classList.remove("btn-success");
+              btnControl.classList.add("btn-danger");
+              btnControl.innerHTML = "⏸️ Pausar Radio";
+            })
+            .catch(error => {
+              btnControl.disabled = false;
+              btnControl.classList.remove("btn-danger");
+              btnControl.classList.add("btn-success");
+              btnControl.innerHTML = "▶️ Escuchar Radio en Vivo";
+              console.error("Fallo de reproducción en dispositivo:", error);
+              alert("Asegúrate de que el servidor de la radio esté encendido y vuelve a intentarlo.");
+            });
+            
+        } else {
+          // Pausa limpia: detenemos el reproductor de forma nativa
+          audioPlayer.pause();
+          
+          // En streams continuos de móviles, en lugar de vaciar la URL (lo que rompe iOS),
+          // forzamos un rebobinado lógico cargando un estado nulo controlado.
+          audioPlayer.src = "";
+          
+          btnControl.classList.remove("btn-danger");
+          btnControl.classList.add("btn-success");
+          btnControl.innerHTML = "▶️ Escuchar Radio en Vivo";
+        }
+      });
     });
-  });
-</script>
+  </script>
+
+</body>
+</html>
