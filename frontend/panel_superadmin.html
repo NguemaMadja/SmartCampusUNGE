@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Panel Superadmin - SmartCampusUNGE</title>
+  <title>Panel SmartCampusUNGE</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <style>
@@ -14,7 +14,6 @@
       display: flex;
       flex-direction: column;
     }
-    /* Sidebar */
     #sidebar {
       width: 250px;
       background-color: #004d26;
@@ -37,7 +36,6 @@
       border-radius: 6px;
     }
     #sidebar a:hover { background-color: #006400; }
-    /* Content */
     #content {
       flex: 1;
       margin-left: 0;
@@ -46,7 +44,6 @@
       color: white;
     }
     #sidebar.active ~ #content { margin-left: 250px; }
-    /* Navbar */
     .navbar { background-color: #004080; position: relative; height: 60px; display: flex; align-items: center; }
     .dropdown-menu { min-width: 200px; }
     footer { background-color: #004080; color: white; padding: 15px; text-align: center; margin-top: auto; }
@@ -62,24 +59,22 @@
   </style>
 </head>
 <body>
-
   <!-- Sidebar -->
   <div id="sidebar">
-    <a href="usuarios.html">Gestión de Usuarios</a>
-    <a href="profesores.html">Gestión de Profesores</a>
-    <a href="estudiantes.html">Gestión de Estudiantes</a>
-    <a href="radio.html">Módulo Radio (CRUD)</a>
-    <a href="escuchar_radio.html">Radio UNGE (Escuchar)</a> 
-    <a href="transporte.html">Transporte Escolar</a>
-    <a href="gestion_energetica.html">Gestión Energética</a>
-    <a href="academia.html">Asistencia vía QR</a>
-    <a href="mapa.html">Mapa del Campus</a>
-    <a href="configuracion.html">Configuración del Sistema</a>
+    <a href="usuarios.html" id="linkUsuarios">Gestión de Usuarios</a>
+    <a href="profesores.html" id="linkProfesores">Gestión de Profesores</a>
+    <a href="estudiantes.html" id="linkEstudiantes">Gestión de Estudiantes</a>
+    <a href="radio.html" id="linkRadioCrud">Módulo Radio (CRUD)</a>
+    <a href="escuchar_radio.html" id="linkRadioEscuchar">Radio UNGE (Escuchar)</a> 
+    <a href="transporte.html" id="linkTransporte">Transporte Escolar</a>
+    <a href="gestion_energetica.html" id="linkEnergia">Gestión Energética</a>
+    <a href="academia.html" id="linkAsistencia">Asistencia vía QR</a>
+    <a href="mapa.html" id="linkMapa">Mapa del Campus</a>
+    <a href="configuracion.html" id="linkConfig">Configuración del Sistema</a>
   </div>
 
   <!-- Content -->
   <div id="content">
-    <!-- Navbar -->
     <nav class="navbar navbar-dark">
       <span id="menuToggle">&#9776;</span>
       <a class="navbar-brand d-flex align-items-center ms-3" href="index.html">
@@ -93,7 +88,7 @@
       </div>
       <div class="dropdown superadmin-container">
         <button class="btn btn-danger dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-          Superadmin
+          Usuario
         </button>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
           <li><span class="dropdown-item-text" id="userId">ID: --</span></li>
@@ -103,13 +98,10 @@
         </ul>
       </div>
     </nav>
-    <!-- Cabecera -->
     <header class="text-center mt-3">
-      <h2>UNGE - Panel Superadmin</h2>
-      <p>Administración completa de módulos y analítica</p>
+      <h2>UNGE - Panel Principal</h2>
+      <p>Administración y acceso a módulos según rol</p>
     </header>
-
-    <!-- Carrusel -->
     <div id="carouselFotos" class="carousel slide mt-4" data-bs-ride="carousel">
       <div class="carousel-inner">
         <div class="carousel-item active">
@@ -130,7 +122,7 @@
       </button>
     </div>
   </div>
-  <!-- Pie de página -->
+
   <footer>
     <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
     <div class="social-buttons">
@@ -140,110 +132,117 @@
       <a href="#" class="btn btn-outline-light"><i class="bi bi-youtube"></i></a>
     </div>
   </footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const TIEMPO_MAXIMO_INACTIVIDAD = 30 * 60 * 1000; 
 
-  
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Configuración: Tiempo máximo de inactividad permitido (30 minutos)
-    const TIEMPO_MAXIMO_INACTIVIDAD = 30 * 60 * 1000; 
+  (function () {
+    window.history.pushState(null, null, window.location.href);
+    const token = localStorage.getItem("token");
+    const rol = localStorage.getItem("rol");
+    const ultimaActividad = localStorage.getItem("ultimaActividad");
+    const horaActual = new Date().getTime();
 
-    // 1. BLINDAJE EXTREMO ANTI-INTRUSOS Y CONTROL DE FLECHAS (BOTÓN ATRÁS)
-    (function () {
-      // Inyectar un estado artificial para capturar las flechas del navegador
-      window.history.pushState(null, null, window.location.href);
+    if (!token || !rol) {
+      cerrarSesionLimpio();
+      window.location.href = "login.html";
+      return;
+    }
 
+    if (ultimaActividad && (horaActual - parseInt(ultimaActividad) > TIEMPO_MAXIMO_INACTIVIDAD)) {
+      alert("Tu sesión ha caducado por inactividad. Inicia sesión de nuevo.");
+      cerrarSesionLimpio();
+      window.location.href = "login.html";
+      return;
+    }
+
+    localStorage.setItem("ultimaActividad", horaActual);
+  })();
+
+  window.addEventListener("popstate", function () {
+    alert("Acción de navegación no permitida. Tu sesión se cerrará por seguridad.");
+    cerrarSesionLimpio();
+    window.location.href = "login.html";
+  });
+
+  const eventosActividad = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart'];
+  eventosActividad.forEach(evento => {
+    document.addEventListener(evento, () => {
       const token = localStorage.getItem("token");
       const rol = localStorage.getItem("rol");
-      const ultimaActividad = localStorage.getItem("ultimaActividad");
-      const horaActual = new Date().getTime();
-
-      // Regla de Oro: Si no es superadmin, expulsión inmediata sin contemplaciones
-      if (!token || rol !== "superadmin") {
-        cerrarSesionLimpio();
-        window.location.href = "login.html";
-        return;
+      if (token && rol) {
+        localStorage.setItem("ultimaActividad", new Date().getTime());
       }
-
-      // Validar si la sesión ya caducó por inactividad prolongada (Ej: Celular en segundo plano)
-      if (ultimaActividad && (horaActual - parseInt(ultimaActividad) > TIEMPO_MAXIMO_INACTIVIDAD)) {
-        alert("Tu sesión ha caducado por inactividad. Por seguridad, inicia sesión de nuevo.");
-        cerrarSesionLimpio();
-        window.location.href = "login.html";
-        return;
-      }
-
-      // Si todo es correcto, renovamos la marca de tiempo de actividad
-      localStorage.setItem("ultimaActividad", horaActual);
-    })();
-
-    // Interceptar la flecha atrás del navegador: Si la pulsan, destruye la sesión y los manda a loguearse
-    window.addEventListener("popstate", function () {
-      alert("Acción de navegación no permitida. Tu sesión se cerrará por seguridad.");
-      cerrarSesionLimpio();
-      window.location.href = "login.html";
     });
+  });
 
-    // 2. DETECTOR DINÁMICO DE ACTIVIDAD DEL USUARIO (Mientras tenga la app abierta)
-    // Cada vez que mueva el ratón, toque la pantalla del celular o pulse una tecla, renovamos su tiempo de vida
-    const eventosActividad = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart'];
-    eventosActividad.forEach(evento => {
-      document.addEventListener(evento, () => {
-        const token = localStorage.getItem("token");
-        const rol = localStorage.getItem("rol");
-        
-        // Solo renovar si la sesión sigue existiendo legalmente
-        if (token && rol === "superadmin") {
-          localStorage.setItem("ultimaActividad", new Date().getTime());
-        }
+  document.getElementById("menuToggle").addEventListener("click", () => {
+    document.getElementById("sidebar").classList.toggle("active");
+  });
+
+  async function cargarPerfil() {
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch("http://10.70.200.112:4000/usuarios/perfil", {
+        method: "GET",
+        headers: { "Authorization": "Bearer " + token }
       });
-    });
+      const data = await res.json();
+      if (data.usuario) {
+        document.getElementById("userId").textContent = "ID: " + data.usuario.id;
+        document.getElementById("userRole").textContent = "Rol: " + data.usuario.rol;
+        document.getElementById("userMenu").textContent = data.usuario.rol;
 
-    // Toggle sidebar
-    document.getElementById("menuToggle").addEventListener("click", () => {
-      document.getElementById("sidebar").classList.toggle("active");
-    });
-
-    // 3. CARGAR PERFIL DESDE EL SERVIDOR
-    async function cargarPerfil() {
-      const token = localStorage.getItem("token");
-      try {
-        const res = await fetch("http://10.70.200.112:4000/usuarios/perfil", {
-          method: "GET",
-          headers: { "Authorization": "Bearer " + token }
-        });
-        const data = await res.json();
-        if (data.usuario) {
-          // Doble validación: Si el servidor dice que el rol no coincide con el guardado local, expulsar
-          if (data.usuario.rol !== "superadmin") {
-            cerrarSesionLimpio();
-            window.location.href = "login.html";
-            return;
-          }
-          document.getElementById("userId").textContent = "ID: " + data.usuario.id;
-          document.getElementById("userRole").textContent = "Rol: " + data.usuario.rol;
-        }
-      } catch (err) {
-        console.error("Error:", err);
-        alert("Error de conexión con el servidor de autenticación");
+        aplicarFiltrosPorRol(data.usuario.rol);
       }
+    } catch (err) {
+      console.error("Error:", err);
+      alert("Error de conexión con el servidor de autenticación");
     }
+  }
 
-    // Función Centralizada para Limpieza Absoluta de Credenciales
-    function cerrarSesionLimpio() {
-      localStorage.removeItem("token");
-      localStorage.removeItem("rol");
-      localStorage.removeItem("ultimaActividad");
+  function aplicarFiltrosPorRol(rol) {
+    // Ocultar/mostrar enlaces según rol
+    if (rol === "superadmin") {
+      // ve todo
+    } else if (rol === "profesor") {
+      document.getElementById("linkUsuarios").style.display = "none";
+      document.getElementById("linkConfig").style.display = "none";
+      document.getElementById("linkRadioCrud").style.display = "none";
+      document.getElementById("linkEnergia").style.display = "none";
+    } else if (rol === "estudiante") {
+      document.getElementById("linkUsuarios").style.display = "none";
+      document.getElementById("linkProfesores").style.display = "none";
+      document.getElementById("linkConfig").style.display = "none";
+      document.getElementById("linkRadioCrud").style.display = "none";
+      document.getElementById("linkEnergia").style.display = "none";
+      document.getElementById("linkAsistencia").style.display = "none";
+    } else if (rol === "radio") {
+      document.getElementById("linkUsuarios").style.display = "none";
+      document.getElementById("linkProfesores").style.display = "none";
+      document.getElementById("linkEstudiantes").style.display = "none";
+      document.getElementById("linkConfig").style.display = "none";
+      document.getElementById("linkEnergia").style.display = "none";
+      document.getElementById("linkAsistencia").style.display = "none";
+      document.getElementById("linkTransporte").style.display = "none";
+      document.getElementById("linkMapa").style.display = "none";
     }
+  }
 
-    // Botón manual de Logout
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      cerrarSesionLimpio();
-      alert("Sesión cerrada correctamente");
-      window.location.href = "login.html";
-    });
+  function cerrarSesionLimpio() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("rol");
+    localStorage.removeItem("ultimaActividad");
+  }
 
-    // Ejecutar carga de datos al verificar que el blindaje pasó con éxito
-    cargarPerfil();
-  </script>
-  </body>
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    cerrarSesionLimpio();
+    alert("Sesión cerrada correctamente");
+    window.location.href = "login.html";
+  });
+
+  cargarPerfil();
+</script>
+</body>
 </html>
+ 
