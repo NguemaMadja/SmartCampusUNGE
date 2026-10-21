@@ -15,7 +15,23 @@
       display: flex;
       flex-direction: column;
     }
-    /* Menú lateral (Sidebar) */
+
+
+    <!-- Sidebar -->
+<div id="sidebar">
+  <a href="usuarios.html" id="link-usuarios">Gestión de Usuarios</a>
+  <a href="profesores.html" id="link-profesores">Gestión de Profesores</a>
+  <a href="estudiantes.html" id="link-estudiantes">Gestión de Estudiantes</a>
+  <a href="radio.html" id="link-radio-crud">Módulo Radio (CRUD)</a>
+  <a href="escuchar_radio.html" id="link-radio-escuchar">Radio UNGE (Escuchar)</a> 
+  <a href="transporte.html" id="link-transporte">Transporte Escolar</a>
+  <a href="gestion_energetica.html" id="link-energia">Gestión Energética</a>
+  <a href="academia.html" id="link-academia">Asistencia vía QR</a>
+  <a href="mapa.html" id="link-mapa">Mapa del Campus</a>
+  <a href="configuracion.html" id="link-config">Configuración del Sistema</a>
+</div>
+
+    
     #sidebar {
       width: 250px;
       background-color: #004d26;
@@ -202,10 +218,10 @@
   <script src="https://jsdelivr.net"></script>
   
   <script>
-    // Parámetro de seguridad coordinado con login.html (30 minutos)
+    // Configuración: Tiempo máximo de inactividad permitido (30 minutos)
     const TIEMPO_MAXIMO_INACTIVIDAD = 30 * 60 * 1000; 
 
-    // 1. CONTROL DE ACCESO PREVENTIVO MULTI-ROL
+    // 1. BLINDAJE MULTI-ROL INTELIGENTE Y CONTROL DE FLECHAS
     (function () {
       window.history.pushState(null, null, window.location.href);
 
@@ -215,14 +231,14 @@
       const horaActual = new Date().getTime();
       const rolesValidos = ["superadmin", "profesor", "estudiante", "radio"];
 
-      // Expulsión si no tiene credenciales válidas
+      // Validar si el usuario está logueado con un rol del sistema
       if (!token || !rolesValidos.includes(rol)) {
         cerrarSesionLimpio();
         window.location.href = "login.html";
         return;
       }
 
-      // Expulsión por inactividad prolongada
+      // Validar caducidad por inactividad prolongada
       if (ultimaActividad && (horaActual - parseInt(ultimaActividad) > TIEMPO_MAXIMO_INACTIVIDAD)) {
         alert("Tu sesión ha caducado por inactividad. Por seguridad, inicia sesión de nuevo.");
         cerrarSesionLimpio();
@@ -233,12 +249,12 @@
       localStorage.setItem("ultimaActividad", horaActual);
     })();
 
-    // Interceptar navegación por flechas de forma segura
+    // Evitar navegación errónea con flechas del navegador
     window.addEventListener("popstate", function () {
       window.history.pushState(null, null, window.location.href);
     });
 
-    // 2. MONITOR DINÁMICO DE ACTIVIDAD
+    // 2. DETECTOR DINÁMICO DE ACTIVIDAD
     const eventosActividad = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart'];
     eventosActividad.forEach(evento => {
       document.addEventListener(evento, () => {
@@ -250,12 +266,12 @@
       });
     });
 
-    // Toggle Sidebar
+    // Toggle sidebar
     document.getElementById("menuToggle").addEventListener("click", () => {
       document.getElementById("sidebar").classList.toggle("active");
     });
 
-     // 3. COMUNICACIÓN CON EL SERVIDOR Y FILTRADO DE VISTAS POR ROL
+    // 3. CARGAR PERFIL Y APLICAR FILTROS DE LA MATRIZ
     async function cargarPerfil() {
       const token = localStorage.getItem("token");
       const rolLocal = localStorage.getItem("rol");
@@ -268,14 +284,12 @@
         const data = await res.json();
         
         if (data.usuario) {
-          // Seguridad extra: Si el servidor reporta un rol diferente al local, desloguear
           if (data.usuario.rol !== rolLocal) {
             cerrarSesionLimpio();
             window.location.href = "login.html";
             return;
           }
           
-          // Renderizar datos del perfil en las etiquetas de cuenta
           document.getElementById("userId").textContent = "ID: " + data.usuario.id;
           document.getElementById("userRole").textContent = "Rol: " + data.usuario.rol.toUpperCase();
           
@@ -283,9 +297,8 @@
           navBtn.textContent = data.usuario.rol.toUpperCase();
 
           const rol = data.usuario.rol;
-          document.getElementById("panelTitle").innerText = `UNGE - Panel de ${rol.charAt(0).toUpperCase() + rol.slice(1)}`;
 
-          // FILTRADO SELECTIVO SEGÚN LA MATRIZ DE ACCESO
+          // RENDERIZADO EXCLUSIVO SEGÚN EL ROL (OCULTAR ELEMENTOS PRIVADOS)
           if (rol === "profesor" || rol === "estudiante") {
             document.getElementById("link-usuarios")?.remove();
             document.getElementById("link-profesores")?.remove();
@@ -296,7 +309,6 @@
             document.getElementById("link-config")?.remove();
             
             navBtn.className = "btn btn-primary dropdown-toggle fw-bold";
-            document.getElementById("marqueeText").innerText = `Bienvenido Profesor/Estudiante. Tienes acceso autorizado de consulta para el mapa, transporte y transmisiones radiales.`;
           } 
           else if (rol === "radio") {
             document.getElementById("link-usuarios")?.remove();
@@ -307,16 +319,13 @@
             document.getElementById("link-config")?.remove();
             
             navBtn.className = "btn btn-success dropdown-toggle fw-bold";
-            document.getElementById("marqueeText").innerText = "Módulo Radial Autorizado. Puedes programar eventos musicales o transmisiones informativas desde el CRUD.";
           } 
           else if (rol === "superadmin") {
             navBtn.className = "btn btn-danger dropdown-toggle fw-bold";
-            document.getElementById("marqueeText").innerText = "Control total administrativo de la plataforma de internet de las cosas (IoT) SmartCampus UNGE.";
           }
         }
       } catch (err) {
-        console.error("Error crítico de autenticación:", err);
-        alert("Aviso: No se pudo verificar el perfil en el servidor, operando con caché local.");
+        console.error("Error en perfil:", err);
       }
     }
 
@@ -326,22 +335,16 @@
       localStorage.removeItem("ultimaActividad");
     }
 
-    // Botón de Logout manual
+    // Botón manual de Logout
     document.getElementById("logoutBtn").addEventListener("click", (e) => {
       e.preventDefault();
       cerrarSesionLimpio();
       window.location.href = "login.html";
     });
 
-    // Forzar actualización al navegar entre páginas para limpiar variables muertas
-    window.addEventListener("pageshow", (event) => {
-      if (event.persisted || (typeof window.performance != "undefined" && window.performance.navigation.type === 2)) {
-        window.location.reload();
-      }
-    });
-
-    // Iniciar verificación
+    // Ejecutar validaciones al cargar
     cargarPerfil();
   </script>
+  
 </body>
 </html>
