@@ -140,21 +140,72 @@
       <a href="#" class="btn btn-outline-light"><i class="bi bi-youtube"></i></a>
     </div>
   </footer>
+
+  
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // Configuración: Tiempo máximo de inactividad permitido (30 minutos)
+    const TIEMPO_MAXIMO_INACTIVIDAD = 30 * 60 * 1000; 
+
+    // 1. BLINDAJE EXTREMO ANTI-INTRUSOS Y CONTROL DE FLECHAS (BOTÓN ATRÁS)
+    (function () {
+      // Inyectar un estado artificial para capturar las flechas del navegador
+      window.history.pushState(null, null, window.location.href);
+
+      const token = localStorage.getItem("token");
+      const rol = localStorage.getItem("rol");
+      const ultimaActividad = localStorage.getItem("ultimaActividad");
+      const horaActual = new Date().getTime();
+
+      // Regla de Oro: Si no es superadmin, expulsión inmediata sin contemplaciones
+      if (!token || rol !== "superadmin") {
+        cerrarSesionLimpio();
+        window.location.href = "login.html";
+        return;
+      }
+
+      // Validar si la sesión ya caducó por inactividad prolongada (Ej: Celular en segundo plano)
+      if (ultimaActividad && (horaActual - parseInt(ultimaActividad) > TIEMPO_MAXIMO_INACTIVIDAD)) {
+        alert("Tu sesión ha caducado por inactividad. Por seguridad, inicia sesión de nuevo.");
+        cerrarSesionLimpio();
+        window.location.href = "login.html";
+        return;
+      }
+
+      // Si todo es correcto, renovamos la marca de tiempo de actividad
+      localStorage.setItem("ultimaActividad", horaActual);
+    })();
+
+    // Interceptar la flecha atrás del navegador: Si la pulsan, destruye la sesión y los manda a loguearse
+    window.addEventListener("popstate", function () {
+      alert("Acción de navegación no permitida. Tu sesión se cerrará por seguridad.");
+      cerrarSesionLimpio();
+      window.location.href = "login.html";
+    });
+
+    // 2. DETECTOR DINÁMICO DE ACTIVIDAD DEL USUARIO (Mientras tenga la app abierta)
+    // Cada vez que mueva el ratón, toque la pantalla del celular o pulse una tecla, renovamos su tiempo de vida
+    const eventosActividad = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart'];
+    eventosActividad.forEach(evento => {
+      document.addEventListener(evento, () => {
+        const token = localStorage.getItem("token");
+        const rol = localStorage.getItem("rol");
+        
+        // Solo renovar si la sesión sigue existiendo legalmente
+        if (token && rol === "superadmin") {
+          localStorage.setItem("ultimaActividad", new Date().getTime());
+        }
+      });
+    });
+
     // Toggle sidebar
     document.getElementById("menuToggle").addEventListener("click", () => {
       document.getElementById("sidebar").classList.toggle("active");
     });
 
-    // Cargar perfil
+    // 3. CARGAR PERFIL DESDE EL SERVIDOR
     async function cargarPerfil() {
       const token = localStorage.getItem("token");
-      if (!token) {
-        alert("No hay sesión activa, vuelve a login");
-        window.location.href = "login.html";
-        return;
-      }
       try {
         const res = await fetch("http://10.70.200.112:4000/usuarios/perfil", {
           method: "GET",
@@ -162,24 +213,37 @@
         });
         const data = await res.json();
         if (data.usuario) {
+          // Doble validación: Si el servidor dice que el rol no coincide con el guardado local, expulsar
+          if (data.usuario.rol !== "superadmin") {
+            cerrarSesionLimpio();
+            window.location.href = "login.html";
+            return;
+          }
           document.getElementById("userId").textContent = "ID: " + data.usuario.id;
           document.getElementById("userRole").textContent = "Rol: " + data.usuario.rol;
         }
       } catch (err) {
         console.error("Error:", err);
-        alert("Error de conexión con el servidor");
+        alert("Error de conexión con el servidor de autenticación");
       }
     }
 
-    // Logout
-    document.getElementById("logoutBtn").addEventListener("click", () => {
+    // Función Centralizada para Limpieza Absoluta de Credenciales
+    function cerrarSesionLimpio() {
       localStorage.removeItem("token");
       localStorage.removeItem("rol");
-      alert("Sesión cerrada");
+      localStorage.removeItem("ultimaActividad");
+    }
+
+    // Botón manual de Logout
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      cerrarSesionLimpio();
+      alert("Sesión cerrada correctamente");
       window.location.href = "login.html";
     });
 
+    // Ejecutar carga de datos al verificar que el blindaje pasó con éxito
     cargarPerfil();
   </script>
-</body>
+  </body>
 </html>
