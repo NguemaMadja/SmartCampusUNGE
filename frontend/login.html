@@ -90,7 +90,7 @@
   </div>
 
   <!-- Pie de página -->
-  <footer>
+   <footer>
     <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
     <div class="social-buttons">
       <a href="#" class="btn btn-outline-light"><i class="bi bi-twitter"></i></a>
@@ -100,7 +100,64 @@
     </div>
   </footer>
 
+  <!-- REEMPLAZA DESDE AQUÍ -->
   <script>
+    // Configuración: Tiempo máximo de inactividad permitido (Ejemplo: 30 minutos)
+    const TIEMPO_MAXIMO_INACTIVIDAD = 30 * 60 * 1000; 
+
+    // 1. COMPROBACIÓN EXTREMA AL CARGAR LA PÁGINA
+    document.addEventListener("DOMContentLoaded", function() {
+      // Evitar que el navegador cargue esta página desde la caché al usar las flechas
+      window.history.pushState(null, null, window.location.href);
+      
+      const token = localStorage.getItem("token");
+      const rol = localStorage.getItem("rol");
+      const ultimaActividad = localStorage.getItem("ultimaActividad");
+      const horaActual = new Date().getTime();
+
+      if (token && rol && ultimaActividad) {
+        // Verificar si la sesión ya caducó por tiempo prolongado
+        if (horaActual - parseInt(ultimaActividad) > TIEMPO_MAXIMO_INACTIVIDAD) {
+          alert("Tu sesión ha caducado por seguridad. Por favor, inicia sesión de nuevo.");
+          cerrarSesionLimpio();
+        } else {
+          // Si todo está bien, actualizar el tiempo de vida y redirigir al panel correspondiente
+          localStorage.setItem("ultimaActividad", horaActual);
+          redirigirPorRol(rol);
+        }
+      } else {
+        // Si no hay datos válidos, nos aseguramos de borrar cualquier residuo
+        cerrarSesionLimpio();
+      }
+    });
+
+    // 2. CONTROL TOTAL DE LAS FLECHAS DEL NAVEGADOR (BOTÓN ATRÁS)
+    window.addEventListener("popstate", function () {
+      // Si el usuario intenta regresar usando las flechas, lo forzamos a quedarse o desloguearse
+      window.history.pushState(null, null, window.location.href);
+    });
+
+    // Función para limpiar credenciales de forma segura
+    function cerrarSesionLimpio() {
+      localStorage.removeItem("token");
+      localStorage.removeItem("rol");
+      localStorage.removeItem("ultimaActividad");
+    }
+
+    // Función centralizada para manejar las redirecciones
+    function redirigirPorRol(rol) {
+      switch (rol) {
+        case "superadmin": window.location.href = "panel_superadmin.html"; break;
+        case "profesor": window.location.href = "panel_profesor.html"; break;
+        case "estudiante": window.location.href = "panel_estudiante.html"; break;
+        case "radio": window.location.href = "panel_radio.html"; break;
+        default: 
+          console.error("Rol desconocido");
+          cerrarSesionLimpio();
+      }
+    }
+
+    // 3. PROCESO DE LOGUEO
     document.getElementById("formLogin").addEventListener("submit", async function(e){
       e.preventDefault();
       const correo = document.getElementById("correo").value;
@@ -116,17 +173,15 @@
         const data = await res.json();
 
         if (data.success) {
+          const horaLogueo = new Date().getTime();
+          
+          // Guardar credenciales y la estampa de tiempo inicial
           localStorage.setItem("token", data.data.token);
           localStorage.setItem("rol", data.data.usuario.rol);
-          alert("Login exitoso: " + data.data.usuario.rol);
-
-          switch (data.data.usuario.rol) {
-            case "superadmin": window.location.href = "panel_superadmin.html"; break;
-            case "profesor": window.location.href = "panel_profesor.html"; break;
-            case "estudiante": window.location.href = "panel_estudiante.html"; break;
-            case "radio": window.location.href = "panel_radio.html"; break;
-            default: alert("Rol desconocido");
-          }
+          localStorage.setItem("ultimaActividad", horaLogueo);
+          
+          // Redirigir usando la función optimizada
+          redirigirPorRol(data.data.usuario.rol);
         } else {
           alert("Credenciales inválidas: " + data.message);
         }
@@ -134,12 +189,13 @@
         console.error("Error en login:", err);
         alert("Error de conexión con el servidor");
       } finally {
-        // limpiar campos siempre
+        // Limpiar campos siempre
         document.getElementById("correo").value = "";
         document.getElementById("password").value = "";
       }
     });
   </script>
+  <!-- HASTA AQUÍ -->
 
 </body>
 </html>
