@@ -133,6 +133,7 @@
     </div>
   </footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
 <script>
   const TIEMPO_MAXIMO_INACTIVIDAD = 30 * 60 * 1000; 
 
@@ -200,16 +201,18 @@
       alert("Error de conexión con el servidor de autenticación");
     }
   }
-
   function aplicarFiltrosPorRol(rol) {
-    // Ocultar/mostrar enlaces según rol
     if (rol === "superadmin") {
       // ve todo
     } else if (rol === "profesor") {
+      // Solo Radio Escuchar, Transporte y Mapa
       document.getElementById("linkUsuarios").style.display = "none";
-      document.getElementById("linkConfig").style.display = "none";
+      document.getElementById("linkProfesores").style.display = "none";
+      document.getElementById("linkEstudiantes").style.display = "none";
       document.getElementById("linkRadioCrud").style.display = "none";
       document.getElementById("linkEnergia").style.display = "none";
+      document.getElementById("linkAsistencia").style.display = "none";
+      document.getElementById("linkConfig").style.display = "none";
     } else if (rol === "estudiante") {
       document.getElementById("linkUsuarios").style.display = "none";
       document.getElementById("linkProfesores").style.display = "none";
@@ -238,11 +241,10 @@
   document.getElementById("logoutBtn").addEventListener("click", () => {
     cerrarSesionLimpio();
     alert("Sesión cerrada correctamente");
-    window.location.href = "login.html";
+    window.location.href = "index.html"; // 🔹 ahora redirige al index
   });
 
   cargarPerfil();
 </script>
 </body>
 </html>
- 
