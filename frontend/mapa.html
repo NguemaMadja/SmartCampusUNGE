@@ -314,6 +314,52 @@
 
 
 
+    // ============================
+// 📌 Buscar lugar y calcular ruta
+// ============================
+function buscarLugar() {
+  const nombre = document.getElementById("buscadorLugar").value.toLowerCase();
+  if (markers[nombre]) {
+    const { marker, data } = markers[nombre];
+    destinoActual = { lat: data.latitud, lng: data.longitud };
+    map.setView([data.latitud, data.longitud], 18);
+    marker.openPopup();
+
+    // Inicializar o actualizar el routingControl
+    if (routingControl) {
+      routingControl.setWaypoints([
+        L.latLng(userLocation ? userLocation.lat : 3.7166, userLocation ? userLocation.lng : 8.6732),
+        L.latLng(data.latitud, data.longitud)
+      ]);
+    } else {
+      routingControl = L.Routing.control({
+        waypoints: [
+          L.latLng(userLocation ? userLocation.lat : 3.7166, userLocation ? userLocation.lng : 8.6732),
+          L.latLng(data.latitud, data.longitud)
+        ],
+        routeWhileDragging: true,
+        show: false,
+        addWaypoints: false
+      }).addTo(map);
+    }
+
+    // Mostrar tarjeta con métricas de la ruta
+    routingControl.on('routesfound', function(e) {
+      const ruta = e.routes[0];
+      document.getElementById("distancia").textContent = "Distancia: " + (ruta.summary.totalDistance/1000).toFixed(2) + " km";
+      document.getElementById("tiempo").textContent = "Tiempo estimado: " + Math.round(ruta.summary.totalTime/60) + " min";
+      document.getElementById("destinoNombre").textContent = data.nombre_lugar;
+      document.getElementById("infoCard").style.display = "block";
+    });
+  } else {
+    mostrarToast("❌ Lugar no encontrado");
+  }
+}
+
+
+    
+
+
         // ========================================================
     // 📌 Controlador de Navegación Activa en tiempo real
     // ========================================================
