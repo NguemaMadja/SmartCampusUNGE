@@ -144,18 +144,12 @@
       localStorage.removeItem("ultimaActividad");
     }
 
-    // Función centralizada para manejar las redirecciones
-    function redirigirPorRol(rol) {
-      switch (rol) {
-        case "superadmin": window.location.href = "panel_superadmin.html"; break;
-        case "profesor": window.location.href = "panel_profesor.html"; break;
-        case "estudiante": window.location.href = "panel_estudiante.html"; break;
-        case "radio": window.location.href = "panel_radio.html"; break;
-        default: 
-          console.error("Rol desconocido");
-          cerrarSesionLimpio();
-      }
-    }
+  // Función centralizada para manejar las redirecciones
+function redirigirPorRol(rol) {
+  // Siempre redirigimos al mismo panel
+  window.location.href = "panel.html";
+}
+
 
     // 3. PROCESO DE LOGUEO
     document.getElementById("formLogin").addEventListener("submit", async function(e){
