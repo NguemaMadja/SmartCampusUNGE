@@ -201,7 +201,8 @@
       alert("Error de conexión con el servidor de autenticación");
     }
   }
-  function aplicarFiltrosPorRol(rol) {
+
+    function aplicarFiltrosPorRol(rol) {
     if (rol === "superadmin") {
       // ve todo
     } else if (rol === "profesor") {
@@ -213,6 +214,7 @@
       document.getElementById("linkEnergia").style.display = "none";
       document.getElementById("linkAsistencia").style.display = "none";
       document.getElementById("linkConfig").style.display = "none";
+      // visibles: linkRadioEscuchar, linkTransporte, linkMapa
     } else if (rol === "estudiante") {
       document.getElementById("linkUsuarios").style.display = "none";
       document.getElementById("linkProfesores").style.display = "none";
