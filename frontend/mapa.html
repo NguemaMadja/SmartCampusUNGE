@@ -315,7 +315,7 @@
 
 
     // ============================
-// 📌 Buscar lugar y calcular ruta
+// 📌 Buscar lugar y calcular ruta con métricas completas
 // ============================
 function buscarLugar() {
   const nombre = document.getElementById("buscadorLugar").value.toLowerCase();
@@ -346,8 +346,25 @@ function buscarLugar() {
     // Mostrar tarjeta con métricas de la ruta
     routingControl.on('routesfound', function(e) {
       const ruta = e.routes[0];
-      document.getElementById("distancia").textContent = "Distancia: " + (ruta.summary.totalDistance/1000).toFixed(2) + " km";
-      document.getElementById("tiempo").textContent = "Tiempo estimado: " + Math.round(ruta.summary.totalTime/60) + " min";
+      const distanciaKm = (ruta.summary.totalDistance / 1000).toFixed(2);
+
+      // Tiempo estimado original (según OSRM)
+      const tiempoMin = Math.round(ruta.summary.totalTime / 60);
+
+      // Cálculo adicional: caminando y en coche
+      const velocidadCaminar = 5;   // km/h
+      const velocidadCoche = 40;    // km/h (ajusta según tu contexto)
+
+      const tiempoCaminar = Math.round((distanciaKm / velocidadCaminar) * 60); // minutos
+      const tiempoCoche = Math.round((distanciaKm / velocidadCoche) * 60);     // minutos
+
+      // Actualizar tarjeta flotante
+      document.getElementById("distancia").textContent = "Distancia: " + distanciaKm + " km";
+      document.getElementById("tiempo").textContent = 
+        "Tiempo estimado (OSRM): " + tiempoMin + " min\n" +
+        "🚶 Caminando: " + tiempoCaminar + " min\n" +
+        "🚗 En coche: " + tiempoCoche + " min";
+
       document.getElementById("destinoNombre").textContent = data.nombre_lugar;
       document.getElementById("infoCard").style.display = "block";
     });
@@ -356,6 +373,10 @@ function buscarLugar() {
   }
 }
 
+
+
+
+    
 
     
 
