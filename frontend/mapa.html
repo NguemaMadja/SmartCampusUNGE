@@ -311,6 +311,128 @@
       }
     });
 
+
+
+
+        // ========================================================
+    // 📌 Controlador de Navegación Activa en tiempo real
+    // ========================================================
+    function conmutarNavegacionEnVivo() {
+      const btn = document.getElementById("btnNavegacion");
+      
+      if (modoNavegacionActivo) {
+        // 🔴 Al detener la navegación se limpia el watchPosition
+        if (idRastreoGps !== null) {
+          navigator.geolocation.clearWatch(idRastreoGps);
+          idRastreoGps = null;
+        }
+        modoNavegacionActivo = false;
+        btn.className = "btn btn-sm btn-gradient-blue";
+        btn.innerHTML = '<i class="bi bi-navigation-fill"></i> Iniciar Ruta';
+        mostrarToast("🧭 Navegación en tiempo real pausada.");
+      } else {
+        if (!navigator.geolocation) {
+          alert("Tu dispositivo o navegador no soporta geolocalización continua.");
+          return;
+        }
+        if (!destinoActual) {
+          alert("Por favor selecciona primero un destino válido en el buscador.");
+          return;
+        }
+
+        modoNavegacionActivo = true;
+        btn.className = "btn btn-sm btn-danger";
+        btn.innerHTML = '<i class="bi bi-stop-fill"></i> Detener Guía';
+        mostrarToast("📡 GPS Activado. Caminando por el campus...");
+
+        // 🟢 Aquí empieza el seguimiento en tiempo real
+        idRastreoGps = navigator.geolocation.watchPosition(
+          (pos) => {
+            const miLat = pos.coords.latitude;
+            const miLng = pos.coords.longitude;
+            userLocation = { lat: miLat, lng: miLng };
+
+            // Actualizar marcador del usuario
+            if (!marcadorUsuarioGps) {
+              marcadorUsuarioGps = L.marker([miLat, miLng], {
+                icon: L.divIcon({
+                  className: 'custom-user-icon',
+                  html: '<div style="background-color: #007bff; width: 14px; height: 14px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>',
+                  iconSize: [14, 14]
+                })
+              }).addTo(map).bindPopup("🚶 Te estás moviendo aquí");
+            } else {
+              marcadorUsuarioGps.setLatLng([miLat, miLng]);
+            }
+            map.panTo([miLat, miLng]);
+
+            // 🟢 ESTE ES EL CÁLCULO DE LA POLILÍNEA EN TIEMPO REAL
+            // Se recalculan los waypoints de la ruta cada vez que cambia la posición
+            if (routingControl && destinoActual) {
+              routingControl.setWaypoints([
+                L.latLng(miLat, miLng),
+                L.latLng(destinoActual.lat, destinoActual.lng)
+              ]);
+            }
+          },
+          (error) => {
+            console.error("Fallo de lectura GPS:", error.message);
+          },
+          { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+        );
+      }
+    }
+
+    // ============================
+    // 📌 Cerrar tarjeta flotante
+    // ============================
+    function cerrarInfo() {
+      if (idRastreoGps !== null) {
+        navigator.geolocation.clearWatch(idRastreoGps);
+        idRastreoGps = null;
+      }
+      modoNavegacionActivo = false;
+      const btn = document.getElementById("btnNavegacion");
+      if (btn) {
+        btn.className = "btn btn-sm btn-gradient-blue";
+        btn.innerHTML = '<i class="bi bi-navigation-fill"></i> Iniciar Ruta';
+      }
+      const card = document.getElementById("infoCard");
+      card.style.animation = "fadeOut 0.5s forwards";
+      setTimeout(() => { card.style.display = "none"; card.style.animation = "slideIn 0.5s forwards"; }, 500);
+    }
+
+    // ============================
+    // 📌 Geolocalización inicial
+    // ============================
+    function miUbicacion() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          if (marcadorUsuarioGps) {
+            marcadorUsuarioGps.setLatLng([userLocation.lat, userLocation.lng]);
+          } else {
+            marcadorUsuarioGps = L.marker([userLocation.lat, userLocation.lng], {
+              icon: L.divIcon({
+                className: 'custom-user-icon',
+                html: '<div style="background-color: #28a745; width: 14px; height: 14px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>',
+                iconSize: [14, 14]
+              })
+            }).addTo(map).bindPopup("📍 Ubicación Inicial").openPopup();
+          }
+          map.setView([userLocation.lat, userLocation.lng], 17);
+        }, (error) => {
+          alert("Asegúrate de conceder permisos de ubicación a la aplicación.");
+        });
+      }
+    }
+
+
+
+
+
+
+    
         // ========================================================
     // 📌 NUEVO: Controlador e Inversor de Navegación Activa
     // ========================================================
