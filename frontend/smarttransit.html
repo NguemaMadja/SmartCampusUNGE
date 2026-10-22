@@ -35,11 +35,11 @@
         <ul class="navbar-nav">
           <li class="nav-item"><a class="nav-link active" href="/smarttransit">Inicio</a></li>
           <li class="nav-item"><a class="nav-link" href="/transporte">Transporte</a></li>
-
         </ul>
       </div>
     </div>
   </nav>
+
   <header class="p-3 d-flex justify-content-between align-items-center">
     <h4 class="mb-0">Movilidad Inteligente en Tiempo Real</h4>
     <div class="dropdown">
@@ -48,7 +48,6 @@
       </button>
       <ul class="dropdown-menu dropdown-menu-end">
         <li><a class="dropdown-item text-danger" href="#">Cerrar Sesión</a></li>
-      
       </ul>
     </div>
   </header>
@@ -58,6 +57,7 @@
       Bienvenido a SmartTransit UNGE – Transporte escolar en tiempo real
     </marquee>
   </div>
+
   <main class="container my-4">
     <div class="row mb-4">
       <div class="col-md-3"><div class="card text-center"><div class="card-header bg-primary text-white">Buses Activos</div><div class="card-body"><h3 id="busesActivos">0</h3></div></div></div>
@@ -65,15 +65,15 @@
       <div class="col-md-3"><div class="card text-center"><div class="card-header bg-primary text-white">ETA Promedio</div><div class="card-body"><h3 id="etaPromedio">-- min</h3></div></div></div>
       <div class="col-md-3"><div class="card text-center"><div class="card-header bg-primary text-white">Alertas</div><div class="card-body"><h3 id="alertas">0</h3></div></div></div>
     </div>
-
     <div class="card mb-4">
       <div class="card-header bg-primary text-white">Mapa Interactivo</div>
       <div class="card-body"><div id="map"></div></div>
     </div>
+
     <div class="card mb-4">
       <div class="card-header bg-primary text-white d-flex justify-content-between">
         <span>Paradas</span>
-        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalParada">Añadir Parada</button>
+        <button class="btn btn-success btn-sm" id="btnAddParada" data-bs-toggle="modal" data-bs-target="#modalParada">Añadir Parada</button>
       </div>
       <div class="card-body table-responsive">
         <table class="table table-striped">
@@ -86,6 +86,7 @@
         </table>
       </div>
     </div>
+
     <div class="modal fade" id="modalParada" tabindex="-1">
       <div class="modal-dialog">
         <form id="formParada" class="modal-content">
@@ -108,10 +109,9 @@
         </form>
       </div>
     </div>
+
     <div class="card mb-4">
-      <div class="card-header bg-primary text-white">
-        Posiciones en Tiempo Real
-      </div>
+      <div class="card-header bg-primary text-white">Posiciones en Tiempo Real</div>
       <div class="card-body table-responsive">
         <table class="table table-striped">
           <thead class="table-dark">
@@ -124,7 +124,8 @@
       </div>
     </div>
   </main>
-  <footer class="text-center py-3">
+
+    <footer class="text-center py-3">
     <p>© 2026 Universidad Nacional de Guinea Ecuatorial – SmartTransit UNGE</p>
     <div class="social-buttons">
       <a href="#" class="btn btn-outline-light"><i class="bi bi-facebook"></i></a>
@@ -133,6 +134,7 @@
       <a href="#" class="btn btn-outline-light"><i class="bi bi-linkedin"></i></a>
     </div>
   </footer>
+
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -151,6 +153,7 @@
         select.innerHTML += `<option value="${v.id_vehiculo}">${v.ruta}</option>`;
       });
     }
+
     // Cargar paradas (tabla + marcadores + polilínea)
     async function cargarParadas() {
       const res = await fetch("/api/paradas");
@@ -166,14 +169,14 @@
             <td>${p.latitud}</td>
             <td>${p.longitud}</td>
             <td>${p.orden}</td>
-            <td>
+            <td class="acciones">
               <button class="btn btn-sm btn-primary" onclick="editarParada(${p.id_parada})">Editar</button>
               <button class="btn btn-sm btn-danger" onclick="eliminarParada(${p.id_parada})">Eliminar</button>
             </td>
           </tr>`;
       });
 
-      // 🔹 Limpiar marcadores y polilíneas previas (sin borrar el tileLayer base)
+      // Limpiar marcadores y polilíneas previas
       map.eachLayer(layer => {
         if (layer instanceof L.Marker || layer instanceof L.Polyline) {
           if (!layer._url) {
@@ -182,7 +185,7 @@
         }
       });
 
-      // 🔹 Dibujar marcadores de paradas y polilínea
+      // Dibujar marcadores y polilínea
       const coords = [];
       paradas.forEach(p => {
         if (p.latitud && p.longitud) {
@@ -237,7 +240,7 @@
       cargarParadas();
     }
 
-    // Cargar posiciones dinámicas desde los kits
+    // Cargar posiciones dinámicas
     async function cargarPosiciones() {
       const res = await fetch("/api/posiciones");
       const posiciones = (await res.json()).data;
@@ -264,8 +267,17 @@
     cargarVehiculos();
     cargarParadas();
     cargarPosiciones();
-    // Actualizar posiciones cada 60 segundos
     setInterval(cargarPosiciones, 60000);
+
+    // 🔹 Restricciones por rol
+    const rol = localStorage.getItem("rol");
+    if (rol === "profesor" || rol === "estudiante" || rol === "radio") {
+      // Ocultar botón Añadir Parada
+      document.getElementById("btnAddParada").style.display = "none";
+      // Ocultar botones de acciones en la tabla
+      const acciones = document.querySelectorAll("#tablaParadas .acciones");
+      acciones.forEach(td => td.style.display = "none");
+    }
   </script>
 </body>
 </html>
