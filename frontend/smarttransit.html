@@ -125,7 +125,7 @@
     </div>
   </main>
 
-    <footer class="text-center py-3">
+     <footer class="text-center py-3">
     <p>© 2026 Universidad Nacional de Guinea Ecuatorial – SmartTransit UNGE</p>
     <div class="social-buttons">
       <a href="#" class="btn btn-outline-light"><i class="bi bi-facebook"></i></a>
@@ -142,6 +142,10 @@
     // Inicializar mapa
     const map = L.map('map').setView([3.7468, 8.7752], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    // Detectar rol
+    const rol = localStorage.getItem("rol");
+    const restringido = (rol === "profesor" || rol === "estudiante" || rol === "radio");
 
     // Cargar vehículos para el select
     async function cargarVehiculos() {
@@ -170,8 +174,10 @@
             <td>${p.longitud}</td>
             <td>${p.orden}</td>
             <td class="acciones">
-              <button class="btn btn-sm btn-primary" onclick="editarParada(${p.id_parada})">Editar</button>
-              <button class="btn btn-sm btn-danger" onclick="eliminarParada(${p.id_parada})">Eliminar</button>
+              ${!restringido ? `
+                <button class="btn btn-sm btn-primary" onclick="editarParada(${p.id_parada})">Editar</button>
+                <button class="btn btn-sm btn-danger" onclick="eliminarParada(${p.id_parada})">Eliminar</button>
+              ` : ''}
             </td>
           </tr>`;
       });
@@ -204,6 +210,7 @@
     // Guardar nueva parada
     document.getElementById("formParada").addEventListener("submit", async e => {
       e.preventDefault();
+      if (restringido) return; // 🔹 Bloquear guardado si es profesor/estudiante/radio
       const parada = {
         id_vehiculo: document.getElementById("idVehiculo").value,
         nombre_parada: document.getElementById("nombreParada").value,
@@ -222,6 +229,7 @@
 
     // Editar parada
     async function editarParada(id) {
+      if (restringido) return; // 🔹 Bloquear edición
       const res = await fetch(`/api/paradas/${id}`);
       const parada = (await res.json()).data;
       document.getElementById("idParada").value = parada.id_parada;
@@ -235,6 +243,7 @@
 
     // Eliminar parada
     async function eliminarParada(id) {
+      if (restringido) return; // 🔹 Bloquear eliminación
       if (!confirm("¿Seguro que deseas eliminar esta parada?")) return;
       await fetch(`/api/paradas/${id}`, { method: "DELETE" });
       cargarParadas();
@@ -269,14 +278,9 @@
     cargarPosiciones();
     setInterval(cargarPosiciones, 60000);
 
-    // 🔹 Restricciones por rol
-    const rol = localStorage.getItem("rol");
-    if (rol === "profesor" || rol === "estudiante" || rol === "radio") {
-      // Ocultar botón Añadir Parada
+    // 🔹 Ocultar botón Añadir Parada si rol restringido
+    if (restringido) {
       document.getElementById("btnAddParada").style.display = "none";
-      // Ocultar botones de acciones en la tabla
-      const acciones = document.querySelectorAll("#tablaParadas .acciones");
-      acciones.forEach(td => td.style.display = "none");
     }
   </script>
 </body>
