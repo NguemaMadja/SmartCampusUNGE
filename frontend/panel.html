@@ -202,7 +202,7 @@
     }
   }
 
-    function aplicarFiltrosPorRol(rol) {
+   function aplicarFiltrosPorRol(rol) {
     if (rol === "superadmin") {
       // ve todo
     } else if (rol === "profesor") {
@@ -214,7 +214,6 @@
       document.getElementById("linkEnergia").style.display = "none";
       document.getElementById("linkAsistencia").style.display = "none";
       document.getElementById("linkConfig").style.display = "none";
-      // visibles: linkRadioEscuchar, linkTransporte, linkMapa
     } else if (rol === "estudiante") {
       document.getElementById("linkUsuarios").style.display = "none";
       document.getElementById("linkProfesores").style.display = "none";
@@ -246,7 +245,14 @@
     window.location.href = "index.html"; // 🔹 ahora redirige al index
   });
 
+  // Aplicar filtros inmediatamente con el rol guardado en localStorage
+  const rolLocal = localStorage.getItem("rol");
+  if (rolLocal) {
+    aplicarFiltrosPorRol(rolLocal);
+  }
+
   cargarPerfil();
 </script>
 </body>
 </html>
+ 
