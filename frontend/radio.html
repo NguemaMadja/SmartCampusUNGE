@@ -73,19 +73,23 @@
     <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
   </footer>
 
-  <!-- Script optimizado para evadir restricciones móviles -->
+  <!-- Script optimizado para evadir restricciones móviles y saltar ngrok -->
+
+  
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       const audioPlayer = document.getElementById("playerRadio");
       const btnControl = document.getElementById("btnControlRadio");
       
-      // Ahora usamos tu dominio con Caddy
-      const streamUrl = "https://app.radiounge.com/radio";
+      // La URL base generada por tu tunel ngrok
+      const baseUrl = "https://diagnosis-shorty-privatize.ngrok-free.dev/radiounge";
+      // Agregamos el bypass de ngrok directamente desde el inicio
+      const streamUrl = baseUrl + "?ngrok-skip-browser-warning=true";
 
       btnControl.addEventListener("click", function() {
         if (audioPlayer.paused || audioPlayer.src === "") {
           
-          // 1. Asignamos la URL limpia directamente en el click del usuario
+          // 1. Asignamos la URL limpia con el bypass directamente en el click del usuario
           audioPlayer.src = streamUrl;
           audioPlayer.load();
           
@@ -102,7 +106,7 @@
             });
             
         } else {
-          // 3. Pausamos y limpiamos el buffer para evitar descargas en segundo plano
+          // 3. Pausamos y limpiamos el buffer para evitar que siga descargando datos móviles en segundo plano
           audioPlayer.pause();
           audioPlayer.src = ""; 
           
