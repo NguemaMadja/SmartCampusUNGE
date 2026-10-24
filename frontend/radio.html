@@ -73,23 +73,19 @@
     <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
   </footer>
 
-  <!-- Script optimizado para evadir restricciones móviles y saltar ngrok -->
-
-  
+  <!-- Script optimizado para la transmisión segura de Cloudflare -->
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       const audioPlayer = document.getElementById("playerRadio");
       const btnControl = document.getElementById("btnControlRadio");
       
-      // La URL base generada por tu tunel ngrok
-      const baseUrl = "https://diagnosis-shorty-privatize.ngrok-free.dev/radiounge";
-      // Agregamos el bypass de ngrok directamente desde el inicio
-      const streamUrl = baseUrl + "?ngrok-skip-browser-warning=true";
+      // URL de transmisión oficial generada por tu túnel seguro de Cloudflare
+      const streamUrl = "https://radiounge.com";
 
       btnControl.addEventListener("click", function() {
         if (audioPlayer.paused || audioPlayer.src === "") {
           
-          // 1. Asignamos la URL limpia con el bypass directamente en el click del usuario
+          // 1. Asignamos la URL limpia de Cloudflare directamente en la acción del usuario
           audioPlayer.src = streamUrl;
           audioPlayer.load();
           
