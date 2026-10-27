@@ -11,8 +11,8 @@
     .navbar { background-color: #004080; height: 60px; display: flex; align-items: center; }
     .container-main { flex: 1; padding: 20px; }
     footer { background-color: #004080; color: white; padding: 15px; text-align: center; margin-top: auto; }
-    .btn-nav { background-color: #006400; color: #fff; border-radius: 8px; padding: 8px 20px; margin: 5px; transition: 0.3s; }
-    .btn-nav:hover { background-color: #004d26; transform: scale(1.05); }
+    .btn-nav { background-color: #006400; color: #fff; border-radius: 8px; padding: 8px 20px; margin: 5px; transition: 0.3s; text-decoration: none; display: inline-block; border: none; }
+    .btn-nav:hover { background-color: #004d26; color: #fff; transform: scale(1.05); }
   </style>
 </head>
 <body>
@@ -28,54 +28,65 @@
   <div class="container-main container">
     <h2 class="text-center text-white mb-4">Aulas de Medición</h2>
 
-    <div class="mb-3 text-end">
-      <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalAula">
+    <!-- Botonera de Control Homogeneizada -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <a href="gestion_energetica.html" class="btn-nav shadow-sm">
+        <i class="bi bi-arrow-left-circle"></i> Volver a Gestión Energética
+      </a>
+      <button class="btn btn-success px-4" onclick="abrirModalCrear()">
         <i class="bi bi-plus-circle"></i> Añadir Aula
       </button>
     </div>
 
-    <div class="card">
-      <div class="card-header bg-primary text-white">Listado de Aulas</div>
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-primary text-white fw-bold">Listado de Aulas</div>
       <div class="card-body">
-        <table class="table table-striped table-hover text-dark" id="tablaAulas">
-          <thead class="table-dark">
-            <tr>
-              <th>ID</th>
-              <th>Nombre Aula</th>
-              <th>Capacidad</th>
-              <th>Ubicación</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+        <div class="table-responsive w-100">
+          <table class="table table-striped table-hover text-dark w-100" id="tablaAulas">
+            <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Nombre Aula</th>
+                <th>Capacidad</th>
+                <th>Ubicación</th>
+                <th style="width: 120px; text-align: center;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
-  <!-- Modal Insertar Aula -->
-  <div class="modal fade" id="modalAula" tabindex="-1">
-    <div class="modal-dialog">
-      <form id="formAula" class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Nueva Aula de Medición</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+  <!-- Modal Único para Guardar y Editar Aula de Medición -->
+  <div class="modal fade" id="modalAula" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <form id="formAula" class="modal-content text-dark">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="modalTitulo">Nueva Aula de Medición</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
+          <!-- ID Oculto para control de edición -->
+          <input type="hidden" id="id_aula_medicion" name="id_aula_medicion">
+          
           <div class="mb-3">
-            <label class="form-label">Nombre Aula</label>
-            <input type="text" class="form-control" name="nombre_aula" required>
+            <label class="form-label fw-bold">Nombre Aula</label>
+            <input type="text" class="form-control" id="nombre_aula" name="nombre_aula" placeholder="Ej: Aula 104 - Bloque B" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Capacidad</label>
-            <input type="number" class="form-control" name="capacidad">
+            <label class="form-label fw-bold">Capacidad (Personas)</label>
+            <input type="number" class="form-control" id="capacidad" name="capacidad" min="0" placeholder="Ej: 40">
           </div>
           <div class="mb-3">
-            <label class="form-label">Ubicación</label>
-            <input type="text" class="form-control" name="ubicacion">
+            <label class="form-label fw-bold">Ubicación / Campus</label>
+            <input type="text" class="form-control" id="ubicacion" name="ubicacion" placeholder="Ej: Segundo Piso - Campus Malabo">
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Guardar</button>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success" id="btnGuardar">Guardar</button>
         </div>
       </form>
     </div>
@@ -83,64 +94,136 @@
 
   <!-- Footer -->
   <footer>
-    <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
+    <p class="m-0">TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
   </footer>
-  <!-- Librerías externas -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+   <!-- Librerías externas -->
+  <script src="https://jquery.com"></script>
+  <script src="https://jsdelivr.net"></script>
+  <script src="https://datatables.net"></script>
+  <script src="https://datatables.net"></script>
 
   <!-- Script principal -->
   <script>
-    const API_BASE = "https://smartcampusunge.onrender.com";
-
+    const API_BASE = "https://onrender.com";
+    
+    // Inicializar DataTable en español
     const tabla = $('#tablaAulas').DataTable({
-      language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' }
+      language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+      autoWidth: false
     });
 
+    // Cargar los registros desde el backend relacional
     async function cargarAulas() {
-      const res = await fetch(`${API_BASE}/api/aulas_medicion`);
-      const data = await res.json();
-      tabla.clear();
-      data.data.forEach(a => {
-        tabla.row.add([
-          a.id_aula_medicion,
-          a.nombre_aula,
-          a.capacidad,
-          a.ubicacion,
-          `<button class="btn btn-danger btn-sm" onclick="eliminarAula(${a.id_aula_medicion})"><i class="bi bi-trash"></i></button>`
-        ]);
-      });
-      tabla.draw();
+      try {
+        const res = await fetch(`${API_BASE}/api/aulas_medicion`);
+        if (!res.ok) throw new Error("Error en la respuesta del servidor");
+        const data = await res.json();
+        
+        tabla.clear();
+        if (Array.isArray(data.data)) {
+          data.data.forEach(a => {
+            // Escapar cadenas de texto para evitar roturas por comillas en los atributos HTML
+            const nombreEscapado = a.nombre_aula.replace(/"/g, '&quot;');
+            const ubicacionEscapada = (a.ubicacion || '').replace(/"/g, '&quot;');
+
+            tabla.row.add([
+              a.id_aula_medicion,
+              a.nombre_aula,
+              a.capacidad || 0,
+              a.ubicacion || 'Sin especificar',
+              `<div class="text-center d-flex justify-content-center gap-2">
+                <button class="btn btn-warning btn-sm shadow-sm" onclick="abrirModalEditar(${a.id_aula_medicion}, '${nombreEscapado}', ${a.capacidad}, '${ubicacionEscapada}')">
+                  <i class="bi bi-pencil-square"></i> Editar
+                </button>
+                <button class="btn btn-danger btn-sm shadow-sm" onclick="eliminarAula(${a.id_aula_medicion})">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>`
+            ]);
+          });
+        }
+        tabla.draw();
+      } catch (err) {
+        console.error("Error al cargar las aulas:", err);
+      }
     }
 
+    // Preparar el modal para una nueva inserción (POST)
+    function abrirModalCrear() {
+      document.getElementById('formAula').reset();
+      document.getElementById('id_aula_medicion').value = "";
+      document.getElementById('modalTitulo').textContent = "Nueva Aula de Medición";
+      document.getElementById('btnGuardar').textContent = "Guardar";
+      
+      const modal = new bootstrap.Modal(document.getElementById('modalAula'));
+      modal.show();
+    }
+
+    // Inyectar datos en el modal para una edición (PUT)
+    function abrirModalEditar(id, nombre, capacidad, ubicacion) {
+      document.getElementById('id_aula_medicion').value = id;
+      document.getElementById('nombre_aula').value = nombre;
+      document.getElementById('capacidad').value = capacidad || 0;
+      document.getElementById('ubicacion').value = ubicacion === 'Sin especificar' ? '' : ubicacion;
+      
+      document.getElementById('modalTitulo').textContent = "Modificar Aula de Medición";
+      document.getElementById('btnGuardar').textContent = "Actualizar Cambios";
+      
+      const modal = new bootstrap.Modal(document.getElementById('modalAula'));
+      modal.show();
+    }
+
+    // Listener único para envíos de datos (Soporta inserción y actualización)
     document.getElementById('formAula').addEventListener('submit', async e => {
       e.preventDefault();
-      const formData = new FormData(e.target);
+      
+      const id = document.getElementById('id_aula_medicion').value;
       const body = {
-        nombre_aula: formData.get('nombre_aula'),
-        capacidad: formData.get('capacidad'),
-        ubicacion: formData.get('ubicacion')
+        nombre_aula: document.getElementById('nombre_aula').value,
+        capacidad: parseInt(document.getElementById('capacidad').value) || 0,
+        ubicacion: document.getElementById('ubicacion').value
       };
-      const res = await fetch(`${API_BASE}/api/aulas_medicion`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      if (res.ok) {
-        e.target.reset();
-        bootstrap.Modal.getInstance(document.getElementById('modalAula')).hide();
-        cargarAulas();
+
+      // Si existe ID, apuntamos a la ruta PUT; de lo contrario, realizamos un POST
+      const url = id ? `${API_BASE}/api/aulas_medicion/${id}` : `${API_BASE}/api/aulas_medicion`;
+      const metodo = id ? 'PUT' : 'POST';
+
+      try {
+        const res = await fetch(url, {
+          method: metodo,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        if (res.ok) {
+          e.target.reset();
+          // Cerrar la ventana modal activa de forma limpia
+          const modalElement = document.getElementById('modalAula');
+          const instance = bootstrap.Modal.getInstance(modalElement);
+          if (instance) instance.hide();
+          
+          cargarAulas();
+        } else {
+          alert("Error al procesar la operación en el servidor.");
+        }
+      } catch (err) {
+        console.error("Error en la operación de guardado:", err);
       }
     });
 
+    // Eliminar aula con confirmación nativa
     async function eliminarAula(id) {
-      if (!confirm("¿Eliminar aula?")) return;
-      await fetch(`${API_BASE}/api/aulas_medicion/${id}`, { method: 'DELETE' });
-      cargarAulas();
+      if (!confirm("¿Está completamente seguro de eliminar esta aula de medición del sistema?")) return;
+      try {
+        const res = await fetch(`${API_BASE}/api/aulas_medicion/${id}`, { method: 'DELETE' });
+        if (res.ok) cargarAulas();
+      } catch (err) {
+        console.error("Error al eliminar aula:", err);
+      }
     }
 
+    // Inicializar carga de datos al estar listo el DOM
     $(document).ready(() => cargarAulas());
   </script>
 </body>
