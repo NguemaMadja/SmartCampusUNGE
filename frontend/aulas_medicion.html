@@ -11,8 +11,8 @@
     .navbar { background-color: #004080; height: 60px; display: flex; align-items: center; }
     .container-main { flex: 1; padding: 20px; }
     footer { background-color: #004080; color: white; padding: 15px; text-align: center; margin-top: auto; }
-    .btn-nav { background-color: #006400; color: #fff; border-radius: 8px; padding: 8px 20px; margin: 5px; transition: 0.3s; }
-    .btn-nav:hover { background-color: #004d26; transform: scale(1.05); }
+    .btn-nav { background-color: #006400; color: #fff; border-radius: 8px; padding: 8px 20px; margin: 5px; transition: 0.3s; text-decoration: none; display: inline-block; border: none; }
+    .btn-nav:hover { background-color: #004d26; color: #fff; transform: scale(1.05); }
   </style>
 </head>
 <body>
@@ -28,8 +28,11 @@
   <div class="container-main container">
     <h2 class="text-center text-white mb-4">Aulas de Medición</h2>
 
-    <div class="mb-3 text-end">
-      <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalAula">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <a href="gestion_energetica.html" class="btn-nav shadow-sm">
+        <i class="bi bi-arrow-left-circle"></i> Volver a Gestión Energética
+      </a>
+      <button class="btn btn-success px-4" onclick="abrirModalCrear()">
         <i class="bi bi-plus-circle"></i> Añadir Aula
       </button>
     </div>
@@ -52,30 +55,34 @@
       </div>
     </div>
   </div>
-  <!-- Modal Insertar Aula -->
+  <!-- Modal Insertar / Editar Aula -->
   <div class="modal fade" id="modalAula" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
       <form id="formAula" class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Nueva Aula de Medición</h5>
+          <h5 class="modal-title" id="modalTitulo">Nueva Aula de Medición</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
+          <!-- Campo oculto para almacenar el ID durante la edición -->
+          <input type="hidden" id="id_aula_medicion" name="id_aula_medicion">
+          
           <div class="mb-3">
-            <label class="form-label">Nombre Aula</label>
-            <input type="text" class="form-control" name="nombre_aula" required>
+            <label class="form-label fw-bold">Nombre Aula</label>
+            <input type="text" class="form-control" id="nombre_aula" name="nombre_aula" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Capacidad</label>
-            <input type="number" class="form-control" name="capacidad">
+            <label class="form-label fw-bold">Capacidad</label>
+            <input type="number" class="form-control" id="capacidad" name="capacidad">
           </div>
           <div class="mb-3">
-            <label class="form-label">Ubicación</label>
-            <input type="text" class="form-control" name="ubicacion">
+            <label class="form-label fw-bold">Ubicación</label>
+            <input type="text" class="form-control" id="ubicacion" name="ubicacion">
           </div>
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Guardar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success" id="btnGuardar">Guardar</button>
         </div>
       </form>
     </div>
@@ -85,7 +92,8 @@
   <footer>
     <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
   </footer>
-  <!-- Librerías externas -->
+
+   <!-- Librerías externas -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -104,33 +112,74 @@
       const data = await res.json();
       tabla.clear();
       data.data.forEach(a => {
+        const nombreEscapado = a.nombre_aula.replace(/"/g, '&quot;');
+        const ubicacionEscapada = (a.ubicacion || '').replace(/"/g, '&quot;');
+
         tabla.row.add([
           a.id_aula_medicion,
           a.nombre_aula,
-          a.capacidad,
-          a.ubicacion,
-          `<button class="btn btn-danger btn-sm" onclick="eliminarAula(${a.id_aula_medicion})"><i class="bi bi-trash"></i></button>`
+          a.capacidad || 0,
+          a.ubicacion || 'Sin especificar',
+          `<div class="text-center d-flex justify-content-center gap-2">
+            <button class="btn btn-warning btn-sm shadow-sm" onclick="abrirModalEditar(${a.id_aula_medicion}, '${nombreEscapado}', ${a.capacidad || 0}, '${ubicacionEscapada}')">
+              <i class="bi bi-pencil-square"></i> Editar
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="eliminarAula(${a.id_aula_medicion})">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>`
         ]);
       });
       tabla.draw();
     }
 
+    function abrirModalCrear() {
+      document.getElementById('formAula').reset();
+      document.getElementById('id_aula_medicion').value = "";
+      document.getElementById('modalTitulo').textContent = "Nueva Aula de Medición";
+      document.getElementById('btnGuardar').textContent = "Guardar";
+      
+      const modal = new bootstrap.Modal(document.getElementById('modalAula'));
+      modal.show();
+    }
+
+    function abrirModalEditar(id, nombre, capacidad, ubicacion) {
+      document.getElementById('id_aula_medicion').value = id;
+      document.getElementById('nombre_aula').value = nombre;
+      document.getElementById('capacidad').value = capacidad;
+      document.getElementById('ubicacion').value = ubicacion;
+      document.getElementById('modalTitulo').textContent = "Modificar Aula de Medición";
+      document.getElementById('btnGuardar').textContent = "Actualizar Cambios";
+      
+      const modal = new bootstrap.Modal(document.getElementById('modalAula'));
+      modal.show();
+    }
+
     document.getElementById('formAula').addEventListener('submit', async e => {
       e.preventDefault();
+      const id = document.getElementById('id_aula_medicion').value;
       const formData = new FormData(e.target);
+      
       const body = {
         nombre_aula: formData.get('nombre_aula'),
-        capacidad: formData.get('capacidad'),
+        capacidad: parseInt(formData.get('capacidad')) || 0,
         ubicacion: formData.get('ubicacion')
       };
-      const res = await fetch(`${API_BASE}/api/aulas_medicion`, {
-        method: 'POST',
+
+      const url = id ? `${API_BASE}/api/aulas_medicion/${id}` : `${API_BASE}/api/aulas_medicion`;
+      const metodo = id ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method: metodo,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
+
       if (res.ok) {
         e.target.reset();
-        bootstrap.Modal.getInstance(document.getElementById('modalAula')).hide();
+        const modalElement = document.getElementById('modalAula');
+        const instance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+        instance.hide();
         cargarAulas();
       }
     });
