@@ -107,7 +107,7 @@
             <input type="text" class="form-control" id="ubicacion" name="ubicacion">
           </div>
         </div>
-        <div class="modal-footer bg-light">
+        <div class="modal-floating-footer modal-footer bg-light">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
           <button type="submit" class="btn btn-success" id="btnGuardar">Guardar</button>
         </div>
@@ -126,7 +126,7 @@
     </div>
   </footer>
 
-  <!-- Librerías externas -->
+ <!-- Librerías externas -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -136,9 +136,26 @@
   <script>
     const API_BASE = "https://smartcampusunge.onrender.com";
 
-    // Inicializar DataTable
+    // Inicializar DataTable optimizado con idioma en español local
     const tabla = $('#tablaSensores').DataTable({
-      language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' }
+      language: {
+        "processing": "Procesando...",
+        "lengthMenu": "Mostrar _MENU_ registros",
+        "zeroRecords": "No se encontraron resultados",
+        "emptyTable": "Ningún dato disponible en esta tabla",
+        "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+        "infoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+        "infoFiltered": "(filtrado de un total de _MAX_ registros)",
+        "search": "Buscar:",
+        "loadingRecords": "Cargando...",
+        "paginate": {
+          "first": "Primero",
+          "last": "Último",
+          "next": "Siguiente",
+          "previous": "Anterior"
+        }
+      },
+      autoWidth: false
     });
 
     // Cargar sensores desde la API
@@ -166,7 +183,7 @@
                 <button class="btn btn-warning btn-sm shadow-sm" onclick="abrirModalEditar(${s.id_sensor}, '${tipoEscapado}', '${parametroEscapado}', ${s.aula_medicion_id}, '${ubicacionEscapada}')">
                   <i class="bi bi-pencil-square"></i> Editar
                 </button>
-                <button class="btn btn-danger btn-sm" onclick="eliminarSensor(${s.id_sensor})">
+                <button class="btn btn-danger btn-sm shadow-sm" onclick="eliminarSensor(${s.id_sensor})">
                   <i class="bi bi-trash"></i>
                 </button>
               </div>`
@@ -187,8 +204,9 @@
       document.getElementById('btnGuardar').textContent = "Guardar";
       document.getElementById('btnGuardar').className = "btn btn-success";
       
-      const modal = new bootstrap.Modal(document.getElementById('modalSensor'));
-      modal.show();
+      const modalElement = document.getElementById('modalSensor');
+      const instance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+      instance.show();
     }
 
     // Configurar modal e inyectar datos para Editar un sensor existente
@@ -203,8 +221,9 @@
       document.getElementById('btnGuardar').textContent = "Actualizar Cambios";
       document.getElementById('btnGuardar').className = "btn btn-primary";
       
-      const modal = new bootstrap.Modal(document.getElementById('modalSensor'));
-      modal.show();
+      const modalElement = document.getElementById('modalSensor');
+      const instance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+      instance.show();
     }
 
     // Listener unificado para envíos de datos (Soporta inserción y actualización)
