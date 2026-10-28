@@ -1,7 +1,7 @@
 // backend/routes/sensores_medicion.js
 const express = require('express');
 const router = express.Router();
-const sequelize = require('../db'); // Conexión directa
+const sequelize = require('../db'); // Conexión directa estándar
 
 // Obtener todos los sensores de medición
 router.get('/', async (req, res) => {
@@ -23,14 +23,14 @@ router.post('/', async (req, res) => {
   const { tipo_sensor, parametro, aula_medicion_id, ubicacion } = req.body;
   try {
     const [result] = await sequelize.query(
-      'INSERT INTO sensores_medicion (tipo_sensor, parametro, aula_medicion_id, ubicacion) VALUES ($1, $2, $3, $4) RETURNING *',
+      'INSERT INTO sensores_medicion (tipo_sensor, parametro, aula_medicion_id, ubicacion) VALUES ($1,$2,$3,$4) RETURNING *',
       { 
         bind: [tipo_sensor, parametro, aula_medicion_id, ubicacion],
-        type: sequelize.QueryTypes.INSERT 
+        type: sequelize.QueryTypes.INSERT
       }
     );
-    // Sequelize en INSERT nativos de Postgres devuelve directamente la fila o un array con la fila insertada
-    res.json(Array.isArray(result) ? result[0] : result);
+    // Se envía la respuesta limpia en formato de objeto plano
+    res.json(result && result[0] ? result[0] : result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -48,7 +48,7 @@ router.put('/:id', async (req, res) => {
         type: sequelize.QueryTypes.UPDATE
       }
     );
-    res.json(Array.isArray(result) ? result[0] : result);
+    res.json(result && result[0] ? result[0] : result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
