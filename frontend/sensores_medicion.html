@@ -14,8 +14,8 @@
     .container-main { flex: 1; padding: 20px; }
     footer { background-color: #004080; color: white; padding: 15px; text-align: center; margin-top: auto; }
     .social-buttons .btn { margin: 5px; border-radius: 50%; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; }
-    .btn-nav { background-color: #006400; color: #fff; border-radius: 8px; padding: 8px 20px; margin: 5px; transition: 0.3s; }
-    .btn-nav:hover { background-color: #004d26; transform: scale(1.05); }
+    .btn-nav { background-color: #006400; color: #fff; border-radius: 8px; padding: 8px 20px; margin: 5px; transition: 0.3s; text-decoration: none; display: inline-block; border: none; }
+    .btn-nav:hover { background-color: #004d26; color: #fff; transform: scale(1.05); }
   </style>
 </head>
 <body>
@@ -47,110 +47,75 @@
     </div>
 
     <div class="mb-3 text-end">
-      <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalSensor">
+      <button class="btn btn-success px-4" onclick="abrirModalCrear()">
         <i class="bi bi-plus-circle"></i> Añadir Sensor
       </button>
     </div>
 
-    <div class="card">
-      <div class="card-header bg-primary text-white">Listado de Sensores</div>
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-primary text-white fw-bold">Listado de Sensores</div>
       <div class="card-body">
-        <table class="table table-striped table-hover text-dark" id="tablaSensores">
-          <thead class="table-dark">
-            <tr>
-              <th>ID</th>
-              <th>Tipo</th>
-              <th>Parámetro</th>
-              <th>Aula</th>
-              <th>Ubicación</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+        <div class="table-responsive w-100">
+          <table class="table table-striped table-hover text-dark w-100" id="tablaSensores">
+            <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Tipo</th>
+                <th>Parámetro</th>
+                <th>ID Aula</th>
+                <th>Ubicación</th>
+                <th style="width: 150px; text-align: center;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 
-  
-
-
-  <!-- Modal Insertar Sensor -->
-<div class="modal fade" id="modalSensor" tabindex="-1">
-  <div class="modal-dialog">
-    <form id="formSensor" class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Registrar Nuevo Sensor</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label">Tipo de Sensor</label>
-          <small class="text-muted d-block">Ejemplo: ESP32, ESP8266</small>
-          <input type="text" class="form-control" name="tipo_sensor" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Parámetro que mide</label>
-          <small class="text-muted d-block">Ejemplo: Temperatura, CO₂, Humedad</small>
-          <input type="text" class="form-control" name="parametro" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">ID del Aula de Medición</label>
-          <small class="text-muted d-block">Número de aula ya registrada en BD</small>
-          <input type="number" class="form-control" name="aula_medicion_id" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Ubicación física</label>
-          <small class="text-muted d-block">Ejemplo: pared norte, techo</small>
-          <input type="text" class="form-control" name="ubicacion">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-success">Guardar</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-  
-
-  
-
-  <!-- Modal Editar Sensor -->
-  <div class="modal fade" id="modalEditarSensor" tabindex="-1">
-    <div class="modal-dialog">
-      <form id="formEditarSensor" class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Editar Sensor</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+  <!-- Modal Único para Registrar y Editar Sensor -->
+  <div class="modal fade" id="modalSensor" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <form id="formSensor" class="modal-content text-dark">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="modalTitulo">Registrar Nuevo Sensor</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <input type="hidden" id="edit_id_sensor">
+          <!-- Campo oculto para el control de edición (ID del Sensor) -->
+          <input type="hidden" id="id_sensor_medicion" name="id_sensor_medicion">
+          
           <div class="mb-3">
-            <label class="form-label">Tipo de Sensor</label>
-            <input type="text" class="form-control" id="edit_tipo_sensor" required>
+            <label class="form-label fw-bold">Tipo de Sensor</label>
+            <small class="text-muted d-block">Ejemplo: ESP32, ESP8266</small>
+            <input type="text" class="form-control" id="tipo_sensor" name="tipo_sensor" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Parámetro</label>
-            <input type="text" class="form-control" id="edit_parametro" required>
+            <label class="form-label fw-bold">Parámetro que mide</label>
+            <small class="text-muted d-block">Ejemplo: Temperatura, CO₂, Humedad</small>
+            <input type="text" class="form-control" id="parametro" name="parametro" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">ID Aula</label>
-            <input type="number" class="form-control" id="edit_aula_medicion_id" required>
+            <label class="form-label fw-bold">ID del Aula de Medición</label>
+            <small class="text-muted d-block">Número de aula ya registrada en BD</small>
+            <input type="number" class="form-control" id="aula_medicion_id" name="aula_medicion_id" required>
           </div>
           <div class="mb-3">
-            <label class="form-label">Ubicación</label>
-            <input type="text" class="form-control" id="edit_ubicacion">
+            <label class="form-label fw-bold">Ubicación física</label>
+            <small class="text-muted d-block">Ejemplo: pared norte, techo</small>
+            <input type="text" class="form-control" id="ubicacion" name="ubicacion">
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary">Actualizar</button>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success" id="btnGuardar">Guardar</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Footer -->
+ <!-- Footer -->
   <footer>
     <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
     <div class="social-buttons">
@@ -160,6 +125,7 @@
       <a href="#" class="btn btn-outline-light"><i class="bi bi-youtube"></i></a>
     </div>
   </footer>
+
   <!-- Librerías externas -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -185,14 +151,25 @@
         tabla.clear();
         if (Array.isArray(data.data)) {
           data.data.forEach(s => {
+            // Escapar datos de texto para prevenir roturas en atributos HTML de los botones
+            const tipoEscapado = (s.tipo_sensor || '').replace(/"/g, '&quot;');
+            const parametroEscapado = (s.parametro || '').replace(/"/g, '&quot;');
+            const ubicacionEscapada = (s.ubicacion || '').replace(/"/g, '&quot;');
+
             tabla.row.add([
               s.id_sensor,
               s.tipo_sensor,
               s.parametro,
               s.nombre_aula || s.aula_medicion_id,
-              s.ubicacion,
-              `<button class="btn btn-primary btn-sm me-2" onclick='abrirEditarSensor(${JSON.stringify(s)})'><i class="bi bi-pencil"></i></button>
-               <button class="btn btn-danger btn-sm" onclick="eliminarSensor(${s.id_sensor})"><i class="bi bi-trash"></i></button>`
+              s.ubicacion || 'Sin especificar',
+              `<div class="text-center d-flex justify-content-center gap-2">
+                <button class="btn btn-warning btn-sm shadow-sm" onclick="abrirModalEditar(${s.id_sensor}, '${tipoEscapado}', '${parametroEscapado}', ${s.aula_medicion_id}, '${ubicacionEscapada}')">
+                  <i class="bi bi-pencil-square"></i> Editar
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="eliminarSensor(${s.id_sensor})">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>`
             ]);
           });
         }
@@ -202,74 +179,76 @@
       }
     }
 
-    // Insertar sensor desde el modal
+    // Configurar modal para Registrar un nuevo sensor
+    function abrirModalCrear() {
+      document.getElementById('formSensor').reset();
+      document.getElementById('id_sensor_medicion').value = "";
+      document.getElementById('modalTitulo').textContent = "Registrar Nuevo Sensor";
+      document.getElementById('btnGuardar').textContent = "Guardar";
+      document.getElementById('btnGuardar').className = "btn btn-success";
+      
+      const modal = new bootstrap.Modal(document.getElementById('modalSensor'));
+      modal.show();
+    }
+
+    // Configurar modal e inyectar datos para Editar un sensor existente
+    function abrirModalEditar(id, tipo, parametro, aulaId, ubicacion) {
+      document.getElementById('id_sensor_medicion').value = id;
+      document.getElementById('tipo_sensor').value = tipo;
+      document.getElementById('parametro').value = parametro;
+      document.getElementById('aula_medicion_id').value = aulaId;
+      document.getElementById('ubicacion').value = ubicacion === 'Sin especificar' ? '' : ubicacion;
+      
+      document.getElementById('modalTitulo').textContent = "Modificar Sensor de Medición";
+      document.getElementById('btnGuardar').textContent = "Actualizar Cambios";
+      document.getElementById('btnGuardar').className = "btn btn-primary";
+      
+      const modal = new bootstrap.Modal(document.getElementById('modalSensor'));
+      modal.show();
+    }
+
+    // Listener unificado para envíos de datos (Soporta inserción y actualización)
     document.getElementById('formSensor').addEventListener('submit', async e => {
       e.preventDefault();
+      
+      const id = document.getElementById('id_sensor_medicion').value;
       const formData = new FormData(e.target);
+      
       const body = {
         tipo_sensor: formData.get('tipo_sensor'),
         parametro: formData.get('parametro'),
-        aula_medicion_id: formData.get('aula_medicion_id'),
+        aula_medicion_id: parseInt(formData.get('aula_medicion_id')) || null,
         ubicacion: formData.get('ubicacion')
       };
+
+      const url = id ? `${API_BASE}/api/sensores_medicion/${id}` : `${API_BASE}/api/sensores_medicion`;
+      const metodo = id ? 'PUT' : 'POST';
+
       try {
-        const res = await fetch(`${API_BASE}/api/sensores_medicion`, {
-          method: 'POST',
+        const res = await fetch(url, {
+          method: metodo,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
         });
+
         if (res.ok) {
           e.target.reset();
-          bootstrap.Modal.getInstance(document.getElementById('modalSensor')).hide();
+          const modalElement = document.getElementById('modalSensor');
+          const instance = bootstrap.Modal.getInstance(modalElement);
+          if (instance) instance.hide();
           cargarSensores();
         } else {
-          console.error("Error al insertar sensor:", res.status);
+          console.error("Error al procesar la operación:", res.status);
+          alert("Ocurrió un error al guardar los datos en el servidor.");
         }
       } catch (err) {
-        console.error("Error al insertar sensor:", err);
+        console.error("Error en la operación de guardado:", err);
       }
     });
 
-    // Abrir modal de edición con datos
-    function abrirEditarSensor(sensor) {
-      document.getElementById('edit_id_sensor').value = sensor.id_sensor;
-      document.getElementById('edit_tipo_sensor').value = sensor.tipo_sensor;
-      document.getElementById('edit_parametro').value = sensor.parametro;
-      document.getElementById('edit_aula_medicion_id').value = sensor.aula_medicion_id;
-      document.getElementById('edit_ubicacion').value = sensor.ubicacion;
-      new bootstrap.Modal(document.getElementById('modalEditarSensor')).show();
-    }
-
-    // Guardar cambios en sensor
-    document.getElementById('formEditarSensor').addEventListener('submit', async e => {
-      e.preventDefault();
-      const id = document.getElementById('edit_id_sensor').value;
-      const body = {
-        tipo_sensor: document.getElementById('edit_tipo_sensor').value,
-        parametro: document.getElementById('edit_parametro').value,
-        aula_medicion_id: document.getElementById('edit_aula_medicion_id').value,
-        ubicacion: document.getElementById('edit_ubicacion').value
-      };
-      try {
-        const res = await fetch(`${API_BASE}/api/sensores_medicion/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        if (res.ok) {
-          bootstrap.Modal.getInstance(document.getElementById('modalEditarSensor')).hide();
-          cargarSensores();
-        } else {
-          console.error("Error al actualizar sensor:", res.status);
-        }
-      } catch (err) {
-        console.error("Error al actualizar sensor:", err);
-      }
-    });
-
-    // Eliminar sensor
+    // Eliminar sensor con confirmación nativa
     async function eliminarSensor(id) {
-      if (!confirm("¿Eliminar sensor?")) return;
+      if (!confirm("¿Está completamente seguro de eliminar este sensor del sistema?")) return;
       try {
         const res = await fetch(`${API_BASE}/api/sensores_medicion/${id}`, { method: 'DELETE' });
         if (res.ok) {
