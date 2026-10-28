@@ -233,6 +233,7 @@
       const id = document.getElementById('id_sensor_medicion').value;
       const formData = new FormData(e.target);
       
+      // Estructura exacta de datos que viaja al backend
       const body = {
         tipo_sensor: formData.get('tipo_sensor'),
         parametro: formData.get('parametro'),
@@ -257,11 +258,26 @@
           if (instance) instance.hide();
           cargarSensores();
         } else {
-          console.error("Error al procesar la operación:", res.status);
-          alert("Ocurrió un error al guardar los datos en el servidor.");
+          // CAPTURA AVANZADA DEL ERROR 500: Extraer los detalles reales enviados por el backend
+          let detallesServidor = "";
+          try {
+            const errorJSON = await res.json();
+            detallesServidor = JSON.stringify(errorJSON, null, 2);
+          } catch (jsonErr) {
+            try {
+              detallesServidor = await res.text();
+            } catch (textErr) {
+              detallesServidor = "Incapaz de leer la respuesta de error del servidor.";
+            }
+          }
+
+          console.error(`[ERROR WEB ${res.status}] Fallo al procesar la operación.`);
+          console.error("Respuesta cruda del backend:", detallesServidor);
+          
+          alert(`Error ${res.status} del Servidor.\n\nDetalles del fallo:\n${detallesServidor}`);
         }
       } catch (err) {
-        console.error("Error en la operación de guardado:", err);
+        console.error("Error crítico de red en la operación de guardado:", err);
       }
     });
 
