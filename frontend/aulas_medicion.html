@@ -103,128 +103,146 @@
   <script src="https://datatables.net"></script>
   <script src="https://datatables.net"></script>
 
-  <!-- Script principal -->
-  <script>
-    const API_BASE = "https://onrender.com";
-    
-    // Inicializar DataTable en español
-    const tabla = $('#tablaAulas').DataTable({
-      language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
-      autoWidth: false
-    });
+ <!-- Script principal -->
+<script>
+const API_BASE = "https://smartcampusunge.onrender.com"; // Asegúrate de cambiar 'tu-subdominio' por el nombre real de tu servicio en Render
 
-    // Cargar los registros desde el backend relacional
-    async function cargarAulas() {
-      try {
+// Inicializar DataTable optimizado con idioma en español local
+const tabla = $('#tablaAulas').DataTable({
+    language: {
+        "processing": "Procesando...",
+        "lengthMenu": "Mostrar _MENU_ registros",
+        "zeroRecords": "No se encontraron resultados",
+        "emptyTable": "Ningún dato disponible en esta tabla",
+        "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+        "infoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+        "infoFiltered": "(filtrado de un total de _MAX_ registros)",
+        "search": "Buscar:",
+        "loadingRecords": "Cargando...",
+        "paginate": {
+            "first": "Primero",
+            "last": "Último",
+            "next": "Siguiente",
+            "previous": "Anterior"
+        }
+    },
+    autoWidth: false
+});
+
+// Cargar los registros desde el backend relacional
+async function cargarAulas() {
+    try {
         const res = await fetch(`${API_BASE}/api/aulas_medicion`);
         if (!res.ok) throw new Error("Error en la respuesta del servidor");
         const data = await res.json();
         
         tabla.clear();
+        
         if (Array.isArray(data.data)) {
-          data.data.forEach(a => {
-            // Escapar cadenas de texto para evitar roturas por comillas en los atributos HTML
-            const nombreEscapado = a.nombre_aula.replace(/"/g, '&quot;');
-            const ubicacionEscapada = (a.ubicacion || '').replace(/"/g, '&quot;');
-
-            tabla.row.add([
-              a.id_aula_medicion,
-              a.nombre_aula,
-              a.capacidad || 0,
-              a.ubicacion || 'Sin especificar',
-              `<div class="text-center d-flex justify-content-center gap-2">
-                <button class="btn btn-warning btn-sm shadow-sm" onclick="abrirModalEditar(${a.id_aula_medicion}, '${nombreEscapado}', ${a.capacidad}, '${ubicacionEscapada}')">
-                  <i class="bi bi-pencil-square"></i> Editar
-                </button>
-                <button class="btn btn-danger btn-sm shadow-sm" onclick="eliminarAula(${a.id_aula_medicion})">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </div>`
-            ]);
-          });
+            data.data.forEach(a => {
+                // Escapar cadenas de texto para evitar roturas por comillas en los atributos HTML
+                const nombreEscapado = a.nombre_aula.replace(/"/g, '&quot;');
+                const ubicacionEscapada = (a.ubicacion || '').replace(/"/g, '&quot;');
+                
+                tabla.row.add([
+                    a.id_aula_medicion,
+                    a.nombre_aula,
+                    a.capacidad || 0,
+                    a.ubicacion || 'Sin especificar',
+                    `<div class="text-center d-flex justify-content-center gap-2">
+                        <button class="btn btn-warning btn-sm shadow-sm" onclick="abrirModalEditar(${a.id_aula_medicion}, '${nombreEscapado}', ${a.capacidad}, '${ubicacionEscapada}')">
+                            <i class="bi bi-pencil-square"></i> Editar
+                        </button>
+                        <button class="btn btn-danger btn-sm shadow-sm" onclick="eliminarAula(${a.id_aula_medicion})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>`
+                ]);
+            });
         }
         tabla.draw();
-      } catch (err) {
+    } catch (err) {
         console.error("Error al cargar las aulas:", err);
-      }
     }
+}
 
-    // Preparar el modal para una nueva inserción (POST)
-    function abrirModalCrear() {
-      document.getElementById('formAula').reset();
-      document.getElementById('id_aula_medicion').value = "";
-      document.getElementById('modalTitulo').textContent = "Nueva Aula de Medición";
-      document.getElementById('btnGuardar').textContent = "Guardar";
-      
-      const modal = new bootstrap.Modal(document.getElementById('modalAula'));
-      modal.show();
-    }
+// Preparar el modal para una nueva inserción (POST)
+function abrirModalCrear() {
+    document.getElementById('formAula').reset();
+    document.getElementById('id_aula_medicion').value = "";
+    document.getElementById('modalTitulo').textContent = "Nueva Aula de Medición";
+    document.getElementById('btnGuardar').textContent = "Guardar";
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalAula'));
+    modal.show();
+}
 
-    // Inyectar datos en el modal para una edición (PUT)
-    function abrirModalEditar(id, nombre, capacidad, ubicacion) {
-      document.getElementById('id_aula_medicion').value = id;
-      document.getElementById('nombre_aula').value = nombre;
-      document.getElementById('capacidad').value = capacidad || 0;
-      document.getElementById('ubicacion').value = ubicacion === 'Sin especificar' ? '' : ubicacion;
-      
-      document.getElementById('modalTitulo').textContent = "Modificar Aula de Medición";
-      document.getElementById('btnGuardar').textContent = "Actualizar Cambios";
-      
-      const modal = new bootstrap.Modal(document.getElementById('modalAula'));
-      modal.show();
-    }
+// Inyectar datos en el modal para una edición (PUT)
+function abrirModalEditar(id, nombre, capacidad, ubicacion) {
+    document.getElementById('id_aula_medicion').value = id;
+    document.getElementById('nombre_aula').value = nombre;
+    document.getElementById('capacidad').value = capacidad || 0;
+    document.getElementById('ubicacion').value = ubicacion === 'Sin especificar' ? '' : ubicacion;
+    document.getElementById('modalTitulo').textContent = "Modificar Aula de Medición";
+    document.getElementById('btnGuardar').textContent = "Actualizar Cambios";
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalAula'));
+    modal.show();
+}
 
-    // Listener único para envíos de datos (Soporta inserción y actualización)
-    document.getElementById('formAula').addEventListener('submit', async e => {
-      e.preventDefault();
-      
-      const id = document.getElementById('id_aula_medicion').value;
-      const body = {
+// Listener único para envíos de datos (Soporta inserción y actualización)
+document.getElementById('formAula').addEventListener('submit', async e => {
+    e.preventDefault();
+    
+    const id = document.getElementById('id_aula_medicion').value;
+    const body = {
         nombre_aula: document.getElementById('nombre_aula').value,
         capacidad: parseInt(document.getElementById('capacidad').value) || 0,
         ubicacion: document.getElementById('ubicacion').value
-      };
-
-      // Si existe ID, apuntamos a la ruta PUT; de lo contrario, realizamos un POST
-      const url = id ? `${API_BASE}/api/aulas_medicion/${id}` : `${API_BASE}/api/aulas_medicion`;
-      const metodo = id ? 'PUT' : 'POST';
-
-      try {
+    };
+    
+    // Si existe ID, apuntamos a la ruta PUT; de lo contrario, realizamos un POST
+    const url = id ? `${API_BASE}/api/aulas_medicion/${id}` : `${API_BASE}/api/aulas_medicion`;
+    const metodo = id ? 'PUT' : 'POST';
+    
+    try {
         const res = await fetch(url, {
-          method: metodo,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
+            method: metodo,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
         });
-
+        
         if (res.ok) {
-          e.target.reset();
-          // Cerrar la ventana modal activa de forma limpia
-          const modalElement = document.getElementById('modalAula');
-          const instance = bootstrap.Modal.getInstance(modalElement);
-          if (instance) instance.hide();
-          
-          cargarAulas();
+            e.target.reset();
+            // Cerrar la ventana modal activa de forma limpia
+            const modalElement = document.getElementById('modalAula');
+            const instance = bootstrap.Modal.getInstance(modalElement);
+            if (instance) instance.hide();
+            cargarAulas();
         } else {
-          alert("Error al procesar la operación en el servidor.");
+            alert("Error al procesar la operación en el servidor.");
         }
-      } catch (err) {
+    } catch (err) {
         console.error("Error en la operación de guardado:", err);
-      }
-    });
-
-    // Eliminar aula con confirmación nativa
-    async function eliminarAula(id) {
-      if (!confirm("¿Está completamente seguro de eliminar esta aula de medición del sistema?")) return;
-      try {
-        const res = await fetch(`${API_BASE}/api/aulas_medicion/${id}`, { method: 'DELETE' });
-        if (res.ok) cargarAulas();
-      } catch (err) {
-        console.error("Error al eliminar aula:", err);
-      }
     }
+});
 
-    // Inicializar carga de datos al estar listo el DOM
-    $(document).ready(() => cargarAulas());
-  </script>
+// Eliminar aula con confirmación nativa
+async function eliminarAula(id) {
+    if (!confirm("¿Está completamente seguro de eliminar esta aula de medición del sistema?")) return;
+    
+    try {
+        const res = await fetch(`${API_BASE}/api/aulas_medicion/${id}`, {
+            method: 'DELETE'
+        });
+        if (res.ok) cargarAulas();
+    } catch (err) {
+        console.error("Error al eliminar aula:", err);
+    }
+}
+
+// Inicializar carga de datos al estar listo el DOM
+$(document).ready(() => cargarAulas());
+</script>
 </body>
 </html>
