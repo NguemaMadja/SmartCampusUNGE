@@ -41,13 +41,13 @@ app.use('/api/aulas', require('./routes/aulas'));
 app.use('/api/profesores', require('./routes/profesores'));
 app.use('/api/relaciones', require('./routes/relaciones'));
 
-// 🔹 Rutas API (Gestión Energética)
+// 🔹 Rutas API (Gestión Energética) - Todas cargadas de forma tradicional y limpia
 app.use('/api/aulas_sensores', require('./routes/aulas_sensores'));
 app.use('/api/estado_aulas_sensores', require('./routes/estado_aulas_sensores'));
 app.use('/api/consumo_energia_sensores', require('./routes/consumo_energia_sensores'));
 app.use('/api/eventos_energia_sensores', require('./routes/eventos_energia_sensores'));
 app.use('/api/aulas_medicion', require('./routes/aulas_medicion'));
-app.use('/api/sensores_medicion', require('./routes/sensores_medicion'));
+app.use('/api/sensores_medicion', require('./routes/sensores_medicion')); // Carga normalizada idéntica a las demás
 
 // 🔹 Servir frontend estático
 app.use(express.static(path.join(__dirname, '../frontend')));
@@ -71,34 +71,6 @@ app.get('/facultades', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/facultades.html'));
 });
 
-app.get('/departamentos', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/departamentos.html'));
-});
-
-app.get('/carreras', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/carreras.html'));
-});
-
-app.get('/asignaturas', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/asignaturas.html'));
-});
-
-app.get('/asistencia_profesor', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/asistencia_profesor.html'));
-});
-
-app.get('/aulas', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/aulas.html'));
-});
-
-app.get('/profesores', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/profesores.html'));
-});
-
-app.get('/relaciones', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/relaciones.html'));
-});
-
 // 🔹 Página Gestión Energética
 app.get('/gestion_energetica', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/gestion_energetica.html'));
@@ -107,5 +79,5 @@ app.get('/gestion_energetica', (req, res) => {
 // 🔹 Puerto
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Servidor corriendo en http://0.0.0.0:${PORT}`);
+  console.log(`Servidor corriendo en http://0.0.0:${PORT}`);
 });
