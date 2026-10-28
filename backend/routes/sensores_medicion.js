@@ -1,7 +1,7 @@
 // backend/routes/sensores_medicion.js
 const express = require('express');
 const router = express.Router();
-const sequelize = require('../db'); // Conexión directa desde la raíz del backend
+const sequelize = require('../db'); // Conexión directa
 
 // Obtener todos los sensores de medición
 router.get('/', async (req, res) => {
@@ -23,10 +23,14 @@ router.post('/', async (req, res) => {
   const { tipo_sensor, parametro, aula_medicion_id, ubicacion } = req.body;
   try {
     const [result] = await sequelize.query(
-      'INSERT INTO sensores_medicion (tipo_sensor, parametro, aula_medicion_id, ubicacion) VALUES ($1,$2,$3,$4) RETURNING *',
-      { bind: [tipo_sensor, parametro, aula_medicion_id, ubicacion] }
+      'INSERT INTO sensores_medicion (tipo_sensor, parametro, aula_medicion_id, ubicacion) VALUES ($1, $2, $3, $4) RETURNING *',
+      { 
+        bind: [tipo_sensor, parametro, aula_medicion_id, ubicacion],
+        type: sequelize.QueryTypes.INSERT 
+      }
     );
-    res.json(result);
+    // Sequelize en INSERT nativos de Postgres devuelve directamente la fila o un array con la fila insertada
+    res.json(Array.isArray(result) ? result[0] : result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -39,9 +43,12 @@ router.put('/:id', async (req, res) => {
   try {
     const [result] = await sequelize.query(
       'UPDATE sensores_medicion SET tipo_sensor=$1, parametro=$2, aula_medicion_id=$3, ubicacion=$4 WHERE id_sensor=$5 RETURNING *',
-      { bind: [tipo_sensor, parametro, aula_medicion_id, ubicacion, id] }
+      { 
+        bind: [tipo_sensor, parametro, aula_medicion_id, ubicacion, id],
+        type: sequelize.QueryTypes.UPDATE
+      }
     );
-    res.json(result);
+    res.json(Array.isArray(result) ? result[0] : result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -58,4 +65,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-module.exports = router; // Exportación tradicional
+module.exports = router; // Exportación tradicional limpia
