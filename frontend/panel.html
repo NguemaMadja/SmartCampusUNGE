@@ -202,25 +202,26 @@
     }
   }
 
-   function aplicarFiltrosPorRol(rol) {
+  function aplicarFiltrosPorRol(rol) {
     if (rol === "superadmin") {
       // ve todo
     } else if (rol === "profesor") {
-      // Solo Radio Escuchar, Transporte y Mapa
+      // Solo Radio Escuchar, Transporte, Mapa y Gestión Energética
       document.getElementById("linkUsuarios").style.display = "none";
       document.getElementById("linkProfesores").style.display = "none";
       document.getElementById("linkEstudiantes").style.display = "none";
       document.getElementById("linkRadioCrud").style.display = "none";
-      document.getElementById("linkEnergia").style.display = "none";
       document.getElementById("linkAsistencia").style.display = "none";
       document.getElementById("linkConfig").style.display = "none";
+      // 🔹 Dejamos visible linkEnergia
     } else if (rol === "estudiante") {
+      // Solo Transporte, Mapa y Gestión Energética
       document.getElementById("linkUsuarios").style.display = "none";
       document.getElementById("linkProfesores").style.display = "none";
       document.getElementById("linkConfig").style.display = "none";
       document.getElementById("linkRadioCrud").style.display = "none";
-      document.getElementById("linkEnergia").style.display = "none";
       document.getElementById("linkAsistencia").style.display = "none";
+      // 🔹 Dejamos visible linkEnergia
     } else if (rol === "radio") {
       document.getElementById("linkUsuarios").style.display = "none";
       document.getElementById("linkProfesores").style.display = "none";
@@ -255,4 +256,3 @@
 </script>
 </body>
 </html>
- 
