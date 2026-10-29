@@ -49,6 +49,10 @@ app.use('/api/eventos_energia_sensores', require('./routes/eventos_energia_senso
 app.use('/api/aulas_medicion', require('./routes/aulas_medicion'));
 app.use('/api/sensores_medicion', require('./routes/sensores_medicion')); // Carga normalizada idéntica a las demás
 
+app.use('/api/control_radio', require('./routes/radio'));
+app.use('/api/programas_radio', require('./routes/programas_radio'));
+
+
 // 🔹 Servir frontend estático
 app.use(express.static(path.join(__dirname, '../frontend')));
 
