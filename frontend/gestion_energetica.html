@@ -76,30 +76,15 @@
   <div class="container-main container">
     <h2 class="text-center text-white mb-4">Gestión Energética</h2>
     
-    <!-- Botonera Homogeneizada -->
+    <!-- Botonera -->
     <div class="text-center mb-4">
-      <a href="panel.html" class="btn-nav shadow-sm">
-        <i class="bi bi-speedometer2"></i> Volver al Panel
-      </a>
-
-      <button class="btn-nav" onclick="window.location.href='gestion_energetica.html'">
-        <i class="bi bi-lightning-charge"></i> Estado de Aulas
-      </button>
-      <button class="btn-nav" onclick="window.location.href='consumo.html'">
-        <i class="bi bi-bar-chart-line"></i> Consumo Energético
-      </button>
-      <button class="btn-nav" onclick="window.location.href='eventos.html'">
-        <i class="bi bi-clock-history"></i> Eventos Energéticos
-      </button>
-      <button class="btn-nav" onclick="window.location.href='lecturas.html'">
-        <i class="bi bi-list-columns"></i> Lecturas de Sensores
-      </button>
-      <button class="btn-nav" onclick="window.location.href='aulas_medicion.html'">
-        <i class="bi bi-building"></i> Aulas de Medición
-      </button>
-      <button class="btn-nav" onclick="window.location.href='sensores_medicion.html'">
-        <i class="bi bi-cpu"></i> Sensores de Medición
-      </button>
+      <a href="panel.html" class="btn-nav shadow-sm"><i class="bi bi-speedometer2"></i> Volver al Panel</a>
+      <button class="btn-nav" onclick="window.location.href='gestion_energetica.html'"><i class="bi bi-lightning-charge"></i> Estado de Aulas</button>
+      <button class="btn-nav" onclick="window.location.href='consumo.html'"><i class="bi bi-bar-chart-line"></i> Consumo Energético</button>
+      <button class="btn-nav" onclick="window.location.href='eventos.html'"><i class="bi bi-clock-history"></i> Eventos Energéticos</button>
+      <button class="btn-nav" onclick="window.location.href='lecturas.html'"><i class="bi bi-list-columns"></i> Lecturas de Sensores</button>
+      <button class="btn-nav" onclick="window.location.href='aulas_medicion.html'"><i class="bi bi-building"></i> Aulas de Medición</button>
+      <button class="btn-nav" onclick="window.location.href='sensores_medicion.html'"><i class="bi bi-cpu"></i> Sensores de Medición</button>
     </div>
 
    <!-- Tarjeta Principal -->
@@ -120,7 +105,8 @@
                 <th>Ruido</th>
                 <th>Luz</th>
                 <th>Estado</th>
-                <th>Acción</th>
+                <th>Acción Apagar</th>
+                <th>Acción Encender</th>
                 <th>Fecha/Hora</th>
               </tr>
             </thead>
@@ -128,10 +114,15 @@
           </table>
         </div>
 
-        <!-- Gráfica Acciones vs Aulas -->
+        <!-- Gráficas -->
         <div class="mt-5">
           <h5 class="text-dark">Acciones vs Aulas</h5>
           <canvas id="graficaAccionesAulas" height="120"></canvas>
+        </div>
+
+        <div class="mt-5">
+          <h5 class="text-dark">Aulas vs Ocupación</h5>
+          <canvas id="graficaOcupacionAulas" height="120"></canvas>
         </div>
 
       </div>
@@ -164,10 +155,9 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Script principal corregido -->
+  <!-- Script principal -->
   <script>
     const API_BASE = "https://smartcampusunge.onrender.com";
-    let acciones = 0;
 
     // Inicializar DataTable
     const tabla = $('#tablaEnergia').DataTable({
@@ -182,29 +172,57 @@
       autoWidth: false
     });
 
-    // Inicializar gráfica
-    const ctx = document.getElementById('graficaAccionesAulas').getContext('2d');
-    const graficaAcciones = new Chart(ctx, {
+    // Inicializar gráficas
+    const ctxAcciones = document.getElementById('graficaAccionesAulas').getContext('2d');
+    const graficaAcciones = new Chart(ctxAcciones, {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Acciones Apagar',
+            data: [],
+            backgroundColor: 'rgba(255, 99, 132, 0.6)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1
+          },
+          {
+            label: 'Acciones Encender',
+            data: [],
+            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: { display: true, text: 'Acciones realizadas en cada aula' }
+        },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+
+    const ctxOcupacion = document.getElementById('graficaOcupacionAulas').getContext('2d');
+    const graficaOcupacion = new Chart(ctxOcupacion, {
       type: 'bar',
       data: {
         labels: [],
         datasets: [{
-          label: 'Acciones por Aula',
+          label: 'Ocupación por Aula',
           data: [],
-          backgroundColor: 'rgba(0, 128, 255, 0.6)',
-          borderColor: 'rgba(0, 128, 255, 1)',
+          backgroundColor: 'rgba(0, 200, 83, 0.6)',
+          borderColor: 'rgba(0, 200, 83, 1)',
           borderWidth: 1
         }]
       },
       options: {
         responsive: true,
         plugins: {
-          legend: { display: false },
-          title: { display: true, text: 'Acciones realizadas en cada aula' }
+          title: { display: true, text: 'Ocupación detectada en cada aula' }
         },
-        scales: {
-          y: { beginAtZero: true }
-        }
+        scales: { y: { beginAtZero: true } }
       }
     });
 
@@ -216,10 +234,13 @@
         const data = await res.json();
 
         tabla.clear();
-        const accionesPorAula = {};
+        const accionesApagar = {};
+        const accionesEncender = {};
+        const ocupacionPorAula = {};
 
         if (Array.isArray(data.data)) {
           data.data.forEach(l => {
+            // Tabla: separar acciones
             tabla.row.add([
               l.aula_sensor_id,
               l.nombre_aula,
@@ -229,17 +250,19 @@
               l.ruido_detectado,
               l.luz_detectada ? "Sí" : "No",
               l.cruce_global,
-              l.accion,
+              l.accion === "Apagar" ? "Apagar" : "",
+              l.accion === "Encender" ? "Encender" : "",
               l.fecha_hora
             ]);
 
-            // Contar acciones por aula
-            if (!accionesPorAula[l.nombre_aula]) {
-              accionesPorAula[l.nombre_aula] = 0;
-            }
-            if (l.accion) {
-              accionesPorAula[l.nombre_aula]++;
-            }
+            // Contar acciones
+            if (!accionesApagar[l.nombre_aula]) accionesApagar[l.nombre_aula] = 0;
+            if (!accionesEncender[l.nombre_aula]) accionesEncender[l.nombre_aula] = 0;
+            if (!ocupacionPorAula[l.nombre_aula]) ocupacionPorAula[l.nombre_aula] = 0;
+
+            if (l.accion === "Apagar") accionesApagar[l.nombre_aula]++;
+            if (l.accion === "Encender") accionesEncender[l.nombre_aula]++;
+            if (l.cruce_global === "Ocupado") ocupacionPorAula[l.nombre_aula]++;
           });
         }
         tabla.draw();
@@ -250,35 +273,24 @@
           document.getElementById('ultimaLectura').textContent = data.data[data.data.length - 1].fecha_hora;
         }
 
-        // Actualizar gráfica
-        graficaAcciones.data.labels = Object.keys(accionesPorAula);
-        graficaAcciones.data.datasets[0].data = Object.values(accionesPorAula);
+        // Actualizar gráfica Acciones
+        graficaAcciones.data.labels = Object.keys(accionesApagar);
+        graficaAcciones.data.datasets[0].data = Object.values(accionesApagar);
+        graficaAcciones.data.datasets[1].data = Object.values(accionesEncender);
         graficaAcciones.update();
+
+        // Actualizar gráfica Ocupación
+        graficaOcupacion.data.labels = Object.keys(ocupacionPorAula);
+        graficaOcupacion.data.datasets[0].data = Object.values(ocupacionPorAula);
+        graficaOcupacion.update();
 
       } catch (err) {
         console.error("Error cargando lecturas:", err);
       }
     }
 
-    // Feedback visual inmediato (toast)
-    function mostrarToast(mensaje, tipo) {
-      const toastContainer = document.querySelector('.toast-container') || (() => {
-        const div = document.createElement('div');
-        div.className = 'toast-container';
-        document.body.appendChild(div);
-        return div;
-      })();
-      const toast = document.createElement('div');
-      toast.className = `toast align-items-center text-bg-${tipo} border-0 show`;
-      toast.role = 'alert';
-      toast.innerHTML = `<div class="d-flex"><div class="toast-body">${mensaje}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
-      toastContainer.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
-    }
-
     // Inicializar
     cargarLecturas();
-    // Refrescar cada 30 segundos para tiempo real
     setInterval(cargarLecturas, 30000);
   </script>
 </body>
