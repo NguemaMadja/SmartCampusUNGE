@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>Gestión Energética - SmartCampusUNGE</title>
-  <link href="https://jsdelivr.net" rel="stylesheet">
-  <link href="https://jsdelivr.net" rel="stylesheet">
-  <link href="https://datatables.net" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
   <style>
     body { background: linear-gradient(135deg, #003366, #004080); color: white; min-height: 100vh; display: flex; flex-direction: column; }
     .navbar { background-color: #004080; height: 60px; display: flex; align-items: center; }
@@ -113,7 +113,6 @@
             <thead class="table-dark">
               <tr>
                 <th>ID Aula</th>
-                <th>Aula</th>
                 <th>Temperatura</th>
                 <th>Humedad</th>
                 <th>CO₂</th>
@@ -184,11 +183,8 @@
         tabla.clear();
         if (Array.isArray(data.data)) {
           data.data.forEach(l => {
-            const nombreLegibleAula = l.aula_nombre || `Aula ${l.aula_sensor_id}`;
-
             tabla.row.add([
               l.aula_sensor_id,
-              nombreLegibleAula,
               l.temperatura,
               l.humedad,
               l.co2,
