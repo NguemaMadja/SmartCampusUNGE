@@ -131,7 +131,113 @@
     </div>
   </footer>
 
-  <!-- Librerías externas -->
+  <!-- Modal: Agregar Programa -->
+  <div class="modal fade" id="modalAgregarPrograma" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title">➕ Registrar Programa</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formAgregarPrograma">
+            <div class="mb-3">
+              <label class="form-label">Nombre del Programa</label>
+              <input type="text" class="form-control" id="nombre_programa" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Tipo</label>
+              <input type="text" class="form-control" id="tipo_programa" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Día</label>
+              <select class="form-select" id="dia_programa" required>
+                <option value="">Seleccione día</option>
+                <option>Lunes</option><option>Martes</option><option>Miércoles</option>
+                <option>Jueves</option><option>Viernes</option><option>Sábado</option><option>Domingo</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Hora Inicio</label>
+              <input type="time" class="form-control" id="hora_inicio" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Hora Fin</label>
+              <input type="time" class="form-control" id="hora_fin" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Locutor</label>
+              <input type="text" class="form-control" id="locutor_programa">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Estado</label>
+              <select class="form-select" id="estado_programa">
+                <option value="Programado">Programado</option>
+                <option value="En vivo">En vivo</option>
+                <option value="Finalizado">Finalizado</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-success">Registrar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Editar Programa -->
+  <div class="modal fade" id="modalEditarPrograma" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-warning text-dark">
+          <h5 class="modal-title">✏️ Editar Programa</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formEditarPrograma">
+            <input type="hidden" id="edit_id">
+            <div class="mb-3">
+              <label class="form-label">Nombre del Programa</label>
+              <input type="text" class="form-control" id="edit_nombre_programa" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Tipo</label>
+              <input type="text" class="form-control" id="edit_tipo_programa" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Día</label>
+              <select class="form-select" id="edit_dia_programa" required>
+                <option>Lunes</option><option>Martes</option><option>Miércoles</option>
+                <option>Jueves</option><option>Viernes</option><option>Sábado</option><option>Domingo</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Hora Inicio</label>
+              <input type="time" class="form-control" id="edit_hora_inicio" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Hora Fin</label>
+              <input type="time" class="form-control" id="edit_hora_fin" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Locutor</label>
+              <input type="text" class="form-control" id="edit_locutor_programa">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Estado</label>
+              <select class="form-select" id="edit_estado_programa">
+                <option value="Programado">Programado</option>
+                <option value="En vivo">En vivo</option>
+                <option value="Finalizado">Finalizado</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-warning">Guardar Cambios</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- Librerías externas -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -162,26 +268,20 @@
       autoWidth: false
     });
 
-    // Gráfica Oyentes vs Programas
+    // Gráficas
     const ctxOyentes = document.getElementById('graficaOyentesProgramas').getContext('2d');
     const graficaOyentes = new Chart(ctxOyentes, {
       type: 'bar',
-      data: { labels: [], datasets: [
-        { label: 'Oyentes', data: [], backgroundColor: 'rgba(54,162,235,0.6)', borderColor: 'rgba(54,162,235,1)', borderWidth: 1 }
-      ]},
-      options: { responsive: true, plugins: { title: { display: true, text: 'Oyentes por Programa' }}, scales: { y: { beginAtZero: true } } }
+      data: { labels: [], datasets: [{ label: 'Oyentes', data: [], backgroundColor: 'rgba(54,162,235,0.6)' }] },
+      options: { responsive: true, plugins: { title: { display: true, text: 'Oyentes por Programa' } } }
     });
 
-    // Gráfica Tipos de Programas
     const ctxTipos = document.getElementById('graficaTiposProgramas').getContext('2d');
     const graficaTipos = new Chart(ctxTipos, {
       type: 'pie',
-      data: { labels: [], datasets: [
-        { label: 'Tipos de Programas', data: [], backgroundColor: ['#ff6384','#36a2eb','#ffce56','#4caf50'] }
-      ]},
+      data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ff6384','#36a2eb','#ffce56','#4caf50'] }] },
       options: { responsive: true, plugins: { title: { display: true, text: 'Distribución de Programas' } } }
     });
-
     // Cargar programación desde API
     async function cargarProgramacion() {
       try {
@@ -202,8 +302,8 @@
               p.nombre,
               p.locutor,
               p.estado,
-              `<button class="btn btn-sm btn-primary">Editar</button>
-               <button class="btn btn-sm btn-danger">Eliminar</button>`
+              `<button class="btn btn-sm btn-primary" onclick="editarPrograma(${p.id})">Editar</button>
+               <button class="btn btn-sm btn-danger" onclick="eliminarPrograma(${p.id})">Eliminar</button>`
             ]);
 
             oyentesPorPrograma[p.nombre] = p.oyentes || 0;
@@ -235,24 +335,72 @@
 
     // Botones de control
     document.getElementById("btnEncenderRadio").addEventListener("click", () => {
-      fetch(`${API_BASE}/api/control_radio`, { method: "POST", body: JSON.stringify({ accion: "encender" }) });
+      fetch(`${API_BASE}/api/control_radio`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ accion: "encender" }) });
       document.getElementById('estadoRadio').textContent = "Encendida";
     });
 
     document.getElementById("btnApagarRadio").addEventListener("click", () => {
-      fetch(`${API_BASE}/api/control_radio`, { method: "POST", body: JSON.stringify({ accion: "apagar" }) });
+      fetch(`${API_BASE}/api/control_radio`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ accion: "apagar" }) });
       document.getElementById('estadoRadio').textContent = "Apagada";
     });
 
     document.getElementById("btnMusica").addEventListener("click", () => {
-      fetch(`${API_BASE}/api/control_radio`, { method: "POST", body: JSON.stringify({ accion: "musica" }) });
+      fetch(`${API_BASE}/api/control_radio`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ accion: "musica" }) });
       document.getElementById('programaActual').textContent = "Música";
     });
 
     document.getElementById("btnPrograma").addEventListener("click", () => {
-      fetch(`${API_BASE}/api/control_radio`, { method: "POST", body: JSON.stringify({ accion: "programa" }) });
+      fetch(`${API_BASE}/api/control_radio`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ accion: "programa" }) });
       document.getElementById('programaActual').textContent = "Programa en vivo";
     });
+
+    // Funciones CRUD
+    document.getElementById("formAgregarPrograma").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const nuevoPrograma = {
+        nombre: document.getElementById("nombre_programa").value,
+        tipo: document.getElementById("tipo_programa").value,
+        dia: document.getElementById("dia_programa").value,
+        hora_inicio: document.getElementById("hora_inicio").value,
+        hora_fin: document.getElementById("hora_fin").value,
+        locutor: document.getElementById("locutor_programa").value,
+        estado: document.getElementById("estado_programa").value
+      };
+      await fetch(`${API_BASE}/api/programas_radio`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(nuevoPrograma) });
+      cargarProgramacion();
+      $('#modalAgregarPrograma').modal('hide');
+    });
+
+    function editarPrograma(id) {
+      document.getElementById("edit_id").value = id;
+      // Aquí deberías cargar datos del programa desde la API y rellenar el modal
+      $('#modalEditarPrograma').modal('show');
+    }
+
+    document.getElementById("formEditarPrograma").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = document.getElementById("edit_id").value;
+      const programaEditado = {
+        nombre: document.getElementById("edit_nombre_programa").value,
+        tipo: document.getElementById("edit_tipo_programa").value,
+        dia: document.getElementById("edit_dia_programa").value,
+        hora_inicio: document.getElementById("edit_hora_inicio").value,
+        hora_fin: document.getElementById("edit_hora_fin").value,
+        locutor: document.getElementById("edit_locutor_programa").value,
+        estado: document.getElementById("edit_estado_programa").value
+      };
+      await fetch(`${API_BASE}/api/programas_radio/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(programaEditado) });
+      cargarProgramacion();
+      $('#modalEditarPrograma').modal('hide');
+    });
+
+    async function eliminarPrograma(id) {
+      if (confirm("¿Seguro que deseas eliminar este programa?")) {
+        await fetch(`${API_BASE}/api/programas_radio/${id}`, { method: "DELETE" });
+        cargarProgramacion();
+      }
+    }
   </script>
 </body>
 </html>
+
