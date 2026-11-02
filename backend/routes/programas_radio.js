@@ -33,19 +33,29 @@ router.post('/', async (req, res) => {
     const [result] = await sequelize.query(
       `INSERT INTO radioprogramas (titulo, descripcion, tipo, dia, hora_inicio, hora_fin, locutor, estado)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
-      { bind: [nombre, descripcion, tipo, dia, hora_inicio, hora_fin, locutor, estado || 'Programado'] }
+      { bind: [
+          nombre,
+          descripcion || null,   // si no envías descripción, se guarda NULL
+          tipo,
+          dia,
+          hora_inicio,
+          hora_fin,
+          locutor || null,
+          estado || 'Programado'
+        ] }
     );
+    const r = result[0];
     res.json({
-      id: result[0].id_programa,
-      nombre: result[0].titulo,
-      descripcion: result[0].descripcion,
-      tipo: result[0].tipo,
-      dia: result[0].dia,
-      hora_inicio: result[0].hora_inicio,
-      hora_fin: result[0].hora_fin,
-      locutor: result[0].locutor,
-      estado: result[0].estado,
-      fecha: result[0].fecha
+      id: r.id_programa,
+      nombre: r.titulo,
+      descripcion: r.descripcion,
+      tipo: r.tipo,
+      dia: r.dia,
+      hora_inicio: r.hora_inicio,
+      hora_fin: r.hora_fin,
+      locutor: r.locutor,
+      estado: r.estado,
+      fecha: r.fecha
     });
   } catch (err) {
     console.error("Error en POST /api/programas_radio:", err);
@@ -62,19 +72,30 @@ router.put('/:id', async (req, res) => {
       `UPDATE radioprogramas
        SET titulo=$1, descripcion=$2, tipo=$3, dia=$4, hora_inicio=$5, hora_fin=$6, locutor=$7, estado=$8
        WHERE id_programa=$9 RETURNING *`,
-      { bind: [nombre, descripcion, tipo, dia, hora_inicio, hora_fin, locutor, estado, id] }
+      { bind: [
+          nombre,
+          descripcion || null,
+          tipo,
+          dia,
+          hora_inicio,
+          hora_fin,
+          locutor || null,
+          estado || 'Programado',
+          id
+        ] }
     );
+    const r = result[0];
     res.json({
-      id: result[0].id_programa,
-      nombre: result[0].titulo,
-      descripcion: result[0].descripcion,
-      tipo: result[0].tipo,
-      dia: result[0].dia,
-      hora_inicio: result[0].hora_inicio,
-      hora_fin: result[0].hora_fin,
-      locutor: result[0].locutor,
-      estado: result[0].estado,
-      fecha: result[0].fecha
+      id: r.id_programa,
+      nombre: r.titulo,
+      descripcion: r.descripcion,
+      tipo: r.tipo,
+      dia: r.dia,
+      hora_inicio: r.hora_inicio,
+      hora_fin: r.hora_fin,
+      locutor: r.locutor,
+      estado: r.estado,
+      fecha: r.fecha
     });
   } catch (err) {
     console.error("Error en PUT /api/programas_radio:", err);
