@@ -30,12 +30,21 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   const { nombre, descripcion, tipo, dia, hora_inicio, hora_fin, locutor, estado } = req.body;
   try {
+    // Validar que el tipo exista en la tabla auxiliar
+    const [tipos] = await sequelize.query(
+      'SELECT nombre_tipo FROM tipos_programa WHERE nombre_tipo=$1',
+      { bind: [tipo] }
+    );
+    if (tipos.length === 0) {
+      return res.status(400).json({ error: `El tipo '${tipo}' no está registrado en tipos_programa` });
+    }
+
     const [result] = await sequelize.query(
       `INSERT INTO radioprogramas (titulo, descripcion, tipo, dia, hora_inicio, hora_fin, locutor, estado)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
       { bind: [
           nombre,
-          descripcion || null,   // si no envías descripción, se guarda NULL
+          descripcion || null,
           tipo,
           dia,
           hora_inicio,
@@ -68,6 +77,15 @@ router.put('/:id', async (req, res) => {
   const { id } = req.params;
   const { nombre, descripcion, tipo, dia, hora_inicio, hora_fin, locutor, estado } = req.body;
   try {
+    // Validar tipo antes de actualizar
+    const [tipos] = await sequelize.query(
+      'SELECT nombre_tipo FROM tipos_programa WHERE nombre_tipo=$1',
+      { bind: [tipo] }
+    );
+    if (tipos.length === 0) {
+      return res.status(400).json({ error: `El tipo '${tipo}' no está registrado en tipos_programa` });
+    }
+
     const [result] = await sequelize.query(
       `UPDATE radioprogramas
        SET titulo=$1, descripcion=$2, tipo=$3, dia=$4, hora_inicio=$5, hora_fin=$6, locutor=$7, estado=$8
@@ -111,6 +129,17 @@ router.delete('/:id', async (req, res) => {
     res.json({ message: 'Programa eliminado' });
   } catch (err) {
     console.error("Error en DELETE /api/programas_radio:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 🔹 Listar tipos de programa (tabla auxiliar)
+router.get('/tipos', async (req, res) => {
+  try {
+    const [rows] = await sequelize.query('SELECT nombre_tipo FROM tipos_programa ORDER BY id_tipo');
+    res.json(rows);
+  } catch (err) {
+    console.error("Error en GET /api/programas_radio/tipos:", err);
     res.status(500).json({ error: err.message });
   }
 });
