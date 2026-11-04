@@ -208,20 +208,18 @@
     if (rol === "superadmin") {
       // ve todo
     } else if (rol === "profesor") {
-      // 🔹 Ahora profesor ve Radio, Transporte, Mapa y Gestión Energética
+      // 🔹 Profesor ve Radio, Transporte, Mapa y Gestión Energética
       document.getElementById("linkUsuarios").style.display = "none";
       document.getElementById("linkProfesores").style.display = "none";
       document.getElementById("linkEstudiantes").style.display = "none";
       document.getElementById("linkAsistencia").style.display = "none";
       document.getElementById("linkConfig").style.display = "none";
-      // 🔹 Dejamos visible linkRadioCrud y linkEnergia
     } else if (rol === "estudiante") {
-      // 🔹 Ahora estudiante ve Radio, Transporte, Mapa y Gestión Energética
+      // 🔹 Estudiante ve Radio, Transporte, Mapa y Gestión Energética
       document.getElementById("linkUsuarios").style.display = "none";
       document.getElementById("linkProfesores").style.display = "none";
       document.getElementById("linkConfig").style.display = "none";
       document.getElementById("linkAsistencia").style.display = "none";
-      // 🔹 Dejamos visible linkRadioCrud y linkEnergia
     } else if (rol === "radio") {
       document.getElementById("linkUsuarios").style.display = "none";
       document.getElementById("linkProfesores").style.display = "none";
@@ -231,6 +229,19 @@
       document.getElementById("linkAsistencia").style.display = "none";
       document.getElementById("linkTransporte").style.display = "none";
       document.getElementById("linkMapa").style.display = "none";
+    }
+
+    // 🔹 Restricciones dentro del módulo escuchar_radio
+    if (rol === "profesor" || rol === "estudiante") {
+      const ocultar = id => { const el = document.getElementById(id); if (el) el.style.display = "none"; };
+      ocultar("btnEncenderRadio");
+      ocultar("btnApagarRadio");
+      ocultar("btnMusica");
+      ocultar("btnPrograma");
+      ocultar("btnAgregarPrograma");
+
+      document.querySelectorAll(".btnEditar").forEach(btn => btn.style.display = "none");
+      document.querySelectorAll(".btnEliminar").forEach(btn => btn.style.display = "none");
     }
   }
 
@@ -243,7 +254,7 @@
   document.getElementById("logoutBtn").addEventListener("click", () => {
     cerrarSesionLimpio();
     alert("Sesión cerrada correctamente");
-    window.location.href = "index.html"; // 🔹 ahora redirige al index
+    window.location.href = "index.html"; 
   });
 
   // Aplicar filtros inmediatamente con el rol guardado en localStorage
