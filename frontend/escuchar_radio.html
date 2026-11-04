@@ -359,7 +359,7 @@
   cargarProgramacion();
   setInterval(cargarProgramacion, 30000);
 
-    // Botones de control
+     // Botones de control
   document.getElementById("btnEncenderRadio").addEventListener("click", () => {
     fetch(`${API_BASE}/api/control_radio`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ accion: "encender" }) });
     document.getElementById('estadoRadio').textContent = "Encendida";
@@ -440,9 +440,11 @@
     document.getElementById("btnPrograma").style.display = "none";
     document.getElementById("btnAgregarPrograma").style.display = "none";
 
-    // Ocultar acciones de edición y eliminación en la tabla
-    document.querySelectorAll(".btnEditar").forEach(btn => btn.style.display = "none");
-    document.querySelectorAll(".btnEliminar").forEach(btn => btn.style.display = "none");
+    // 🔹 Ocultar acciones de edición y eliminación cada vez que se dibuje la tabla
+    tablaProgramas.on('draw', function () {
+      document.querySelectorAll(".btnEditar").forEach(btn => btn.style.display = "none");
+      document.querySelectorAll(".btnEliminar").forEach(btn => btn.style.display = "none");
+    });
   }
   // radio y superadmin tienen acceso total
 </script>
