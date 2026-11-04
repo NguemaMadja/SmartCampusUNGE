@@ -71,23 +71,22 @@
     </div>
   </div>
 
-    <!-- Contenido principal -->
+  <!-- Contenido principal -->
   <div class="container-main container">
     <h2 class="text-center text-white mb-4">Gestión de Programación Radio</h2>
     
     <!-- Botonera -->
-    <div class="text-center mb-4">
-      <a href="panel.html" class="btn-nav shadow-sm">
+    <div class="text-center mb-4" id="radioControls">
+      <a href="panel.html" class="btn-nav shadow-sm" id="btnVolverPanel">
         <i class="bi bi-speedometer2"></i> Volver al Panel
       </a>
       <button class="btn-nav" id="btnEncenderRadio"><i class="bi bi-play-circle"></i> Encender Radio</button>
       <button class="btn-nav" id="btnApagarRadio"><i class="bi bi-stop-circle"></i> Apagar Radio</button>
       <button class="btn-nav" id="btnMusica"><i class="bi bi-music-note"></i> Pasar a Música</button>
       <button class="btn-nav" id="btnPrograma"><i class="bi bi-mic"></i> Pasar a Programa</button>
-      
       <button class="btn-nav" id="btnAgregarPrograma" data-bs-toggle="modal" data-bs-target="#modalAgregarPrograma">
-  <i class="bi bi-plus-circle"></i> Añadir Programa
-</button>
+        <i class="bi bi-plus-circle"></i> Añadir Programa
+      </button>
     </div>
 
     <!-- Tabla Programación -->
@@ -189,11 +188,9 @@
     </div>
   </div>
 
+    
 
-
-  
-
-<!-- Modal: Editar Programa -->
+  <!-- Modal: Editar Programa -->
 <div class="modal fade" id="modalEditarPrograma" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -210,7 +207,7 @@
           </div>
           <div class="mb-3">
             <label class="form-label">Tipo</label>
-            <!-- 🔹 Ahora es un select vacío que se llenará dinámicamente -->
+            <!-- 🔹 Select dinámico -->
             <select class="form-select" id="edit_tipo_programa" required></select>
           </div>
           <div class="mb-3">
@@ -260,9 +257,7 @@
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-
- 
+  
 <!-- Script principal -->
 <script>
   const API_BASE = "https://smartcampusunge.onrender.com";
@@ -313,7 +308,7 @@
     }
   }
 
-  // Cargar programación desde API
+    // Cargar programación desde API
   async function cargarProgramacion() {
     try {
       const res = await fetch(`${API_BASE}/api/programas_radio`);
@@ -333,8 +328,8 @@
             p.nombre,
             p.locutor,
             p.estado,
-            `<button class="btn btn-sm btn-primary" onclick="editarPrograma(${p.id})">Editar</button>
-             <button class="btn btn-sm btn-danger" onclick="eliminarPrograma(${p.id})">Eliminar</button>`
+            `<button class="btn btn-sm btn-primary btnEditar" onclick="editarPrograma(${p.id})">Editar</button>
+             <button class="btn btn-sm btn-danger btnEliminar" onclick="eliminarPrograma(${p.id})">Eliminar</button>`
           ]);
 
           oyentesPorPrograma[p.nombre] = p.oyentes || 0;
@@ -408,7 +403,6 @@
   function editarPrograma(id) {
     document.getElementById("edit_id").value = id;
     cargarTiposPrograma("edit_tipo_programa");
-    // Aquí deberías cargar datos del programa desde la API y rellenar el modal
     $('#modalEditarPrograma').modal('show');
   }
 
@@ -435,6 +429,20 @@
       cargarProgramacion();
     }
   }
+
+  // Restricciones por rol
+  const rol = localStorage.getItem("rol");
+  if (rol === "profesor" || rol === "estudiante") {
+    document.getElementById("btnEncenderRadio").style.display = "none";
+    document.getElementById("btnApagarRadio").style.display = "none";
+    document.getElementById("btnMusica").style.display = "none";
+    document.getElementById("btnPrograma").style.display = "none";
+    document.getElementById("btnAgregarPrograma").style.display = "none";
+
+    document.querySelectorAll(".btnEditar").forEach(btn => btn.style.display = "none");
+    document.querySelectorAll(".btnEliminar").forEach(btn => btn.style.display = "none");
+  }
+  // radio y superadmin tienen acceso total
 </script>
 </body>
 </html>
