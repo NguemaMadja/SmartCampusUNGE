@@ -76,34 +76,30 @@
 
 
   <!-- Content -->
-<div id="content">
-  <nav class="navbar navbar-dark">
-    <span id="menuToggle">&#9776;</span>
-    <a class="navbar-brand d-flex align-items-center ms-3" href="index.html">
-      <img src="logo/LOGO-UNGE-1.png" alt="Logo UNGE" class="img-fluid me-2" style="max-height:50px;">
-      <span>SmartCampusUNGE</span>
-    </a>
-    <div class="scroll-msg text-center">
-      <marquee behavior="scroll" direction="left" scrollamount="6">
-        Selecciona un módulo en el menú lateral para gestionar usuarios, profesores, estudiantes, radio, transporte, mapa o configuración
-      </marquee>
-    </div>
-
-    <!-- 🔹 Menú de usuario con ID y Rol automáticos -->
-    <div class="dropdown superadmin-container">
-      <button class="btn btn-danger dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-        Usuario
-      </button>
-      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-        <li><span class="dropdown-item-text" id="userId">ID: --</span></li>
-        <li><span class="dropdown-item-text" id="userRole">Rol: --</span></li>
-        <li><hr class="dropdown-divider"></li>
-        <li><a class="dropdown-item text-danger" href="#" id="logoutBtn">Cerrar sesión</a></li>
-      </ul>
-    </div>
-  </nav>
-</div>
-
+  <div id="content">
+    <nav class="navbar navbar-dark">
+      <span id="menuToggle">&#9776;</span>
+      <a class="navbar-brand d-flex align-items-center ms-3" href="index.html">
+        <img src="logo/LOGO-UNGE-1.png" alt="Logo UNGE" class="img-fluid me-2" style="max-height:50px;">
+        <span>SmartCampusUNGE</span>
+      </a>
+      <div class="scroll-msg text-center">
+        <marquee behavior="scroll" direction="left" scrollamount="6">
+          Selecciona un módulo en el menú lateral para gestionar usuarios, profesores, estudiantes, radio, transporte, mapa o configuración
+        </marquee>
+      </div>
+      <div class="dropdown superadmin-container">
+        <button class="btn btn-danger dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+          Usuario
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+          <li><span class="dropdown-item-text" id="userId">ID: --</span></li>
+          <li><span class="dropdown-item-text" id="userRole">Rol: --</span></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" href="#" id="logoutBtn">Cerrar sesión</a></li>
+        </ul>
+      </div>
+    </nav>
 
 
   
