@@ -183,26 +183,34 @@
     document.getElementById("sidebar").classList.toggle("active");
   });
 
-  async function cargarPerfil() {
-    const token = localStorage.getItem("token");
-    try {
-      const res = await fetch("http://10.70.200.112:4000/usuarios/perfil", {
-        method: "GET",
-        headers: { "Authorization": "Bearer " + token }
-      });
-      const data = await res.json();
-      if (data.usuario) {
-        document.getElementById("userId").textContent = "ID: " + data.usuario.id;
-        document.getElementById("userRole").textContent = "Rol: " + data.usuario.rol;
-        document.getElementById("userMenu").textContent = data.usuario.rol;
 
-        aplicarFiltrosPorRol(data.usuario.rol);
-      }
-    } catch (err) {
-      console.error("Error:", err);
-      alert("Error de conexión con el servidor de autenticación");
+  
+ async function cargarPerfil() {
+  const token = localStorage.getItem("token");
+  try {
+    const res = await fetch("http://10.70.200.112:4000/usuarios/perfil", {
+      method: "GET",
+      headers: { "Authorization": "Bearer " + token }
+    });
+    const data = await res.json();
+    if (data.usuario) {
+      // 🔹 Mostrar automáticamente ID y Rol en la interfaz
+      document.getElementById("userId").textContent = "ID: " + data.usuario.id;
+      document.getElementById("userRole").textContent = "Rol: " + data.usuario.rol;
+      document.getElementById("userMenu").textContent = data.usuario.rol;
+
+      // Aplicar filtros según rol
+      aplicarFiltrosPorRol(data.usuario.rol);
     }
+  } catch (err) {
+    console.error("Error:", err);
+    alert("Error de conexión con el servidor de autenticación");
   }
+}
+
+// 🔹 Ejecutar automáticamente al cargar la página
+window.addEventListener("DOMContentLoaded", cargarPerfil);
+
 
   function aplicarFiltrosPorRol(rol) {
     if (rol === "superadmin") {
