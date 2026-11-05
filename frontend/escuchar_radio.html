@@ -249,7 +249,7 @@
 </div>
 
 
-  <!-- Modal: Chat Radio -->
+ <!-- Modal: Chat Radio -->
 <div class="modal fade" id="modalChatRadio" tabindex="-1" aria-labelledby="modalChatRadioLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content bg-dark text-white">
@@ -264,7 +264,8 @@
         <!-- Formulario de envío -->
         <form id="formMensaje" class="d-flex">
           <input type="hidden" id="id_usuario" value="123">
-          <input type="hidden" id="rol" value="estudiante">
+          <!-- 🔹 Rol ya no fijo, se asigna en JS -->
+          <input type="hidden" id="rol">
           <input type="text" id="contenido" class="form-control me-2" placeholder="Escribe tu mensaje...">
           <button type="submit" class="btn btn-success">Enviar</button>
         </form>
@@ -272,6 +273,7 @@
     </div>
   </div>
 </div>
+
 
   
 
@@ -486,6 +488,9 @@
   // 🔹 Chat con Radio (Socket.io + API)
   const socket = io(API_BASE); // Conexión al servidor
 
+  // Asignar rol dinámico al campo oculto cuando cargue la página
+  document.getElementById("rol").value = localStorage.getItem("rol");
+
   // Cargar historial inicial de mensajes
   async function cargarMensajes() {
     try {
@@ -524,6 +529,12 @@
     // Emitir evento en tiempo real
     socket.emit("nuevoMensaje", mensaje);
 
+    // 🔹 Mostrar inmediatamente en la lista
+    const li = document.createElement("li");
+    li.className = "list-group-item";
+    li.textContent = `[${mensaje.rol}] ${mensaje.contenido} (ahora)`;
+    document.getElementById("listaMensajes").appendChild(li);
+
     // Limpiar campo
     document.getElementById("contenido").value = "";
   });
@@ -538,8 +549,6 @@
 
   // Cargar historial al abrir el modal
   document.getElementById("btnChatRadio").addEventListener("click", cargarMensajes);
-
-  
 </script>
 </body>
 </html>
