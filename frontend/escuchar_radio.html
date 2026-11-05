@@ -87,6 +87,10 @@
       <button class="btn-nav" id="btnAgregarPrograma" data-bs-toggle="modal" data-bs-target="#modalAgregarPrograma">
         <i class="bi bi-plus-circle"></i> Añadir Programa
       </button>
+      <button class="btn-nav" id="btnChatRadio" data-bs-toggle="modal" data-bs-target="#modalChatRadio">
+  <i class="bi bi-chat-dots"></i> Chat con Radio
+</button>
+
     </div>
 
     <!-- Tabla Programación -->
@@ -244,6 +248,33 @@
   </div>
 </div>
 
+
+  <!-- Modal: Chat Radio -->
+<div class="modal fade" id="modalChatRadio" tabindex="-1" aria-labelledby="modalChatRadioLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalChatRadioLabel">💬 Chat con Radio</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Lista de mensajes -->
+        <ul id="listaMensajes" class="list-group mb-3 text-dark"></ul>
+
+        <!-- Formulario de envío -->
+        <form id="formMensaje" class="d-flex">
+          <input type="hidden" id="id_usuario" value="123">
+          <input type="hidden" id="rol" value="estudiante">
+          <input type="text" id="contenido" class="form-control me-2" placeholder="Escribe tu mensaje...">
+          <button type="submit" class="btn btn-success">Enviar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
 <!-- Librerías externas -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -257,6 +288,9 @@
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="/socket.io/socket.io.js"></script>
+
   
 <!-- Script principal -->
 <script>
@@ -447,6 +481,65 @@
     });
   }
   // radio y superadmin tienen acceso total
+
+
+  // 🔹 Chat con Radio (Socket.io + API)
+  const socket = io(API_BASE); // Conexión al servidor
+
+  // Cargar historial inicial de mensajes
+  async function cargarMensajes() {
+    try {
+      const res = await fetch(`${API_BASE}/api/mensajes_radio`);
+      const mensajes = await res.json();
+      const lista = document.getElementById("listaMensajes");
+      lista.innerHTML = "";
+      mensajes.forEach(msg => {
+        const li = document.createElement("li");
+        li.className = "list-group-item";
+        li.textContent = `[${msg.rol}] ${msg.contenido} (${msg.fecha_hora})`;
+        lista.appendChild(li);
+      });
+    } catch (err) {
+      console.error("Error cargando mensajes:", err);
+    }
+  }
+
+  // Enviar mensaje desde el formulario
+  document.getElementById("formMensaje").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const mensaje = {
+      id_usuario: document.getElementById("id_usuario").value,
+      rol: document.getElementById("rol").value,
+      contenido: document.getElementById("contenido").value,
+      destinatario: null
+    };
+
+    // Guardar en BD
+    await fetch(`${API_BASE}/api/mensajes_radio`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(mensaje)
+    });
+
+    // Emitir evento en tiempo real
+    socket.emit("nuevoMensaje", mensaje);
+
+    // Limpiar campo
+    document.getElementById("contenido").value = "";
+  });
+
+  // Recibir mensajes en tiempo real
+  socket.on("nuevoMensaje", (msg) => {
+    const li = document.createElement("li");
+    li.className = "list-group-item";
+    li.textContent = `[${msg.rol}] ${msg.contenido} (${msg.fecha_hora})`;
+    document.getElementById("listaMensajes").appendChild(li);
+  });
+
+  // Cargar historial al abrir el modal
+  document.getElementById("btnChatRadio").addEventListener("click", cargarMensajes);
+
+  
 </script>
 </body>
 </html>
