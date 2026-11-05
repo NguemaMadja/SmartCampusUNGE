@@ -1,21 +1,32 @@
 // backend/routes/mensajes_radio.js
 const express = require('express');
 const router = express.Router();
-const pool = require('../db'); // conexión directa a BD (PostgreSQL con pg/pool)
+const sequelize = require('../db'); // conexión directa con Sequelize
 
 // 🔹 Guardar un nuevo mensaje (público o privado)
 router.post('/', async (req, res) => {
   const { id_usuario, rol, contenido, destinatario } = req.body;
 
+  if (!contenido || contenido.trim() === "") {
+    return res.status(400).json({ error: "El mensaje no puede estar vacío" });
+  }
+
   try {
-    const result = await pool.query(
+    const [result] = await sequelize.query(
       `INSERT INTO mensajes_radio (id_usuario, rol, contenido, destinatario, fecha_hora)
-       VALUES ($1, $2, $3, $4, NOW())
+       VALUES (:id_usuario, :rol, :contenido, :destinatario, NOW())
        RETURNING *`,
-      [id_usuario, rol, contenido, destinatario || null]
+      {
+        replacements: {
+          id_usuario,
+          rol,
+          contenido,
+          destinatario: destinatario || null
+        }
+      }
     );
 
-    res.json(result.rows[0]);
+    res.json(result[0]);
   } catch (err) {
     console.error('Error al guardar mensaje:', err);
     res.status(500).json({ error: 'Error al guardar mensaje' });
@@ -25,10 +36,10 @@ router.post('/', async (req, res) => {
 // 🔹 Listar todos los mensajes (admin)
 router.get('/', async (req, res) => {
   try {
-    const result = await pool.query(
+    const [result] = await sequelize.query(
       `SELECT * FROM mensajes_radio ORDER BY fecha_hora DESC`
     );
-    res.json(result.rows);
+    res.json(result);
   } catch (err) {
     console.error('Error al obtener mensajes:', err);
     res.status(500).json({ error: 'Error al obtener mensajes' });
@@ -38,11 +49,11 @@ router.get('/', async (req, res) => {
 // 🔹 Listar mensajes de un usuario específico
 router.get('/usuario/:id', async (req, res) => {
   try {
-    const result = await pool.query(
-      `SELECT * FROM mensajes_radio WHERE id_usuario = $1 ORDER BY fecha_hora DESC`,
-      [req.params.id]
+    const [result] = await sequelize.query(
+      `SELECT * FROM mensajes_radio WHERE id_usuario = :id ORDER BY fecha_hora DESC`,
+      { replacements: { id: req.params.id } }
     );
-    res.json(result.rows);
+    res.json(result);
   } catch (err) {
     console.error('Error al obtener mensajes de usuario:', err);
     res.status(500).json({ error: 'Error al obtener mensajes de usuario' });
@@ -53,14 +64,15 @@ router.get('/usuario/:id', async (req, res) => {
 router.get('/privados/:id1/:id2', async (req, res) => {
   const { id1, id2 } = req.params;
   try {
-    const result = await pool.query(
+    const [result] = await sequelize.query(
       `SELECT * FROM mensajes_radio 
-       WHERE (id_usuario = $1 AND destinatario = $2) 
-          OR (id_usuario = $2 AND destinatario = $1)
+       WHERE destinatario IS NOT NULL
+         AND ((id_usuario = :id1 AND destinatario = :id2) 
+           OR (id_usuario = :id2 AND destinatario = :id1))
        ORDER BY fecha_hora DESC`,
-      [id1, id2]
+      { replacements: { id1, id2 } }
     );
-    res.json(result.rows);
+    res.json(result);
   } catch (err) {
     console.error('Error al obtener mensajes privados:', err);
     res.status(500).json({ error: 'Error al obtener mensajes privados' });
