@@ -486,7 +486,7 @@
 
 
   // 🔹 Chat con Radio (Socket.io + API)
-  const socket = io(API_BASE); // Conexión al servidor
+ const socket = io("https://smartcampusunge.onrender.com");  // Conexión al servidor
 
   // Asignar rol dinámico al campo oculto cuando cargue la página
   document.getElementById("rol").value = localStorage.getItem("rol");
