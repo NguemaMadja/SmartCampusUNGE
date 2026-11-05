@@ -28,11 +28,7 @@ app.use('/api/vehiculos', require('./routes/vehiculos'));
 app.use('/api/paradas', require('./routes/paradas'));
 app.use('/api/rutas', require('./routes/rutas'));
 app.use('/api/posiciones', require('./routes/posiciones'));
-
-// ✅ Ruta edificios API
-const edificiosRouter = require('./routes/edificios');
-app.use('/api/edificios', edificiosRouter);
-
+app.use('/api/edificios', require('./routes/edificios'));
 app.use('/api/facultades', require('./routes/facultades'));
 app.use('/api/departamentos', require('./routes/departamentos'));
 app.use('/api/carreras', require('./routes/carreras'));
@@ -41,17 +37,19 @@ app.use('/api/aulas', require('./routes/aulas'));
 app.use('/api/profesores', require('./routes/profesores'));
 app.use('/api/relaciones', require('./routes/relaciones'));
 
-// 🔹 Rutas API (Gestión Energética) - Todas cargadas de forma tradicional y limpia
+// 🔹 Rutas API (Gestión Energética)
 app.use('/api/aulas_sensores', require('./routes/aulas_sensores'));
 app.use('/api/estado_aulas_sensores', require('./routes/estado_aulas_sensores'));
 app.use('/api/consumo_energia_sensores', require('./routes/consumo_energia_sensores'));
 app.use('/api/eventos_energia_sensores', require('./routes/eventos_energia_sensores'));
 app.use('/api/aulas_medicion', require('./routes/aulas_medicion'));
-app.use('/api/sensores_medicion', require('./routes/sensores_medicion')); // Carga normalizada idéntica a las demás
+app.use('/api/sensores_medicion', require('./routes/sensores_medicion'));
 
 app.use('/api/control_radio', require('./routes/control_radio'));
 app.use('/api/programas_radio', require('./routes/programas_radio'));
 
+// 🔹 Nueva ruta para chat (REST)
+app.use('/api/mensajes_radio', require('./routes/mensajes_radio'));
 
 // 🔹 Servir frontend estático
 app.use(express.static(path.join(__dirname, '../frontend')));
@@ -60,28 +58,45 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 app.get('/transporte', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/transporte.html'));
 });
-
 app.get('/smarttransit', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/smarttransit.html'));
 });
-
-// ⚠️ Cambiado para evitar conflicto con la API
 app.get('/edificios.html', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/edificios.html'));
 });
-
-// 🔹 Páginas académicas
 app.get('/facultades', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/facultades.html'));
 });
-
-// 🔹 Página Gestión Energética
 app.get('/gestion_energetica', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/gestion_energetica.html'));
 });
 
-// 🔹 Puerto
+// 🔹 Puerto + Socket.io
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Servidor corriendo en http://0.0.0:${PORT}`);
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Servidor corriendo en http://0.0.0.0:${PORT}`);
+});
+
+// 🔹 Configuración de Socket.io para chat en tiempo real
+const { Server } = require('socket.io');
+const io = new Server(server, {
+  cors: { origin: "*" }
+});
+
+io.on('connection', (socket) => {
+  console.log('Nuevo cliente conectado:', socket.id);
+
+  // Mensajes públicos
+  socket.on('message', (msg) => {
+    io.emit('message', msg); // lo ven todos
+  });
+
+  // Mensajes privados
+  socket.on('private_message', ({ from, to, contenido }) => {
+    io.to(to).emit('private_message', { from, contenido });
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Cliente desconectado:', socket.id);
+  });
 });
