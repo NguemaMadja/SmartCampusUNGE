@@ -83,17 +83,39 @@ const io = new Server(server, {
   cors: { origin: "*" }
 });
 
+// 🔹 Chat en tiempo real con políticas de rol
 io.on('connection', (socket) => {
   console.log('Nuevo cliente conectado:', socket.id);
 
-  // Mensajes públicos
-  socket.on('message', (msg) => {
-    io.emit('message', msg); // lo ven todos
+  // Mensajes del chat
+  socket.on('nuevoMensaje', async (msg) => {
+    try {
+      // 🔹 Políticas de rol
+      if (msg.rol === "profesor" || msg.rol === "estudiante") {
+        // Solo pueden enviar al locutor
+        msg.destinatario = "radio";
+      }
+
+      // Guardar en BD (si tienes modelo Sequelize)
+      const MensajesRadio = require('./models/MensajesRadio');
+      await MensajesRadio.create(msg);
+
+      // Reenviar a todos los clientes conectados
+      io.emit('nuevoMensaje', msg);
+    } catch (err) {
+      console.error("Error guardando mensaje:", err);
+    }
   });
 
-  // Mensajes privados
-  socket.on('private_message', ({ from, to, contenido }) => {
-    io.to(to).emit('private_message', { from, contenido });
+  // Eliminar mensajes (solo superadmin)
+  socket.on('eliminarMensaje', async ({ id, rol }) => {
+    if (rol === "superadmin") {
+      const MensajesRadio = require('./models/MensajesRadio');
+      await MensajesRadio.destroy({ where: { id } });
+      io.emit('mensajeEliminado', id);
+    } else {
+      socket.emit('error', "No tienes permisos para eliminar mensajes");
+    }
   });
 
   socket.on('disconnect', () => {
