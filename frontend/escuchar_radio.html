@@ -268,12 +268,12 @@
           <input type="hidden" id="rol">
           <input type="text" id="contenido" class="form-control me-2" placeholder="Escribe tu mensaje...">
           <button type="submit" class="btn btn-success">Enviar</button>
+
+          <button id="btnEliminarSeleccionados" class="btn btn-danger mt-2" style="display:none;">
+            Eliminar seleccionados
+          </button>
           
         </form>
-
-      <button id="btnEliminarSeleccionados" class="btn btn-danger mt-2" style="display:none;">
-  Eliminar seleccionados
-</button>
         
       </div>
     </div>
@@ -545,14 +545,53 @@
     document.getElementById("contenido").value = "";
   });
 
-  // Recibir mensajes en tiempo real
-  socket.on("nuevoMensaje", (msg) => {
-    const li = document.createElement("li");
-    li.className = "list-group-item";
-    li.textContent = `[${msg.rol}] ${msg.contenido} (${msg.fecha_hora})`;
-    document.getElementById("listaMensajes").appendChild(li);
-  });
+ // Recibir mensajes en tiempo real
+socket.on("nuevoMensaje", (msg) => {
+  const li = document.createElement("li");
+  li.className = "list-group-item d-flex justify-content-between align-items-center";
 
+  // Texto del mensaje
+  const span = document.createElement("span");
+  span.textContent = `[${msg.rol}] ${msg.contenido} (${msg.fecha_hora})`;
+  li.appendChild(span);
+
+  // 🔹 Checkbox para selección múltiple (solo superadmin)
+  if (localStorage.getItem("rol") === "superadmin") {
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "form-check-input ms-2";
+    checkbox.dataset.id = msg.id; // guardar el id del mensaje
+    li.appendChild(checkbox);
+  }
+
+  document.getElementById("listaMensajes").appendChild(li);
+});
+
+
+  // Mostrar botón solo al superadmin
+if (localStorage.getItem("rol") === "superadmin") {
+  document.getElementById("btnEliminarSeleccionados").style.display = "block";
+}
+
+// Acción de eliminar seleccionados
+document.getElementById("btnEliminarSeleccionados").addEventListener("click", () => {
+  const seleccionados = document.querySelectorAll("#listaMensajes input[type='checkbox']:checked");
+  if (seleccionados.length === 0) {
+    alert("Selecciona al menos un mensaje para eliminar.");
+    return;
+  }
+
+  if (confirm(`¿Seguro que deseas eliminar ${seleccionados.length} mensaje(s)?`)) {
+    seleccionados.forEach(chk => {
+      const id = chk.dataset.id;
+      socket.emit("eliminarMensaje", { id, rol: "superadmin" });
+      chk.parentElement.remove(); // quitar del DOM inmediatamente
+    });
+  }
+});
+
+
+  
   // Cargar historial al abrir el modal
   document.getElementById("btnChatRadio").addEventListener("click", cargarMensajes);
 </script>
