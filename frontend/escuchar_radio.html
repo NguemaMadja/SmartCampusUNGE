@@ -508,9 +508,32 @@ async function cargarMensajes() {
       li.className = "list-group-item d-flex justify-content-between align-items-center";
       li.dataset.id = msg.id;
 
+
+
       const span = document.createElement("span");
-      span.textContent = `[${msg.rol}] ${msg.contenido} (${msg.fecha_hora})`;
-      li.appendChild(span);
+span.textContent = `[${msg.rol}] ${msg.contenido} (${msg.fecha_hora})`;
+
+// 🔹 Colores por rol
+switch (msg.rol) {
+  case "superadmin":
+    span.style.color = "green";
+    break;
+  case "profesor":
+    span.style.color = "blue";
+    break;
+  case "estudiante":
+    span.style.color = "red";
+    break;
+  case "radio":
+    span.style.color = "black";
+    break;
+}
+
+li.appendChild(span);
+
+
+
+      
 
       // 🔹 Checkbox solo para superadmin
       if (localStorage.getItem("rol") === "superadmin") {
@@ -577,9 +600,33 @@ socket.on("nuevoMensaje", (msg) => {
   li.className = "list-group-item d-flex justify-content-between align-items-center";
   li.dataset.id = msg.id;
 
+
+
+
   const span = document.createElement("span");
-  span.textContent = `[${msg.rol}] ${msg.contenido} (${msg.fecha_hora})`;
-  li.appendChild(span);
+span.textContent = `[${msg.rol}] ${msg.contenido} (${msg.fecha_hora})`;
+
+// 🔹 Colores por rol
+switch (msg.rol) {
+  case "superadmin":
+    span.style.color = "green";
+    break;
+  case "profesor":
+    span.style.color = "blue";
+    break;
+  case "estudiante":
+    span.style.color = "red";
+    break;
+  case "radio":
+    span.style.color = "black";
+    break;
+}
+
+li.appendChild(span);
+
+
+
+  
 
   if (localStorage.getItem("rol") === "superadmin") {
     const checkbox = document.createElement("input");
