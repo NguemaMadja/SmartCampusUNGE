@@ -594,33 +594,35 @@ document.getElementById("formMensaje").addEventListener("submit", async (e) => {
   document.getElementById("contenido").value = "";
 });
 
-// Recibir mensajes en tiempo real
-socket.on("nuevoMensaje", (msg) => {
+
+
+  socket.on("nuevoMensaje", (msg) => {
   const li = document.createElement("li");
   li.className = "list-group-item d-flex justify-content-between align-items-center";
   li.dataset.id = msg.id;
 
   const span = document.createElement("span");
-span.textContent = `[${msg.rol}] ${msg.contenido} (${msg.fecha_hora})`;
+  span.textContent = `[${msg.rol}] ${msg.contenido} (${msg.fecha_hora})`;
 
-// 🔹 Colores por rol
-switch (msg.rol) {
-  case "superadmin":
-    span.style.color = "green";
-    break;
-  case "profesor":
-    span.style.color = "blue";
-    break;
-  case "estudiante":
-    span.style.color = "red";
-    break;
-  case "radio":
-    span.style.color = "black";
-    break;
-}
+  // Colores por rol
+  switch (msg.rol) {
+    case "superadmin":
+      span.style.color = "green";
+      break;
+    case "profesor":
+      span.style.color = "blue";
+      break;
+    case "estudiante":
+      span.style.color = "red";
+      break;
+    case "radio":
+      span.style.color = "black";
+      break;
+  }
 
-li.appendChild(span);
+  li.appendChild(span);
 
+  // 🔹 Checkbox para selección múltiple (solo superadmin)
   if (localStorage.getItem("rol") === "superadmin") {
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
@@ -629,8 +631,18 @@ li.appendChild(span);
     li.appendChild(checkbox);
   }
 
+  // 🔹 Marcar como mensaje nuevo y aplicar efecto elegante
+  li.classList.add("nuevo");
+  setTimeout(() => {
+    li.classList.remove("nuevo");
+  }, 3000); // efecto dura 3 segundos
+
   document.getElementById("listaMensajes").appendChild(li);
 });
+
+
+
+  
 
 // Mostrar botón solo al superadmin
 if (localStorage.getItem("rol") === "superadmin") {
