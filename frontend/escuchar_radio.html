@@ -490,85 +490,109 @@
   }
   // radio y superadmin tienen acceso total
 
+ // 🔹 Chat con Radio (Socket.io + API)
+const socket = io("https://smartcampusunge.onrender.com");  // Conexión al servidor
 
-  // 🔹 Chat con Radio (Socket.io + API)
- const socket = io("https://smartcampusunge.onrender.com");  // Conexión al servidor
+// Asignar rol dinámico al campo oculto cuando cargue la página
+document.getElementById("rol").value = localStorage.getItem("rol");
 
-  // Asignar rol dinámico al campo oculto cuando cargue la página
-  document.getElementById("rol").value = localStorage.getItem("rol");
+// Cargar historial inicial de mensajes
+async function cargarMensajes() {
+  try {
+    const res = await fetch(`${API_BASE}/api/mensajes_radio`);
+    const mensajes = await res.json();
+    const lista = document.getElementById("listaMensajes");
+    lista.innerHTML = "";
+    mensajes.forEach(msg => {
+      const li = document.createElement("li");
+      li.className = "list-group-item d-flex justify-content-between align-items-center";
+      li.dataset.id = msg.id;
 
-  // Cargar historial inicial de mensajes
-  async function cargarMensajes() {
-    try {
-      const res = await fetch(`${API_BASE}/api/mensajes_radio`);
-      const mensajes = await res.json();
-      const lista = document.getElementById("listaMensajes");
-      lista.innerHTML = "";
-      mensajes.forEach(msg => {
-        const li = document.createElement("li");
-        li.className = "list-group-item";
-        li.textContent = `[${msg.rol}] ${msg.contenido} (${msg.fecha_hora})`;
-        lista.appendChild(li);
-      });
-    } catch (err) {
-      console.error("Error cargando mensajes:", err);
-    }
-  }
+      const span = document.createElement("span");
+      span.textContent = `[${msg.rol}] ${msg.contenido} (${msg.fecha_hora})`;
+      li.appendChild(span);
 
-  // Enviar mensaje desde el formulario
-  document.getElementById("formMensaje").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const mensaje = {
-      id_usuario: document.getElementById("id_usuario").value,
-      rol: document.getElementById("rol").value,
-      contenido: document.getElementById("contenido").value,
-      destinatario: null
-    };
+      // 🔹 Checkbox solo para superadmin
+      if (localStorage.getItem("rol") === "superadmin") {
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "form-check-input ms-2";
+        checkbox.dataset.id = msg.id;
+        li.appendChild(checkbox);
+      }
 
-    // Guardar en BD
-    await fetch(`${API_BASE}/api/mensajes_radio`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(mensaje)
+      lista.appendChild(li);
     });
+  } catch (err) {
+    console.error("Error cargando mensajes:", err);
+  }
+}
 
-    // Emitir evento en tiempo real
-    socket.emit("nuevoMensaje", mensaje);
+// Enviar mensaje desde el formulario
+document.getElementById("formMensaje").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const mensaje = {
+    id_usuario: document.getElementById("id_usuario").value,
+    rol: document.getElementById("rol").value,
+    contenido: document.getElementById("contenido").value,
+    destinatario: null
+  };
 
-    // 🔹 Mostrar inmediatamente en la lista
-    const li = document.createElement("li");
-    li.className = "list-group-item";
-    li.textContent = `[${mensaje.rol}] ${mensaje.contenido} (ahora)`;
-    document.getElementById("listaMensajes").appendChild(li);
-
-    // Limpiar campo
-    document.getElementById("contenido").value = "";
+  // Guardar en BD
+  await fetch(`${API_BASE}/api/mensajes_radio`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(mensaje)
   });
 
- // Recibir mensajes en tiempo real
-socket.on("nuevoMensaje", (msg) => {
+  // Emitir evento en tiempo real
+  socket.emit("nuevoMensaje", mensaje);
+
+  // 🔹 Mostrar inmediatamente en la lista
   const li = document.createElement("li");
   li.className = "list-group-item d-flex justify-content-between align-items-center";
+  li.dataset.id = mensaje.id || Date.now();
 
-  // Texto del mensaje
   const span = document.createElement("span");
-  span.textContent = `[${msg.rol}] ${msg.contenido} (${msg.fecha_hora})`;
+  span.textContent = `[${mensaje.rol}] ${mensaje.contenido} (ahora)`;
   li.appendChild(span);
 
-  // 🔹 Checkbox para selección múltiple (solo superadmin)
   if (localStorage.getItem("rol") === "superadmin") {
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.className = "form-check-input ms-2";
-    checkbox.dataset.id = msg.id; // guardar el id del mensaje
+    checkbox.dataset.id = mensaje.id || Date.now();
+    li.appendChild(checkbox);
+  }
+
+  document.getElementById("listaMensajes").appendChild(li);
+
+  // Limpiar campo
+  document.getElementById("contenido").value = "";
+});
+
+// Recibir mensajes en tiempo real
+socket.on("nuevoMensaje", (msg) => {
+  const li = document.createElement("li");
+  li.className = "list-group-item d-flex justify-content-between align-items-center";
+  li.dataset.id = msg.id;
+
+  const span = document.createElement("span");
+  span.textContent = `[${msg.rol}] ${msg.contenido} (${msg.fecha_hora})`;
+  li.appendChild(span);
+
+  if (localStorage.getItem("rol") === "superadmin") {
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "form-check-input ms-2";
+    checkbox.dataset.id = msg.id;
     li.appendChild(checkbox);
   }
 
   document.getElementById("listaMensajes").appendChild(li);
 });
 
-
-  // Mostrar botón solo al superadmin
+// Mostrar botón solo al superadmin
 if (localStorage.getItem("rol") === "superadmin") {
   document.getElementById("btnEliminarSeleccionados").style.display = "block";
 }
@@ -590,10 +614,15 @@ document.getElementById("btnEliminarSeleccionados").addEventListener("click", ()
   }
 });
 
+// Escuchar eliminaciones en tiempo real
+socket.on("mensajeEliminado", (id) => {
+  const li = document.querySelector(`#listaMensajes li[data-id='${id}']`);
+  if (li) li.remove();
+});
 
-  
-  // Cargar historial al abrir el modal
-  document.getElementById("btnChatRadio").addEventListener("click", cargarMensajes);
+// Cargar historial al abrir el modal
+document.getElementById("btnChatRadio").addEventListener("click", cargarMensajes);
+
 </script>
 </body>
 </html>
