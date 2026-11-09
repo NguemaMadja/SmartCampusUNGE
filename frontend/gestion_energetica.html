@@ -229,8 +229,15 @@
               l.ruido_detectado,
               l.luz_detectada ? "Sí" : "No",
               l.cruce_global,
-              l.accion === "Apagar" ? "Apagar" : "",
-              l.accion === "Encender" ? "Encender" : "",
+              
+              l.accion === "APAGAR_LUCES" || l.accion === "Apagar"
+              ? "Apagar"
+              : "",
+
+              l.accion === "ENCENDER_LUCES" || l.accion === "Encender"
+             ? "Encender"
+            : "",
+              
               l.fecha_hora
             ]);
 
