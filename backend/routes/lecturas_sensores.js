@@ -181,33 +181,33 @@ router.post('/', async (req, res) => {
     }
 
     // 5. Si hay cambio de estado eléctrico, guardar evento
-    if (accion_automatica !== "NINGUNA") {
+   if (accion_automatica !== "NINGUNA") {
 
-      await sequelize.query(
-        `INSERT INTO eventos_energia_sensores
-         (
-           aula_sensor_id,
-           tipo_evento,
-           descripcion,
-           fecha_hora
-         )
-         VALUES
-         (
-           $1,
-           $2,
-           $3,
-           NOW()
-         )`,
-        {
-          bind: [
-            id_aula,
-            accion_automatica,
-            `Cambio automático por motor IoT [${cruce_global}].`
-          ]
-        }
-      );
+  await sequelize.query(
+    `INSERT INTO eventos_energia_sensores
+     (
+       aula_sensor_id,
+       accion,
+       motivo,
+       fecha_hora
+     )
+     VALUES
+     (
+       $1,
+       $2,
+       $3,
+       NOW()
+     )`,
+     {
+       bind: [
+         id_aula,
+         accion_automatica,
+         `Cambio automático por motor IoT [${cruce_global}].`
+       ]
+     }
+  );
 
-    }
+}
 
     // Responder al ESP32
     res.json({
