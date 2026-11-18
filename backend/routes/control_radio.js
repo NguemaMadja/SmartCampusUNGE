@@ -1,40 +1,58 @@
 // backend/routes/control_radio.js
 
 const express = require('express');
+const { QueryTypes } = require('sequelize');
+const sequelize = require('../db');
 
 const router = express.Router();
 
 
 
 // =====================================
-// ESTADO TEMPORAL DE RADIO
+// CONSULTAR ESTADO ACTUAL DE LA RADIO
 // =====================================
 
-let estadoRadio = {
+router.get('/', async (req, res) => {
 
-  estado: "Apagada",
+  try {
 
-  modo: "ninguno",
+    const estado = await sequelize.query(
 
-  programa_actual: "Ninguno",
+      `
+      SELECT *
+      FROM radio_estado
+      WHERE id_estado = 1
+      `,
+      {
+        type: QueryTypes.SELECT
+      }
 
-  oyentes_actuales: 0,
+    );
 
-  ultima_accion: null,
+    if (!estado.length) {
 
-  fecha_actualizacion: null
+      return res.status(404).json({
+        error: "No existe configuración de radio"
+      });
 
-};
+    }
 
+    res.json(estado[0]);
 
+  }
 
-// =====================================
-// CONSULTAR ESTADO
-// =====================================
+  catch (error) {
 
-router.get('/', (req, res) => {
+    console.error(
+      "Error consultando radio:",
+      error
+    );
 
-  res.json(estadoRadio);
+    res.status(500).json({
+      error: "Error interno del servidor"
+    });
+
+  }
 
 });
 
@@ -58,17 +76,21 @@ router.post('/', async (req, res) => {
 
     }
 
+    let estado = "Apagada";
+    let modo = "ninguno";
+    let programa_actual = "Ninguno";
+    let ultima_accion = "";
+
 
 
     switch (accion) {
 
       case "encender":
 
-        estadoRadio.estado =
-          "Encendida";
-
-        estadoRadio.ultima_accion =
-          "Encender Radio";
+        estado = "Encendida";
+        modo = "ninguno";
+        programa_actual = "Ninguno";
+        ultima_accion = "Encender Radio";
 
         break;
 
@@ -76,17 +98,10 @@ router.post('/', async (req, res) => {
 
       case "apagar":
 
-        estadoRadio.estado =
-          "Apagada";
-
-        estadoRadio.modo =
-          "ninguno";
-
-        estadoRadio.programa_actual =
-          "Ninguno";
-
-        estadoRadio.ultima_accion =
-          "Apagar Radio";
+        estado = "Apagada";
+        modo = "ninguno";
+        programa_actual = "Ninguno";
+        ultima_accion = "Apagar Radio";
 
         break;
 
@@ -94,17 +109,10 @@ router.post('/', async (req, res) => {
 
       case "musica":
 
-        estadoRadio.estado =
-          "Encendida";
-
-        estadoRadio.modo =
-          "musica";
-
-        estadoRadio.programa_actual =
-          "Música";
-
-        estadoRadio.ultima_accion =
-          "Pasar a Música";
+        estado = "Encendida";
+        modo = "musica";
+        programa_actual = "Música";
+        ultima_accion = "Pasar a Música";
 
         break;
 
@@ -112,17 +120,10 @@ router.post('/', async (req, res) => {
 
       case "programa":
 
-        estadoRadio.estado =
-          "Encendida";
-
-        estadoRadio.modo =
-          "programa";
-
-        estadoRadio.programa_actual =
-          "Programa en vivo";
-
-        estadoRadio.ultima_accion =
-          "Pasar a Programa";
+        estado = "Encendida";
+        modo = "programa";
+        programa_actual = "Programa en vivo";
+        ultima_accion = "Pasar a Programa";
 
         break;
 
@@ -141,13 +142,108 @@ router.post('/', async (req, res) => {
 
 
 
-    estadoRadio.fecha_actualizacion =
-      new Date();
+    // ===============================
+    // ACTUALIZAR ESTADO DE RADIO
+    // ===============================
+
+    await sequelize.query(
+
+      `
+      UPDATE radio_estado
+      SET
+          estado = :estado,
+          modo = :modo,
+          programa_actual = :programa_actual,
+          ultima_accion = :ultima_accion,
+          fecha_actualizacion = CURRENT_TIMESTAMP
+      WHERE id_estado = 1
+      `,
+      {
+        replacements: {
+          estado,
+          modo,
+          programa_actual,
+          ultima_accion
+        }
+      }
+
+    );
+
+
+
+    // ===============================
+    // REGISTRAR EVENTO
+    // ===============================
+
+    await sequelize.query(
+
+      `
+      INSERT INTO radio_eventos (
+          accion,
+          estado_radio,
+          modo_radio,
+          programa_actual,
+          usuario,
+          observacion
+      )
+      VALUES (
+          :accion,
+          :estado_radio,
+          :modo_radio,
+          :programa_actual,
+          :usuario,
+          :observacion
+      )
+      `,
+      {
+        replacements: {
+
+          accion:
+            ultima_accion,
+
+          estado_radio:
+            estado,
+
+          modo_radio:
+            modo,
+
+          programa_actual:
+            programa_actual,
+
+          usuario:
+            "Sistema",
+
+          observacion:
+            `Acción ejecutada desde SmartCampusUNGE`
+
+        }
+      }
+
+    );
+
+
+
+    // ===============================
+    // DEVOLVER ESTADO ACTUALIZADO
+    // ===============================
+
+    const estadoActual = await sequelize.query(
+
+      `
+      SELECT *
+      FROM radio_estado
+      WHERE id_estado = 1
+      `,
+      {
+        type: QueryTypes.SELECT
+      }
+
+    );
 
 
 
     console.log(
-      `[RADIO] ${estadoRadio.ultima_accion}`
+      `[RADIO] ${ultima_accion}`
     );
 
 
@@ -157,9 +253,10 @@ router.post('/', async (req, res) => {
       success: true,
 
       mensaje:
-        `${estadoRadio.ultima_accion} ejecutado correctamente`,
+        `${ultima_accion} ejecutado correctamente`,
 
-      estadoRadio
+      radio:
+        estadoActual[0]
 
     });
 
