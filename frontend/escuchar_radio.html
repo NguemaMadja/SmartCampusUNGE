@@ -1,429 +1,911 @@
 <!DOCTYPE html>
 <html lang="es">
 
+<head>
+<meta charset="UTF-8">
+<title>Radio SmartCampusUNGE</title>
 
-  <head>
-  <meta charset="UTF-8">
-  <title>Radio SmartCampusUNGE</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-  <style>
-    body { 
-      background: linear-gradient(135deg, #003366, #004080); 
-      color: white; 
-      min-height: 100vh; 
-      display: flex; 
-      flex-direction: column; 
-    }
-    .navbar { 
-      background-color: #004080; 
-      height: 60px; 
-      display: flex; 
-      align-items: center; 
-    }
-    .scroll-msg { 
-      background-color: #008000; 
-      color: #fff; 
-      font-weight: bold; 
-      padding: 5px; 
-      flex: 1; 
-      margin: 0 60px; 
-    }
-    .scroll-msg marquee { font-size: 1.1em; }
-    .container-main { flex: 1; padding: 20px; }
-    footer { 
-      background-color: #004080; 
-      color: white; 
-      padding: 15px; 
-      text-align: center; 
-      margin-top: auto; 
-    }
-    .social-buttons .btn { 
-      margin: 5px; 
-      border-radius: 50%; 
-      width: 40px; 
-      height: 40px; 
-      display: inline-flex; 
-      align-items: center; 
-      justify-content: center; 
-    }
-    .btn-nav { 
-      background-color: #006400; 
-      color: #fff; 
-      border-radius: 8px; 
-      padding: 8px 20px; 
-      margin: 5px; 
-      transition: 0.3s; 
-      text-decoration: none; 
-      display: inline-block; 
-    }
-    .btn-nav:hover { 
-      background-color: #004d26; 
-      color: #fff; 
-      transform: scale(1.05); 
-    }
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
 
-    /* 🔹 Diferenciación de mensajes */
-    .list-group-item.antiguo {
-      background-color: #ffffff; /* fondo normal */
-    }
-    .list-group-item.nuevo {
-      background-color: #e6ffe6; /* verde claro para destacar */
-      transition: background-color 5s ease; /* transición suave */
-    }
+<style>
+  body {
+    background: linear-gradient(135deg, #003366, #004080);
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
 
-    /* 🔹 Colores por rol */
-    .msg-superadmin { color: green; font-weight: bold; }
-    .msg-profesor   { color: blue; }
-    .msg-estudiante { color: red; }
-    .msg-radio      { color: black; }
-  </style>
+  .navbar {
+    background-color: #004080;
+    height: 60px;
+    display: flex;
+    align-items: center;
+  }
+
+  .scroll-msg {
+    background-color: #008000;
+    color: #fff;
+    font-weight: bold;
+    padding: 5px;
+    flex: 1;
+    margin: 0 60px;
+  }
+
+  .scroll-msg marquee {
+    font-size: 1.1em;
+  }
+
+  .container-main {
+    flex: 1;
+    padding: 20px;
+  }
+
+  footer {
+    background-color: #004080;
+    color: white;
+    padding: 15px;
+    text-align: center;
+    margin-top: auto;
+  }
+
+  .social-buttons .btn {
+    margin: 5px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-nav {
+    background-color: #006400;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 20px;
+    margin: 5px;
+    transition: 0.3s;
+    text-decoration: none;
+    display: inline-block;
+    border: none;
+  }
+
+  .btn-nav:hover {
+    background-color: #004d26;
+    color: #fff;
+    transform: scale(1.05);
+  }
+
+  /* Mensajes */
+
+  .list-group-item.antiguo {
+    background-color: #ffffff;
+  }
+
+  .list-group-item.nuevo {
+    background-color: #e6ffe6;
+    transition: background-color 5s ease;
+  }
+
+  /* Roles */
+
+  .msg-superadmin {
+    color: green;
+    font-weight: bold;
+  }
+
+  .msg-profesor {
+    color: blue;
+  }
+
+  .msg-estudiante {
+    color: red;
+  }
+
+  .msg-radio {
+    color: black;
+  }
+
+  /* ===== NUEVO SISTEMA DE ESTADO RADIO ===== */
+
+  .estado-on {
+    color: #00ff88;
+    font-weight: bold;
+  }
+
+  .estado-off {
+    color: #ff6666;
+    font-weight: bold;
+  }
+
+  .modo-musica {
+    background-color: #198754 !important;
+  }
+
+  .modo-programa {
+    background-color: #0d6efd !important;
+  }
+
+  .modo-inactivo {
+    background-color: #6c757d !important;
+  }
+
+  .radio-alert {
+    font-size: 1rem;
+    font-weight: bold;
+  }
+</style>
 </head>
 
-
-
-  
 <body>
-  <!-- Cabecera -->
-  <nav class="navbar navbar-dark">
-    <a class="navbar-brand d-flex align-items-center ms-3" href="index.html">
-      <img src="logo/LOGO-UNGE-1.png" alt="Logo UNGE" class="img-fluid me-2" style="max-height:50px;">
-      <span>SmartCampusUNGE</span>
+
+<!-- Cabecera -->
+<nav class="navbar navbar-dark">
+  <a class="navbar-brand d-flex align-items-center ms-3" href="index.html">
+    <img src="logo/LOGO-UNGE-1.png"
+         alt="Logo UNGE"
+         class="img-fluid me-2"
+         style="max-height:50px;">
+    <span>SmartCampusUNGE</span>
+  </a>
+
+  <div class="scroll-msg text-center">
+    <marquee behavior="scroll"
+             direction="left"
+             scrollamount="6">
+      Radio SmartCampusUNGE: música y programas en vivo
+    </marquee>
+  </div>
+</nav>
+
+<!-- Dashboard -->
+
+<div class="container mt-4">
+
+  <div class="row text-center">
+
+    <!-- ESTADO RADIO -->
+
+    <div class="col-md-4">
+      <div class="card bg-success text-white">
+        <div class="card-body">
+
+          <h5>Estado Radio</h5>
+
+          <h2 id="estadoRadio" class="estado-off">
+            Apagada
+          </h2>
+
+          <hr>
+
+          <h6>Modo Actual</h6>
+
+          <span
+            id="modoRadio"
+            class="badge modo-inactivo fs-6">
+              Sin transmisión
+          </span>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- OYENTES -->
+
+    <div class="col-md-4">
+      <div class="card bg-info text-white">
+        <div class="card-body">
+          <h5>Oyentes Actuales</h5>
+          <h2 id="oyentesActuales">0</h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROGRAMA -->
+
+    <div class="col-md-4">
+      <div class="card bg-warning text-dark">
+        <div class="card-body">
+          <h5>Programa en Curso</h5>
+          <h2 id="programaActual">Ninguno</h2>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Contenido principal -->
+
+<div class="container-main container">
+
+  <h2 class="text-center text-white mb-4">
+    Gestión de Programación Radio
+  </h2>
+
+  <!-- Botonera -->
+
+  <div class="text-center mb-4" id="radioControls">
+
+    <a href="panel.html"
+       class="btn-nav shadow-sm"
+       id="btnVolverPanel">
+
+      <i class="bi bi-speedometer2"></i>
+      Volver al Panel
+
     </a>
-    <div class="scroll-msg text-center">
-      <marquee behavior="scroll" direction="left" scrollamount="6">
-        Radio SmartCampusUNGE: música y programas en vivo
-      </marquee>
-    </div>
 
+    <button class="btn-nav" id="btnEncenderRadio">
+      <i class="bi bi-play-circle"></i>
+      Encender Radio
+    </button>
 
-    
-    
-  </nav>
+    <button class="btn-nav" id="btnApagarRadio">
+      <i class="bi bi-stop-circle"></i>
+      Apagar Radio
+    </button>
 
-  <!-- Dashboard -->
-  <div class="container mt-4">
-    <div class="row text-center">
-      <div class="col-md-4">
-        <div class="card bg-success text-white">
-          <div class="card-body">
-            <h5>Estado Radio</h5>
-            <h2 id="estadoRadio">Apagada</h2>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card bg-info text-white">
-          <div class="card-body">
-            <h5>Oyentes Actuales</h5>
-            <h2 id="oyentesActuales">0</h2>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card bg-warning text-dark">
-          <div class="card-body">
-            <h5>Programa en Curso</h5>
-            <h2 id="programaActual">Ninguno</h2>
-          </div>
-        </div>
-      </div>
-    </div>
+    <button class="btn-nav" id="btnMusica">
+      <i class="bi bi-music-note"></i>
+      Pasar a Música
+    </button>
+
+    <button class="btn-nav" id="btnPrograma">
+      <i class="bi bi-mic"></i>
+      Pasar a Programa
+    </button>
+
+    <button
+      class="btn-nav"
+      id="btnAgregarPrograma"
+      data-bs-toggle="modal"
+      data-bs-target="#modalAgregarPrograma">
+
+      <i class="bi bi-plus-circle"></i>
+      Añadir Programa
+
+    </button>
+
+    <button
+      class="btn-nav"
+      id="btnChatRadio"
+      data-bs-toggle="modal"
+      data-bs-target="#modalChatRadio">
+
+      <i class="bi bi-chat-dots"></i>
+      Chat con Radio
+
+    </button>
+
   </div>
 
-  <!-- Contenido principal -->
-  <div class="container-main container">
-    <h2 class="text-center text-white mb-4">Gestión de Programación Radio</h2>
-    
-    <!-- Botonera -->
-    <div class="text-center mb-4" id="radioControls">
-      <a href="panel.html" class="btn-nav shadow-sm" id="btnVolverPanel">
-        <i class="bi bi-speedometer2"></i> Volver al Panel
-      </a>
-      <button class="btn-nav" id="btnEncenderRadio"><i class="bi bi-play-circle"></i> Encender Radio</button>
-      <button class="btn-nav" id="btnApagarRadio"><i class="bi bi-stop-circle"></i> Apagar Radio</button>
-      <button class="btn-nav" id="btnMusica"><i class="bi bi-music-note"></i> Pasar a Música</button>
-      <button class="btn-nav" id="btnPrograma"><i class="bi bi-mic"></i> Pasar a Programa</button>
-      <button class="btn-nav" id="btnAgregarPrograma" data-bs-toggle="modal" data-bs-target="#modalAgregarPrograma">
-        <i class="bi bi-plus-circle"></i> Añadir Programa
-      </button>
-      <button class="btn-nav" id="btnChatRadio" data-bs-toggle="modal" data-bs-target="#modalChatRadio">
-  <i class="bi bi-chat-dots"></i> Chat con Radio
-</button>
+  <!-- NUEVO PANEL DE ESTADO -->
 
-    </div>
+  <div
+      id="radioStatus"
+      class="alert alert-info text-center radio-alert">
 
-    <!-- Tabla Programación -->
-    <div class="card bg-white mt-4" style="border-radius: 8px;">
-      <div class="card-header bg-primary text-white fw-bold">Programación Semanal</div>
-      <div class="card-body p-3">
-        <div class="table-responsive">
-          <table class="table table-striped table-hover text-dark w-100" id="tablaProgramas">
-            <thead class="table-dark">
-              <tr>
-                <th>Día</th>
-                <th>Hora Inicio</th>
-                <th>Hora Fin</th>
-                <th>Programa</th>
-                <th>Locutor</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+      Sistema de radio listo para operar
 
-    <!-- Gráficas -->
-    <div class="mt-5">
-      <h5 class="text-dark">Oyentes vs Programas</h5>
-      <canvas id="graficaOyentesProgramas" height="120"></canvas>
-    </div>
-    <div class="mt-5">
-      <h5 class="text-dark">Distribución de Tipos de Programas</h5>
-      <canvas id="graficaTiposProgramas" height="120"></canvas>
-    </div>
   </div>
 
-  <!-- Footer homogéneo -->
-  <footer>
-    <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
-    <div class="social-buttons">
-      <a href="#" class="btn btn-outline-light"><i class="bi bi-twitter"></i></a>
-      <a href="#" class="btn btn-outline-light"><i class="bi bi-facebook"></i></a>
-      <a href="#" class="btn btn-outline-light"><i class="bi bi-instagram"></i></a>
-      <a href="#" class="btn btn-outline-light"><i class="bi bi-youtube"></i></a>
-    </div>
-  </footer>
+  <!-- Tabla Programación -->
 
-  <!-- Modal: Agregar Programa -->
-  <div class="modal fade" id="modalAgregarPrograma" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header bg-success text-white">
-          <h5 class="modal-title">➕ Registrar Programa</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <form id="formAgregarPrograma">
-            <div class="mb-3">
-              <label class="form-label">Nombre del Programa</label>
-              <input type="text" class="form-control" id="nombre_programa" placeholder="Ej: Noticias de la Mañana" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Tipo</label>
-              <!-- 🔹 Ahora es un select vacío que se llenará dinámicamente -->
-              <select class="form-select" id="tipo_programa" required></select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Día</label>
-              <select class="form-select" id="dia_programa" required>
-                <option value="">Seleccione día</option>
-                <option>Lunes</option><option>Martes</option><option>Miércoles</option>
-                <option>Jueves</option><option>Viernes</option><option>Sábado</option><option>Domingo</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Hora Inicio</label>
-              <input type="time" class="form-control" id="hora_inicio" placeholder="Ej: 08:00" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Hora Fin</label>
-              <input type="time" class="form-control" id="hora_fin" placeholder="Ej: 09:30" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Locutor</label>
-              <input type="text" class="form-control" id="locutor_programa" placeholder="Ej: Juan Pérez">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Estado</label>
-              <select class="form-select" id="estado_programa">
-                <option value="Programado">Programado</option>
-                <option value="En vivo">En vivo</option>
-                <option value="Finalizado">Finalizado</option>
-              </select>
-            </div>
-            <button type="submit" class="btn btn-success">Registrar</button>
-          </form>
-        </div>
-      </div>
+  <div class="card bg-white mt-4" style="border-radius: 8px;">
+
+    <div class="card-header bg-primary text-white fw-bold">
+      Programación Semanal
     </div>
+
+    <div class="card-body p-3">
+
+      <div class="table-responsive">
+
+        <table class="table table-striped table-hover text-dark w-100"
+               id="tablaProgramas">
+
+          <thead class="table-dark">
+
+          <tr>
+            <th>Día</th>
+            <th>Hora Inicio</th>
+            <th>Hora Fin</th>
+            <th>Programa</th>
+            <th>Locutor</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+
+          </thead>
+
+          <tbody></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
   </div>
 
-    
+  <!-- Gráficas -->
 
-  <!-- Modal: Editar Programa -->
-<div class="modal fade" id="modalEditarPrograma" tabindex="-1" aria-hidden="true">
+  <div class="mt-5">
+    <h5 class="text-dark">
+      Oyentes vs Programas
+    </h5>
+
+    <canvas
+      id="graficaOyentesProgramas"
+      height="120">
+    </canvas>
+  </div>
+
+  <div class="mt-5">
+    <h5 class="text-dark">
+      Distribución de Tipos de Programas
+    </h5>
+
+    <canvas
+      id="graficaTiposProgramas"
+      height="120">
+    </canvas>
+  </div>
+
+</div>
+
+<!-- Footer -->
+
+<footer>
+
+  <p>
+    TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026
+  </p>
+
+  <div class="social-buttons">
+
+    <a href="#" class="btn btn-outline-light">
+      <i class="bi bi-twitter"></i>
+    </a>
+
+    <a href="#" class="btn btn-outline-light">
+      <i class="bi bi-facebook"></i>
+    </a>
+
+    <a href="#" class="btn btn-outline-light">
+      <i class="bi bi-instagram"></i>
+    </a>
+
+    <a href="#" class="btn btn-outline-light">
+      <i class="bi bi-youtube"></i>
+    </a>
+
+  </div>
+
+</footer>
+
+<!-- Modal: Agregar Programa -->
+<div class="modal fade" id="modalAgregarPrograma" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <div class="modal-header bg-warning text-dark">
-        <h5 class="modal-title">✏️ Editar Programa</h5>
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">➕ Registrar Programa</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
+
       <div class="modal-body">
-        <form id="formEditarPrograma">
-          <input type="hidden" id="edit_id">
+
+        <form id="formAgregarPrograma">
+
           <div class="mb-3">
             <label class="form-label">Nombre del Programa</label>
-            <input type="text" class="form-control" id="edit_nombre_programa" placeholder="Ej: Noticias de la Mañana" required>
+            <input
+              type="text"
+              class="form-control"
+              id="nombre_programa"
+              placeholder="Ej: Noticias de la Mañana"
+              required>
           </div>
+
           <div class="mb-3">
             <label class="form-label">Tipo</label>
-            <!-- 🔹 Select dinámico -->
-            <select class="form-select" id="edit_tipo_programa" required></select>
+
+            <!-- Se llena dinámicamente -->
+            <select class="form-select" id="tipo_programa" required></select>
           </div>
+
           <div class="mb-3">
             <label class="form-label">Día</label>
-            <select class="form-select" id="edit_dia_programa" required>
-              <option>Lunes</option><option>Martes</option><option>Miércoles</option>
-              <option>Jueves</option><option>Viernes</option><option>Sábado</option><option>Domingo</option>
+
+            <select class="form-select" id="dia_programa" required>
+              <option value="">Seleccione día</option>
+              <option>Lunes</option>
+              <option>Martes</option>
+              <option>Miércoles</option>
+              <option>Jueves</option>
+              <option>Viernes</option>
+              <option>Sábado</option>
+              <option>Domingo</option>
             </select>
           </div>
+
           <div class="mb-3">
             <label class="form-label">Hora Inicio</label>
-            <input type="time" class="form-control" id="edit_hora_inicio" placeholder="Ej: 08:00" required>
+            <input
+              type="time"
+              class="form-control"
+              id="hora_inicio"
+              placeholder="Ej: 08:00"
+              required>
           </div>
+
           <div class="mb-3">
             <label class="form-label">Hora Fin</label>
-            <input type="time" class="form-control" id="edit_hora_fin" placeholder="Ej: 09:30" required>
+            <input
+              type="time"
+              class="form-control"
+              id="hora_fin"
+              placeholder="Ej: 09:30"
+              required>
           </div>
+
           <div class="mb-3">
             <label class="form-label">Locutor</label>
-            <input type="text" class="form-control" id="edit_locutor_programa" placeholder="Ej: Juan Pérez">
+            <input
+              type="text"
+              class="form-control"
+              id="locutor_programa"
+              placeholder="Ej: Juan Pérez">
           </div>
+
           <div class="mb-3">
             <label class="form-label">Estado</label>
-            <select class="form-select" id="edit_estado_programa">
+
+            <select class="form-select" id="estado_programa">
               <option value="Programado">Programado</option>
               <option value="En vivo">En vivo</option>
               <option value="Finalizado">Finalizado</option>
+              <option value="Suspendido">Suspendido</option>
             </select>
+
           </div>
-          <button type="submit" class="btn btn-warning">Guardar Cambios</button>
+
+          <button type="submit" class="btn btn-success">
+            Registrar
+          </button>
+
         </form>
+
       </div>
     </div>
   </div>
 </div>
 
 
- <!-- Modal: Chat Radio -->
-<div class="modal fade" id="modalChatRadio" tabindex="-1" aria-labelledby="modalChatRadioLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content bg-dark text-white">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalChatRadioLabel">💬 Chat con Radio</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+<!-- Modal: Editar Programa -->
+
+<div class="modal fade" id="modalEditarPrograma" tabindex="-1" aria-hidden="true">
+
+  <div class="modal-dialog modal-lg">
+
+    <div class="modal-content">
+
+      <div class="modal-header bg-warning text-dark">
+
+        <h5 class="modal-title">
+          ✏️ Editar Programa
+        </h5>
+
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal">
+        </button>
+
       </div>
+
       <div class="modal-body">
+
+        <form id="formEditarPrograma">
+
+          <input type="hidden" id="edit_id">
+
+          <div class="mb-3">
+            <label class="form-label">
+              Nombre del Programa
+            </label>
+
+            <input
+              type="text"
+              class="form-control"
+              id="edit_nombre_programa"
+              placeholder="Ej: Noticias de la Mañana"
+              required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">
+              Tipo
+            </label>
+
+            <!-- Select dinámico -->
+            <select
+              class="form-select"
+              id="edit_tipo_programa"
+              required>
+            </select>
+
+          </div>
+
+          <div class="mb-3">
+
+            <label class="form-label">
+              Día
+            </label>
+
+            <select
+              class="form-select"
+              id="edit_dia_programa"
+              required>
+
+              <option>Lunes</option>
+              <option>Martes</option>
+              <option>Miércoles</option>
+              <option>Jueves</option>
+              <option>Viernes</option>
+              <option>Sábado</option>
+              <option>Domingo</option>
+
+            </select>
+
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">
+              Hora Inicio
+            </label>
+
+            <input
+              type="time"
+              class="form-control"
+              id="edit_hora_inicio"
+              placeholder="Ej: 08:00"
+              required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">
+              Hora Fin
+            </label>
+
+            <input
+              type="time"
+              class="form-control"
+              id="edit_hora_fin"
+              placeholder="Ej: 09:30"
+              required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">
+              Locutor
+            </label>
+
+            <input
+              type="text"
+              class="form-control"
+              id="edit_locutor_programa"
+              placeholder="Ej: Juan Pérez">
+          </div>
+
+          <div class="mb-3">
+
+            <label class="form-label">
+              Estado
+            </label>
+
+            <select
+              class="form-select"
+              id="edit_estado_programa">
+
+              <option value="Programado">Programado</option>
+              <option value="En vivo">En vivo</option>
+              <option value="Finalizado">Finalizado</option>
+              <option value="Suspendido">Suspendido</option>
+
+            </select>
+
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-warning">
+
+            Guardar Cambios
+
+          </button>
+
+        </form>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+  <!-- Modal: Chat Radio -->
+
+<div class="modal fade"
+     id="modalChatRadio"
+     tabindex="-1"
+     aria-labelledby="modalChatRadioLabel"
+     aria-hidden="true">
+
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+
+    <div class="modal-content bg-dark text-white">
+
+      <div class="modal-header">
+
+        <h5 class="modal-title" id="modalChatRadioLabel">
+          💬 Chat con Radio
+        </h5>
+
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal">
+        </button>
+
+      </div>
+
+      <div class="modal-body">
+
         <!-- Lista de mensajes -->
-        <ul id="listaMensajes" class="list-group mb-3 text-dark"></ul>
+
+        <ul id="listaMensajes"
+            class="list-group mb-3 text-dark">
+        </ul>
 
         <!-- Formulario de envío -->
-        <form id="formMensaje" class="d-flex">
-          <input type="hidden" id="id_usuario" value="123">
-          <!-- 🔹 Rol ya no fijo, se asigna en JS -->
-          <input type="hidden" id="rol">
-          <input type="text" id="contenido" class="form-control me-2" placeholder="Escribe tu mensaje...">
-          <button type="submit" class="btn btn-success">Enviar</button>
 
-          <button id="btnEliminarSeleccionados" class="btn btn-danger mt-2" style="display:none;">
+        <form id="formMensaje" class="d-flex">
+
+          <input
+            type="hidden"
+            id="id_usuario"
+            value="123">
+
+          <input
+            type="hidden"
+            id="rol">
+
+          <input
+            type="text"
+            id="contenido"
+            class="form-control me-2"
+            placeholder="Escribe tu mensaje...">
+
+          <button
+            type="submit"
+            class="btn btn-success">
+            Enviar
+          </button>
+
+          <button
+            type="button"
+            id="btnEliminarSeleccionados"
+            class="btn btn-danger mt-2"
+            style="display:none;">
             Eliminar seleccionados
           </button>
-          
+
         </form>
-        
+
       </div>
+
     </div>
+
   </div>
+
 </div>
 
 
-  
-
 <!-- Librerías externas -->
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script src="/socket.io/socket.io.js"></script>
 
-  
-<!-- Script principal -->
+<!-- Socket.IO -->
+
 <script>
+  const socket = io();
+</script>
+
+<!-- Script principal -->
+
+<script>
+
   const API_BASE = "https://smartcampusunge.onrender.com";
 
   // Inicializar DataTable
+
   const tablaProgramas = $('#tablaProgramas').DataTable({
     dom: 'Bfrtip',
     buttons: [
-      { extend: 'excelHtml5', text: 'Exportar a Excel', className: 'btn btn-success btn-sm' },
-      { extend: 'pdfHtml5', text: 'Exportar a PDF', className: 'btn btn-danger btn-sm' },
-      { extend: 'print', text: 'Imprimir', className: 'btn btn-info btn-sm' }
+      {
+        extend: 'excelHtml5',
+        text: 'Exportar a Excel',
+        className: 'btn btn-success btn-sm'
+      },
+      {
+        extend: 'pdfHtml5',
+        text: 'Exportar a PDF',
+        className: 'btn btn-danger btn-sm'
+      },
+      {
+        extend: 'print',
+        text: 'Imprimir',
+        className: 'btn btn-info btn-sm'
+      }
     ],
-    language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+    language: {
+      url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+    },
     scrollX: true,
     autoWidth: false
   });
 
-  // Gráficas
-  const ctxOyentes = document.getElementById('graficaOyentesProgramas').getContext('2d');
+  // Gráfica de Oyentes
+
+  const ctxOyentes =
+      document.getElementById('graficaOyentesProgramas')
+      .getContext('2d');
+
   const graficaOyentes = new Chart(ctxOyentes, {
     type: 'bar',
-    data: { labels: [], datasets: [{ label: 'Oyentes', data: [], backgroundColor: 'rgba(54,162,235,0.6)' }] },
-    options: { responsive: true, plugins: { title: { display: true, text: 'Oyentes por Programa' } } }
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Oyentes',
+        data: [],
+        backgroundColor: 'rgba(54,162,235,0.6)'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: 'Oyentes por Programa'
+        }
+      }
+    }
   });
 
-  const ctxTipos = document.getElementById('graficaTiposProgramas').getContext('2d');
+  // Gráfica de Tipos
+
+  const ctxTipos =
+      document.getElementById('graficaTiposProgramas')
+      .getContext('2d');
+
   const graficaTipos = new Chart(ctxTipos, {
     type: 'pie',
-    data: { labels: [], datasets: [{ data: [], backgroundColor: ['#ff6384','#36a2eb','#ffce56','#4caf50'] }] },
-    options: { responsive: true, plugins: { title: { display: true, text: 'Distribución de Programas' } } }
+    data: {
+      labels: [],
+      datasets: [{
+        data: [],
+        backgroundColor: [
+          '#ff6384',
+          '#36a2eb',
+          '#ffce56',
+          '#4caf50'
+        ]
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: 'Distribución de Programas'
+        }
+      }
+    }
   });
 
-  // 🔹 Cargar tipos de programa desde API
+  // Cargar tipos de programa
+
   async function cargarTiposPrograma(selectId) {
+
     try {
-      const res = await fetch(`${API_BASE}/api/programas_radio/tipos`);
-      const tipos = await res.json();
-      const select = document.getElementById(selectId);
+
+      const res =
+        await fetch(`${API_BASE}/api/programas_radio/tipos`);
+
+      const tipos =
+        await res.json();
+
+      const select =
+        document.getElementById(selectId);
+
       select.innerHTML = '';
+
       tipos.forEach(t => {
-        const option = document.createElement('option');
+
+        const option =
+          document.createElement('option');
+
         option.value = t.nombre_tipo;
         option.textContent = t.nombre_tipo;
+
         select.appendChild(option);
+
       });
+
     } catch (err) {
-      console.error("Error cargando tipos de programa:", err);
+
+      console.error(
+        "Error cargando tipos de programa:",
+        err
+      );
+
     }
   }
 
-  // Cargar programación desde API
+  // Cargar programación
+
   async function cargarProgramacion() {
+
     try {
-      const res = await fetch(`${API_BASE}/api/programas_radio`);
-      if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
-      const data = await res.json();
+
+      const res =
+        await fetch(`${API_BASE}/api/programas_radio`);
+
+      if (!res.ok)
+        throw new Error(`Error HTTP: ${res.status}`);
+
+      const data =
+        await res.json();
 
       tablaProgramas.clear();
+
       const oyentesPorPrograma = {};
       const tiposProgramas = {};
 
       if (Array.isArray(data)) {
+
         data.forEach(p => {
+
           tablaProgramas.row.add([
             p.dia,
             p.hora_inicio,
@@ -431,311 +913,929 @@
             p.nombre,
             p.locutor,
             p.estado,
-            `<button class="btn btn-sm btn-primary btnEditar" onclick="editarPrograma(${p.id})">Editar</button>
-             <button class="btn btn-sm btn-danger btnEliminar" onclick="eliminarPrograma(${p.id})">Eliminar</button>`
+            `<button class="btn btn-sm btn-primary btnEditar"
+                     onclick="editarPrograma(${p.id})">
+                     Editar
+             </button>
+
+             <button class="btn btn-sm btn-danger btnEliminar"
+                     onclick="eliminarPrograma(${p.id})">
+                     Eliminar
+             </button>`
           ]);
 
-          oyentesPorPrograma[p.nombre] = p.oyentes || 0;
-          tiposProgramas[p.tipo] = (tiposProgramas[p.tipo] || 0) + 1;
-        });
-      }
-      tablaProgramas.draw();
+          oyentesPorPrograma[p.nombre] =
+              p.oyentes || 0;
 
-      graficaOyentes.data.labels = Object.keys(oyentesPorPrograma);
-      graficaOyentes.data.datasets[0].data = Object.values(oyentesPorPrograma);
+          tiposProgramas[p.tipo] =
+              (tiposProgramas[p.tipo] || 0) + 1;
+
+        });
+
+      
+      }
+
+
+
+           tablaProgramas.draw();
+
+      graficaOyentes.data.labels =
+        Object.keys(oyentesPorPrograma);
+
+      graficaOyentes.data.datasets[0].data =
+        Object.values(oyentesPorPrograma);
+
       graficaOyentes.update();
 
-      graficaTipos.data.labels = Object.keys(tiposProgramas);
-      graficaTipos.data.datasets[0].data = Object.values(tiposProgramas);
+      graficaTipos.data.labels =
+        Object.keys(tiposProgramas);
+
+      graficaTipos.data.datasets[0].data =
+        Object.values(tiposProgramas);
+
       graficaTipos.update();
 
-      // Actualizar indicadores
-      document.getElementById('estadoRadio').textContent = data.estado || "Apagada";
-      document.getElementById('oyentesActuales').textContent = data.oyentes_actuales || 0;
-      document.getElementById('programaActual').textContent = data.programa_actual || "Ninguno";
+
+
+      // ==========================
+      // ACTUALIZAR DASHBOARD RADIO
+      // ==========================
+
+      const estadoRadio =
+        document.getElementById("estadoRadio");
+
+      const modoRadio =
+        document.getElementById("modoRadio");
+
+      document.getElementById("oyentesActuales").textContent =
+        data.oyentes_actuales || 0;
+
+      document.getElementById("programaActual").textContent =
+        data.programa_actual || "Ninguno";
+
+      estadoRadio.textContent =
+        data.estado || "Apagada";
+
+
+
+      if (
+        (data.estado || "").toLowerCase()
+        === "encendida"
+      ) {
+
+        estadoRadio.className =
+          "estado-on";
+
+      } else {
+
+        estadoRadio.className =
+          "estado-off";
+
+      }
+
+
+
+      if (
+        (data.modo || "").toLowerCase()
+        === "musica"
+      ) {
+
+        modoRadio.textContent =
+          "Música";
+
+        modoRadio.className =
+          "badge modo-musica fs-6";
+
+      }
+
+      else if (
+        (data.modo || "").toLowerCase()
+        === "programa"
+      ) {
+
+        modoRadio.textContent =
+          "Programa";
+
+        modoRadio.className =
+          "badge modo-programa fs-6";
+
+      }
+
+      else {
+
+        modoRadio.textContent =
+          "Sin transmisión";
+
+        modoRadio.className =
+          "badge modo-inactivo fs-6";
+
+      }
 
     } catch (err) {
-      console.error("Error cargando programación:", err);
+
+      console.error(
+        "Error cargando programación:",
+        err
+      );
+
     }
+
   }
+
+
 
   cargarProgramacion();
-  setInterval(cargarProgramacion, 30000);
 
-     // Botones de control
-  document.getElementById("btnEncenderRadio").addEventListener("click", () => {
-    fetch(`${API_BASE}/api/control_radio`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ accion: "encender" }) });
-    document.getElementById('estadoRadio').textContent = "Encendida";
-  });
 
-  document.getElementById("btnApagarRadio").addEventListener("click", () => {
-    fetch(`${API_BASE}/api/control_radio`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ accion: "apagar" }) });
-    document.getElementById('estadoRadio').textContent = "Apagada";
-  });
 
-  document.getElementById("btnMusica").addEventListener("click", () => {
-    fetch(`${API_BASE}/api/control_radio`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ accion: "musica" }) });
-    document.getElementById('programaActual').textContent = "Música";
-  });
+  setInterval(
+    cargarProgramacion,
+    30000
+  );
 
-  document.getElementById("btnPrograma").addEventListener("click", () => {
-    fetch(`${API_BASE}/api/control_radio`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ accion: "programa" }) });
-    document.getElementById('programaActual').textContent = "Programa en vivo";
-  });
 
-  // Funciones CRUD
-  document.getElementById("formAgregarPrograma").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const nuevoPrograma = {
-      nombre: document.getElementById("nombre_programa").value,
-      tipo: document.getElementById("tipo_programa").value,
-      dia: document.getElementById("dia_programa").value,
-      hora_inicio: document.getElementById("hora_inicio").value,
-      hora_fin: document.getElementById("hora_fin").value,
-      locutor: document.getElementById("locutor_programa").value,
-      estado: document.getElementById("estado_programa").value
-    };
-    await fetch(`${API_BASE}/api/programas_radio`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(nuevoPrograma) });
-    cargarProgramacion();
-    $('#modalAgregarPrograma').modal('hide');
-  });
 
-  // 🔹 Cargar tipos al abrir modales
-  document.getElementById("btnAgregarPrograma").addEventListener("click", () => cargarTiposPrograma("tipo_programa"));
+  // ==================================
+  // CONTROL DE RADIO
+  // ==================================
 
-  function editarPrograma(id) {
-    document.getElementById("edit_id").value = id;
-    cargarTiposPrograma("edit_tipo_programa");
-    $('#modalEditarPrograma').modal('show');
-  }
+  async function ejecutarControlRadio(accion) {
 
-  document.getElementById("formEditarPrograma").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const id = document.getElementById("edit_id").value;
-    const programaEditado = {
-      nombre: document.getElementById("edit_nombre_programa").value,
-      tipo: document.getElementById("edit_tipo_programa").value,
-      dia: document.getElementById("edit_dia_programa").value,
-      hora_inicio: document.getElementById("edit_hora_inicio").value,
-      hora_fin: document.getElementById("edit_hora_fin").value,
-      locutor: document.getElementById("edit_locutor_programa").value,
-      estado: document.getElementById("edit_estado_programa").value
-    };
-    await fetch(`${API_BASE}/api/programas_radio/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(programaEditado) });
-    cargarProgramacion();
-    $('#modalEditarPrograma').modal('hide');
-  });
+    try {
 
-  async function eliminarPrograma(id) {
-    if (confirm("¿Seguro que deseas eliminar este programa?")) {
-      await fetch(`${API_BASE}/api/programas_radio/${id}`, { method: "DELETE" });
-      cargarProgramacion();
+      const respuesta =
+        await fetch(
+          `${API_BASE}/api/control_radio`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+            body: JSON.stringify({
+              accion
+            })
+          }
+        );
+
+      const resultado =
+        await respuesta.json();
+
+      if (!respuesta.ok) {
+
+        throw new Error(
+          resultado.error ||
+          "Error al controlar radio"
+        );
+
+      }
+
+      const estadoRadio =
+        document.getElementById(
+          "estadoRadio"
+        );
+
+      const modoRadio =
+        document.getElementById(
+          "modoRadio"
+        );
+
+      const radioStatus =
+        document.getElementById(
+          "radioStatus"
+        );
+
+
+
+      switch (accion) {
+
+        case "encender":
+
+          estadoRadio.textContent =
+            "Encendida";
+
+          estadoRadio.className =
+            "estado-on";
+
+          radioStatus.className =
+            "alert alert-success text-center radio-alert";
+
+          radioStatus.innerHTML =
+            "✅ Radio encendida correctamente";
+
+          break;
+
+
+
+        case "apagar":
+
+          estadoRadio.textContent =
+            "Apagada";
+
+          estadoRadio.className =
+            "estado-off";
+
+          modoRadio.textContent =
+            "Sin transmisión";
+
+          modoRadio.className =
+            "badge modo-inactivo fs-6";
+
+          radioStatus.className =
+            "alert alert-danger text-center radio-alert";
+
+          radioStatus.innerHTML =
+            "⛔ Radio apagada correctamente";
+
+          break;
+
+
+
+        case "musica":
+
+          modoRadio.textContent =
+            "Música";
+
+          modoRadio.className =
+            "badge modo-musica fs-6";
+
+          document.getElementById(
+            "programaActual"
+          ).textContent =
+            "Música";
+
+          radioStatus.className =
+            "alert alert-success text-center radio-alert";
+
+          radioStatus.innerHTML =
+            "🎵 Radio en modo música";
+
+          break;
+
+
+
+        case "programa":
+
+          modoRadio.textContent =
+            "Programa";
+
+          modoRadio.className =
+            "badge modo-programa fs-6";
+
+          document.getElementById(
+            "programaActual"
+          ).textContent =
+            "Programa en vivo";
+
+          radioStatus.className =
+            "alert alert-primary text-center radio-alert";
+
+          radioStatus.innerHTML =
+            "🎙️ Programa en vivo activado";
+
+          break;
+
+      }
+
+    } catch (error) {
+
+      console.error(error);
+
+      const radioStatus =
+        document.getElementById(
+          "radioStatus"
+        );
+
+      radioStatus.className =
+        "alert alert-danger text-center radio-alert";
+
+      radioStatus.innerHTML =
+        `❌ ${error.message}`;
+
     }
+
   }
 
-  // 🔹 Restricciones por rol
-  const rol = localStorage.getItem("rol");
-  if (rol === "profesor" || rol === "estudiante") {
-    // Ocultar botones de gestión
-    document.getElementById("btnEncenderRadio").style.display = "none";
-    document.getElementById("btnApagarRadio").style.display = "none";
-    document.getElementById("btnMusica").style.display = "none";
-    document.getElementById("btnPrograma").style.display = "none";
-    document.getElementById("btnAgregarPrograma").style.display = "none";
 
-    // 🔹 Ocultar acciones de edición y eliminación cada vez que se dibuje la tabla
-    tablaProgramas.on('draw', function () {
-      document.querySelectorAll(".btnEditar").forEach(btn => btn.style.display = "none");
-      document.querySelectorAll(".btnEliminar").forEach(btn => btn.style.display = "none");
-    });
+
+  // ==================================
+  // BOTONES DE RADIO
+  // ==================================
+
+  document
+    .getElementById("btnEncenderRadio")
+    .addEventListener(
+      "click",
+      () => ejecutarControlRadio(
+        "encender"
+      )
+    );
+
+
+
+  document
+    .getElementById("btnApagarRadio")
+    .addEventListener(
+      "click",
+      () => ejecutarControlRadio(
+        "apagar"
+      )
+    );
+
+
+
+  document
+    .getElementById("btnMusica")
+    .addEventListener(
+      "click",
+      () => ejecutarControlRadio(
+        "musica"
+      )
+    );
+
+
+
+  document
+    .getElementById("btnPrograma")
+    .addEventListener(
+      "click",
+      () => ejecutarControlRadio(
+        "programa"
+      )
+    );
+
+
+      
+  // Funciones CRUD
+
+document.getElementById("formAgregarPrograma").addEventListener("submit", async (e) => {
+
+  e.preventDefault();
+
+  const nuevoPrograma = {
+    nombre: document.getElementById("nombre_programa").value,
+    tipo: document.getElementById("tipo_programa").value,
+    dia: document.getElementById("dia_programa").value,
+    hora_inicio: document.getElementById("hora_inicio").value,
+    hora_fin: document.getElementById("hora_fin").value,
+    locutor: document.getElementById("locutor_programa").value,
+    estado: document.getElementById("estado_programa").value
+  };
+
+  await fetch(`${API_BASE}/api/programas_radio`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(nuevoPrograma)
+  });
+
+  cargarProgramacion();
+
+  $('#modalAgregarPrograma').modal('hide');
+
+});
+
+
+
+// Cargar tipos al abrir modales
+
+document.getElementById("btnAgregarPrograma")
+  .addEventListener(
+    "click",
+    () => cargarTiposPrograma("tipo_programa")
+  );
+
+
+
+function editarPrograma(id) {
+
+  document.getElementById("edit_id").value = id;
+
+  cargarTiposPrograma(
+    "edit_tipo_programa"
+  );
+
+  $('#modalEditarPrograma').modal('show');
+
+}
+
+
+
+document.getElementById("formEditarPrograma")
+  .addEventListener(
+    "submit",
+    async (e) => {
+
+      e.preventDefault();
+
+      const id =
+        document.getElementById("edit_id").value;
+
+      const programaEditado = {
+
+        nombre:
+          document.getElementById("edit_nombre_programa").value,
+
+        tipo:
+          document.getElementById("edit_tipo_programa").value,
+
+        dia:
+          document.getElementById("edit_dia_programa").value,
+
+        hora_inicio:
+          document.getElementById("edit_hora_inicio").value,
+
+        hora_fin:
+          document.getElementById("edit_hora_fin").value,
+
+        locutor:
+          document.getElementById("edit_locutor_programa").value,
+
+        estado:
+          document.getElementById("edit_estado_programa").value
+
+      };
+
+      await fetch(
+        `${API_BASE}/api/programas_radio/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(programaEditado)
+        }
+      );
+
+      cargarProgramacion();
+
+      $('#modalEditarPrograma').modal('hide');
+
+    }
+  );
+
+
+
+async function eliminarPrograma(id) {
+
+  if (
+    confirm(
+      "¿Seguro que deseas eliminar este programa?"
+    )
+  ) {
+
+    await fetch(
+      `${API_BASE}/api/programas_radio/${id}`,
+      {
+        method: "DELETE"
+      }
+    );
+
+    cargarProgramacion();
+
   }
-  // radio y superadmin tienen acceso total
 
- // 🔹 Chat con Radio (Socket.io + API)
-const socket = io("https://smartcampusunge.onrender.com");  // Conexión al servidor
-
-// Asignar rol dinámico al campo oculto cuando cargue la página
-document.getElementById("rol").value = localStorage.getItem("rol");
+}
 
 
-  // Cargar historial inicial de mensajes
+
+// Restricciones por rol
+
+const rol =
+  localStorage.getItem("rol");
+
+if (
+  rol === "profesor" ||
+  rol === "estudiante"
+) {
+
+  document.getElementById("btnEncenderRadio").style.display = "none";
+  document.getElementById("btnApagarRadio").style.display = "none";
+  document.getElementById("btnMusica").style.display = "none";
+  document.getElementById("btnPrograma").style.display = "none";
+  document.getElementById("btnAgregarPrograma").style.display = "none";
+
+  tablaProgramas.on(
+    "draw",
+    function () {
+
+      document.querySelectorAll(".btnEditar")
+        .forEach(
+          btn => btn.style.display = "none"
+        );
+
+      document.querySelectorAll(".btnEliminar")
+        .forEach(
+          btn => btn.style.display = "none"
+        );
+
+    }
+  );
+
+}
+
+
+
+// ========================================
+// CHAT CON RADIO
+// ========================================
+
+// Socket ya inicializado anteriormente
+
+document.getElementById("rol").value =
+  localStorage.getItem("rol") || "estudiante";
+
+
+
 async function cargarMensajes() {
+
   try {
-    const res = await fetch(`${API_BASE}/api/mensajes_radio`);
-    const mensajes = await res.json();
-    const lista = document.getElementById("listaMensajes");
+
+    const res =
+      await fetch(
+        `${API_BASE}/api/mensajes_radio`
+      );
+
+    const mensajes =
+      await res.json();
+
+    const lista =
+      document.getElementById(
+        "listaMensajes"
+      );
+
     lista.innerHTML = "";
+
     mensajes.forEach(msg => {
-      const li = document.createElement("li");
-      li.className = "list-group-item d-flex justify-content-between align-items-center";
-      li.dataset.id = msg.id;
 
-      // 🔹 Marcar como mensaje antiguo
-      li.classList.add("antiguo");
+      const li =
+        document.createElement("li");
 
-      const span = document.createElement("span");
-      span.textContent = `[${msg.rol}] ${msg.contenido} (${msg.fecha_hora})`;
+      li.className =
+        "list-group-item d-flex justify-content-between align-items-center";
 
-      // 🔹 Colores por rol
+      li.dataset.id =
+        msg.id;
+
+      li.classList.add(
+        "antiguo"
+      );
+
+      const span =
+        document.createElement(
+          "span"
+        );
+
+      span.textContent =
+        `[${msg.rol}] ${msg.contenido} (${msg.fecha_hora})`;
+
       switch (msg.rol) {
+
         case "superadmin":
           span.style.color = "green";
           break;
+
         case "profesor":
           span.style.color = "blue";
           break;
+
         case "estudiante":
           span.style.color = "red";
           break;
+
         case "radio":
           span.style.color = "black";
           break;
+
       }
 
       li.appendChild(span);
 
-      // 🔹 Checkbox solo para superadmin
-      if (localStorage.getItem("rol") === "superadmin") {
-        const checkbox = document.createElement("input");
+      if (
+        localStorage.getItem("rol") === "superadmin"
+      ) {
+
+        const checkbox =
+          document.createElement("input");
+
         checkbox.type = "checkbox";
         checkbox.className = "form-check-input ms-2";
         checkbox.dataset.id = msg.id;
+
         li.appendChild(checkbox);
+
       }
 
       lista.appendChild(li);
+
     });
-  } catch (err) {
-    console.error("Error cargando mensajes:", err);
+
   }
+
+  catch (err) {
+
+    console.error(
+      "Error cargando mensajes:",
+      err
+    );
+
+  }
+
 }
 
 
 
-// Enviar mensaje desde el formulario
-document.getElementById("formMensaje").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const mensaje = {
-    id_usuario: document.getElementById("id_usuario").value,
-    rol: document.getElementById("rol").value,
-    contenido: document.getElementById("contenido").value,
-    destinatario: null
-  };
+// ENVIAR MENSAJES
 
-  // Guardar en BD
-  await fetch(`${API_BASE}/api/mensajes_radio`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(mensaje)
-  });
+document.getElementById("formMensaje")
+  .addEventListener(
+    "submit",
+    async (e) => {
 
-  // Emitir evento en tiempo real
-  socket.emit("nuevoMensaje", mensaje);
+      e.preventDefault();
 
-  // 🔹 Mostrar inmediatamente en la lista
-  const li = document.createElement("li");
-  li.className = "list-group-item d-flex justify-content-between align-items-center";
-  li.dataset.id = mensaje.id || Date.now();
+      const mensaje = {
 
-  const span = document.createElement("span");
-  span.textContent = `[${mensaje.rol}] ${mensaje.contenido} (ahora)`;
-  li.appendChild(span);
+        id_usuario:
+          document.getElementById("id_usuario").value,
 
-  if (localStorage.getItem("rol") === "superadmin") {
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.className = "form-check-input ms-2";
-    checkbox.dataset.id = mensaje.id || Date.now();
-    li.appendChild(checkbox);
+        rol:
+          document.getElementById("rol").value,
+
+        contenido:
+          document.getElementById("contenido").value,
+
+        destinatario: null
+
+      };
+
+      await fetch(
+        `${API_BASE}/api/mensajes_radio`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+          body:
+            JSON.stringify(mensaje)
+        }
+      );
+
+      socket.emit(
+        "nuevoMensaje",
+        mensaje
+      );
+
+      const li =
+        document.createElement("li");
+
+      li.className =
+        "list-group-item d-flex justify-content-between align-items-center";
+
+      li.dataset.id =
+        mensaje.id ||
+        Date.now();
+
+      const span =
+        document.createElement("span");
+
+      span.textContent =
+        `[${mensaje.rol}] ${mensaje.contenido} (ahora)`;
+
+      switch (mensaje.rol) {
+
+        case "superadmin":
+          span.style.color = "green";
+          break;
+
+        case "profesor":
+          span.style.color = "blue";
+          break;
+
+        case "estudiante":
+          span.style.color = "red";
+          break;
+
+        case "radio":
+          span.style.color = "black";
+          break;
+
+      }
+
+      li.appendChild(span);
+
+      if (
+        localStorage.getItem("rol")
+        === "superadmin"
+      ) {
+
+        const checkbox =
+          document.createElement("input");
+
+        checkbox.type = "checkbox";
+        checkbox.className =
+          "form-check-input ms-2";
+
+        checkbox.dataset.id =
+          mensaje.id || Date.now();
+
+        li.appendChild(checkbox);
+
+      }
+
+      document.getElementById(
+        "listaMensajes"
+      ).appendChild(li);
+
+      document.getElementById(
+        "contenido"
+      ).value = "";
+
+      document.getElementById(
+        "contenido"
+      ).focus();
+
+    }
+  );
+
+
+
+// RECIBIR MENSAJES
+
+socket.on(
+  "nuevoMensaje",
+  (msg) => {
+
+    const li =
+      document.createElement("li");
+
+    li.className =
+      "list-group-item d-flex justify-content-between align-items-center";
+
+    li.dataset.id =
+      msg.id;
+
+    const span =
+      document.createElement("span");
+
+    span.textContent =
+      `[${msg.rol}] ${msg.contenido} (${msg.fecha_hora})`;
+
+    switch (msg.rol) {
+
+      case "superadmin":
+        span.style.color = "green";
+        break;
+
+      case "profesor":
+        span.style.color = "blue";
+        break;
+
+      case "estudiante":
+        span.style.color = "red";
+        break;
+
+      case "radio":
+        span.style.color = "black";
+        break;
+
+    }
+
+    li.appendChild(span);
+
+    if (
+      localStorage.getItem("rol")
+      === "superadmin"
+    ) {
+
+      const checkbox =
+        document.createElement("input");
+
+      checkbox.type = "checkbox";
+      checkbox.className =
+        "form-check-input ms-2";
+      checkbox.dataset.id = msg.id;
+
+      li.appendChild(checkbox);
+
+    }
+
+    li.classList.add("nuevo");
+
+    setTimeout(
+      () => {
+        li.classList.remove("nuevo");
+      },
+      3000
+    );
+
+    document.getElementById(
+      "listaMensajes"
+    ).appendChild(li);
+
   }
-
-  document.getElementById("listaMensajes").appendChild(li);
-
-  // Limpiar campo
-  document.getElementById("contenido").value = "";
-});
+);
 
 
 
-  socket.on("nuevoMensaje", (msg) => {
-  const li = document.createElement("li");
-  li.className = "list-group-item d-flex justify-content-between align-items-center";
-  li.dataset.id = msg.id;
+// ELIMINAR MENSAJES
 
-  const span = document.createElement("span");
-  span.textContent = `[${msg.rol}] ${msg.contenido} (${msg.fecha_hora})`;
+if (
+  localStorage.getItem("rol")
+  === "superadmin"
+) {
 
-  // Colores por rol
-  switch (msg.rol) {
-    case "superadmin":
-      span.style.color = "green";
-      break;
-    case "profesor":
-      span.style.color = "blue";
-      break;
-    case "estudiante":
-      span.style.color = "red";
-      break;
-    case "radio":
-      span.style.color = "black";
-      break;
-  }
+  document.getElementById(
+    "btnEliminarSeleccionados"
+  ).style.display = "block";
 
-  li.appendChild(span);
-
-  // 🔹 Checkbox para selección múltiple (solo superadmin)
-  if (localStorage.getItem("rol") === "superadmin") {
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.className = "form-check-input ms-2";
-    checkbox.dataset.id = msg.id;
-    li.appendChild(checkbox);
-  }
-
-  // 🔹 Marcar como mensaje nuevo y aplicar efecto elegante
-  li.classList.add("nuevo");
-  setTimeout(() => {
-    li.classList.remove("nuevo");
-  }, 3000); // efecto dura 3 segundos
-
-  document.getElementById("listaMensajes").appendChild(li);
-});
-
-
-
-  
-
-// Mostrar botón solo al superadmin
-if (localStorage.getItem("rol") === "superadmin") {
-  document.getElementById("btnEliminarSeleccionados").style.display = "block";
 }
 
-// Acción de eliminar seleccionados
-document.getElementById("btnEliminarSeleccionados").addEventListener("click", () => {
-  const seleccionados = document.querySelectorAll("#listaMensajes input[type='checkbox']:checked");
-  if (seleccionados.length === 0) {
-    alert("Selecciona al menos un mensaje para eliminar.");
-    return;
+
+
+document.getElementById(
+  "btnEliminarSeleccionados"
+).addEventListener(
+  "click",
+  () => {
+
+    const seleccionados =
+      document.querySelectorAll(
+        "#listaMensajes input[type='checkbox']:checked"
+      );
+
+    if (
+      seleccionados.length === 0
+    ) {
+
+      alert(
+        "Selecciona al menos un mensaje para eliminar."
+      );
+
+      return;
+
+    }
+
+    if (
+      confirm(
+        `¿Seguro que deseas eliminar ${seleccionados.length} mensaje(s)?`
+      )
+    ) {
+
+      seleccionados.forEach(
+        chk => {
+
+          const id =
+            chk.dataset.id;
+
+          socket.emit(
+            "eliminarMensaje",
+            {
+              id,
+              rol: "superadmin"
+            }
+          );
+
+          chk.parentElement.remove();
+
+        }
+      );
+
+    }
+
   }
+);
 
-  if (confirm(`¿Seguro que deseas eliminar ${seleccionados.length} mensaje(s)?`)) {
-    seleccionados.forEach(chk => {
-      const id = chk.dataset.id;
-      socket.emit("eliminarMensaje", { id, rol: "superadmin" });
-      chk.parentElement.remove(); // quitar del DOM inmediatamente
-    });
+
+
+socket.on(
+  "mensajeEliminado",
+  (id) => {
+
+    const li =
+      document.querySelector(
+        `#listaMensajes li[data-id='${id}']`
+      );
+
+    if (li) li.remove();
+
   }
-});
+);
 
-// Escuchar eliminaciones en tiempo real
-socket.on("mensajeEliminado", (id) => {
-  const li = document.querySelector(`#listaMensajes li[data-id='${id}']`);
-  if (li) li.remove();
-});
 
-// Cargar historial al abrir el modal
-document.getElementById("btnChatRadio").addEventListener("click", cargarMensajes);
+
+// CARGAR CHAT
+
+document.getElementById(
+  "btnChatRadio"
+).addEventListener(
+  "click",
+  cargarMensajes
+);
 
 </script>
+
 </body>
 </html>
