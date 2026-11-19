@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>Radio UNGE</title>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
   <style>
     body {
       background: url("image/imge-unge5.jpg") no-repeat center center fixed;
@@ -13,6 +15,7 @@
       display: flex;
       flex-direction: column;
     }
+
     .radio-card {
       max-width: 600px;
       margin: 60px auto;
@@ -21,9 +24,11 @@
       padding: 20px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
+
     .radio-card .btn {
       margin-top: 20px;
     }
+
     footer {
       background-color: #004080;
       color: white;
@@ -31,87 +36,178 @@
       text-align: center;
       margin-top: auto;
     }
-    /* Estilo personalizado para nuestro botón de control */
+
     .btn-audio-control {
       font-size: 1.25rem;
       padding: 12px;
       font-weight: bold;
     }
+
+    .estado-radio {
+      font-size: 14px;
+      color: #555;
+      margin-top: 10px;
+    }
   </style>
 </head>
+
 <body>
 
-  <!-- Cabecera -->
   <header>
     <nav class="navbar navbar-expand-lg navbar-dark container">
-      <a class="navbar-brand" href="index.html">UNGE - TODOS LOS CAMPUS</a>
+      <a class="navbar-brand" href="index.html">
+        UNGE - TODOS LOS CAMPUS
+      </a>
+
       <div class="ms-auto">
-        <a href="login.html" class="btn btn-outline-light me-2">Login</a>
-        <a href="radio.html" class="btn btn-success">Radio UNGE</a>
+        <a href="login.html" class="btn btn-outline-light me-2">
+          Login
+        </a>
+
+        <a href="radio.html" class="btn btn-success">
+          Radio UNGE
+        </a>
       </div>
     </nav>
   </header>
 
-  <!-- Reproductor de radio -->
   <div class="radio-card text-center">
-    <h3>Radio UNGE en vivo</h3>
-    
-    <!-- Elemento de audio invisible / Sin controles nativos conflictivos en móvil -->
-    <audio id="playerRadio" preload="none"></audio>
-    
-    <!-- Botón interactivo obligatorio para la directiva de reproducción móvil -->
-    <button id="btnControlRadio" class="btn btn-success w-100 btn-audio-control my-3">
+
+    <h3>📻 Radio UNGE en Vivo</h3>
+
+    <audio
+      id="playerRadio"
+      preload="none">
+    </audio>
+
+    <button
+      id="btnControlRadio"
+      class="btn btn-success w-100 btn-audio-control my-3">
+
       ▶️ Escuchar Radio en Vivo
+
     </button>
 
-    <!-- Botón de regreso al login -->
-    <a href="login.html" target="_blank" class="btn btn-primary w-100">Ir al Login</a>
+    <div class="estado-radio" id="estadoRadio">
+      Presione el botón para comenzar la reproducción.
+    </div>
+
+    <a
+      href="login.html"
+      target="_blank"
+      class="btn btn-primary w-100">
+
+      Ir al Login
+
+    </a>
+
   </div>
 
-  <!-- Pie de página -->
   <footer>
-    <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
+    <p>
+      TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026
+    </p>
   </footer>
 
-  <!-- Script optimizado para la transmisión segura de Cloudflare -->
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      const audioPlayer = document.getElementById("playerRadio");
-      const btnControl = document.getElementById("btnControlRadio");
-      
-      // URL de transmisión oficial generada por tu túnel seguro de Cloudflare
-      const streamUrl = "https://radiounge.com/radiounge";
 
-      btnControl.addEventListener("click", function() {
-        if (audioPlayer.paused || audioPlayer.src === "") {
-          
-          // 1. Asignamos la URL limpia de Cloudflare directamente en la acción del usuario
-          audioPlayer.src = streamUrl;
-          audioPlayer.load();
-          
-          // 2. Ejecutamos la reproducción protegida por promesas (requerido por iOS/Android)
-          audioPlayer.play()
-            .then(() => {
-              btnControl.classList.remove("btn-success");
-              btnControl.classList.add("btn-danger");
-              btnControl.innerHTML = "⏸️ Pausar Radio";
-            })
-            .catch(error => {
-              console.error("Error al reproducir en dispositivo móvil:", error);
-              alert("Error de conexión. Por favor toca el botón de reproducción nuevamente.");
-            });
-            
+    document.addEventListener("DOMContentLoaded", () => {
+
+      const audioPlayer =
+        document.getElementById("playerRadio");
+
+      const btnControl =
+        document.getElementById("btnControlRadio");
+
+      const estadoRadio =
+        document.getElementById("estadoRadio");
+
+      let reproduciendo = false;
+
+      btnControl.addEventListener("click", async () => {
+
+        if (!reproduciendo) {
+
+          try {
+
+            const streamUrl =
+              "https://radiounge.com/radiounge?t=" +
+              Date.now();
+
+            audioPlayer.src = streamUrl;
+
+            audioPlayer.load();
+
+            await audioPlayer.play();
+
+            reproduciendo = true;
+
+            btnControl.classList.remove(
+              "btn-success"
+            );
+
+            btnControl.classList.add(
+              "btn-danger"
+            );
+
+            btnControl.innerHTML =
+              "⏸️ Pausar Radio";
+
+            estadoRadio.innerHTML =
+              "🟢 Conectado a Radio UNGE";
+
+          }
+
+          catch (error) {
+
+            console.error(error);
+
+            estadoRadio.innerHTML =
+              "🔴 No se pudo conectar con la emisora.";
+
+            alert(
+              "Error al conectar con Radio UNGE."
+            );
+
+          }
+
         } else {
-          // 3. Pausamos y limpiamos el buffer para evitar que siga descargando datos móviles en segundo plano
+
           audioPlayer.pause();
-          audioPlayer.src = ""; 
-          
-          btnControl.classList.remove("btn-danger");
-          btnControl.classList.add("btn-success");
-          btnControl.innerHTML = "▶️ Escuchar Radio en Vivo";
+
+          audioPlayer.removeAttribute("src");
+
+          audioPlayer.load();
+
+          reproduciendo = false;
+
+          btnControl.classList.remove(
+            "btn-danger"
+          );
+
+          btnControl.classList.add(
+            "btn-success"
+          );
+
+          btnControl.innerHTML =
+            "▶️ Escuchar Radio en Vivo";
+
+          estadoRadio.innerHTML =
+            "⏹️ Reproducción detenida.";
+
         }
+
       });
+
+      audioPlayer.addEventListener("error", () => {
+
+        estadoRadio.innerHTML =
+          "🔴 Error de transmisión.";
+
+      });
+
     });
+
   </script>
 
 </body>
