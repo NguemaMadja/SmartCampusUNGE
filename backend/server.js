@@ -48,6 +48,9 @@ app.use('/api/sensores_medicion', require('./routes/sensores_medicion'));
 app.use('/api/control_radio', require('./routes/control_radio'));
 app.use('/api/programas_radio', require('./routes/programas_radio'));
 
+// NUEVA RUTA
+app.use('/api/radio_archivos', require('./routes/radio_archivos'));
+
 // 🔹 Nueva ruta para chat (REST)
 app.use('/api/mensajes_radio', require('./routes/mensajes_radio'));
 
