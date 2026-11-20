@@ -109,106 +109,187 @@
     </p>
   </footer>
 
-  <script>
+ <script>
 
-    document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
 
-      const audioPlayer =
+    const audioPlayer =
         document.getElementById("playerRadio");
 
-      const btnControl =
+    const btnControl =
         document.getElementById("btnControlRadio");
 
-      const estadoRadio =
+    const estadoRadio =
         document.getElementById("estadoRadio");
 
-      let reproduciendo = false;
+    let reproduciendo = false;
 
-      btnControl.addEventListener("click", async () => {
+    let ultimoModo = null;
+    let ultimoEstado = null;
 
-        if (!reproduciendo) {
+    async function conectarRadio() {
 
-          try {
+        const streamUrl =
+            "https://radiounge.com/radiounge?ts=" +
+            Date.now();
 
-            const streamUrl =
-              "https://radiounge.com/radiounge?t=" +
-              Date.now();
+        audioPlayer.pause();
 
-            audioPlayer.src = streamUrl;
+        audioPlayer.src = "";
 
-            audioPlayer.load();
+        audioPlayer.load();
 
-            await audioPlayer.play();
+        audioPlayer.src = streamUrl;
 
-            reproduciendo = true;
+        audioPlayer.load();
 
-            btnControl.classList.remove(
-              "btn-success"
-            );
+        await audioPlayer.play();
 
-            btnControl.classList.add(
-              "btn-danger"
-            );
+        reproduciendo = true;
 
-            btnControl.innerHTML =
-              "⏸️ Pausar Radio";
+        btnControl.classList.remove("btn-success");
 
-            estadoRadio.innerHTML =
-              "🟢 Conectado a Radio UNGE";
+        btnControl.classList.add("btn-danger");
 
-          }
+        btnControl.innerHTML =
+            "⏸️ Pausar Radio";
 
-          catch (error) {
+        estadoRadio.innerHTML =
+            "🟢 Radio UNGE conectada";
+    }
+
+    function detenerRadio() {
+
+        audioPlayer.pause();
+
+        audioPlayer.removeAttribute("src");
+
+        audioPlayer.load();
+
+        reproduciendo = false;
+
+        btnControl.classList.remove("btn-danger");
+
+        btnControl.classList.add("btn-success");
+
+        btnControl.innerHTML =
+            "▶️ Escuchar Radio en Vivo";
+
+        estadoRadio.innerHTML =
+            "⏹️ Reproducción detenida";
+    }
+
+    btnControl.addEventListener("click", async () => {
+
+        try {
+
+            if (!reproduciendo) {
+
+                await conectarRadio();
+
+            } else {
+
+                detenerRadio();
+
+            }
+
+        }
+
+        catch (error) {
 
             console.error(error);
 
             estadoRadio.innerHTML =
-              "🔴 No se pudo conectar con la emisora.";
-
-            alert(
-              "Error al conectar con Radio UNGE."
-            );
-
-          }
-
-        } else {
-
-          audioPlayer.pause();
-
-          audioPlayer.removeAttribute("src");
-
-          audioPlayer.load();
-
-          reproduciendo = false;
-
-          btnControl.classList.remove(
-            "btn-danger"
-          );
-
-          btnControl.classList.add(
-            "btn-success"
-          );
-
-          btnControl.innerHTML =
-            "▶️ Escuchar Radio en Vivo";
-
-          estadoRadio.innerHTML =
-            "⏹️ Reproducción detenida.";
+                "🔴 Error de conexión";
 
         }
 
-      });
-
-      audioPlayer.addEventListener("error", () => {
-
-        estadoRadio.innerHTML =
-          "🔴 Error de transmisión.";
-
-      });
-
     });
 
-  </script>
+    async function verificarEstadoRadio() {
+
+        try {
+
+            const response =
+                await fetch(
+                    "https://smartcampusunge.onrender.com/api/control_radio"
+                );
+
+            const data =
+                await response.json();
+
+            const estado =
+                data.estado;
+
+            const modo =
+                data.modo;
+
+            if (
+                ultimoModo !== null &&
+                (
+                    modo !== ultimoModo ||
+                    estado !== ultimoEstado
+                )
+            ) {
+
+                console.log(
+                    "[RADIO] Cambio detectado:",
+                    estado,
+                    modo
+                );
+
+                if (reproduciendo) {
+
+                    if (
+                        estado === "Apagada"
+                    ) {
+
+                        detenerRadio();
+
+                    }
+
+                    else {
+
+                        await conectarRadio();
+
+                    }
+                }
+            }
+
+            ultimoModo = modo;
+            ultimoEstado = estado;
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "[RADIO]",
+                error
+            );
+
+        }
+
+    }
+
+    setInterval(
+        verificarEstadoRadio,
+        5000
+    );
+
+    audioPlayer.addEventListener(
+        "error",
+        () => {
+
+            estadoRadio.innerHTML =
+                "🔴 Error de transmisión";
+
+        }
+    );
+
+});
+
+</script>
 
 </body>
 </html>
