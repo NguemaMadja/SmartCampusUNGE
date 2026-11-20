@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>Biblioteca Multimedia Radio UNGE</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+
+body{
+    background:url("image/imge-unge5.jpg") no-repeat center center fixed;
+    background-size:cover;
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+}
+
+.panel-principal{
+    max-width:1200px;
+    margin:40px auto;
+    background:rgba(255,255,255,0.95);
+    border-radius:12px;
+    padding:25px;
+    box-shadow:0 4px 12px rgba(0,0,0,.3);
+}
+
+.card-estadistica{
+    text-align:center;
+    padding:15px;
+    border-radius:10px;
+    background:#f8f9fa;
+    box-shadow:0 2px 6px rgba(0,0,0,.15);
+}
+
+.card-estadistica h2{
+    margin:0;
+    color:#004080;
+}
+
+footer{
+    background-color:#004080;
+    color:white;
+    padding:15px;
+    text-align:center;
+    margin-top:auto;
+}
+
+.table-responsive{
+    margin-top:20px;
+}
+
+.acciones button{
+    margin-right:4px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<nav class="navbar navbar-expand-lg navbar-dark container">
+
+<a class="navbar-brand" href="index.html">
+UNGE - TODOS LOS CAMPUS
+</a>
+
+<div class="ms-auto">
+
+<a href="login.html"
+class="btn btn-outline-light me-2">
+Login
+</a>
+
+<a href="radio.html"
+class="btn btn-success">
+Radio UNGE
+</a>
+
+</div>
+
+</nav>
+
+</header>
+
+<div class="panel-principal">
+
+<h2 class="text-center mb-4">
+
+📻 Biblioteca Multimedia Radio UNGE
+
+</h2>
+
+<div class="row mb-4">
+
+<div class="col-md-4">
+
+<div class="card-estadistica">
+
+<h2 id="totalArchivos">0</h2>
+
+<p>Total Archivos</p>
+
+</div>
+
+</div>
+
+<div class="col-md-4">
+
+<div class="card-estadistica">
+
+<h2 id="totalMusica">0</h2>
+
+<p>Música</p>
+
+</div>
+
+</div>
+
+<div class="col-md-4">
+
+<div class="card-estadistica">
+
+<h2 id="totalProgramas">0</h2>
+
+<p>Programas</p>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="row mb-3">
+
+<div class="col-md-4">
+
+<button class="btn btn-success w-100" disabled>
+
+➕ Añadir Música
+
+</button>
+
+</div>
+
+<div class="col-md-4">
+
+<button class="btn btn-primary w-100" disabled>
+
+🎙 Añadir Programa Grabado
+
+</button>
+
+</div>
+
+<div class="col-md-4">
+
+<button
+id="btnActualizar"
+class="btn btn-warning w-100">
+
+🔄 Actualizar Biblioteca
+
+</button>
+
+</div>
+
+</div>
+
+<div class="row mb-3">
+
+<div class="col-md-12">
+
+<input
+type="text"
+id="buscar"
+class="form-control"
+placeholder="🔍 Buscar archivo...">
+
+</div>
+
+</div>
+
+<div class="table-responsive">
+
+<table class="table table-striped table-bordered">
+
+<thead class="table-dark">
+
+<tr>
+
+<th>ID</th>
+
+<th>Tipo</th>
+
+<th>Archivo</th>
+
+<th>Categoría</th>
+
+<th>Fecha</th>
+
+<th>Acciones</th>
+
+</tr>
+
+</thead>
+
+<tbody id="tablaArchivos">
+
+<tr>
+
+<td colspan="6" class="text-center">
+
+Cargando registros...
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<footer>
+
+<p>
+
+TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026
+
+</p>
+
+</footer>
+
+<script>
+
+let archivos = [];
+
+async function cargarArchivos(){
+
+    try{
+
+        const response =
+        await fetch('/api/radio_archivos');
+
+        archivos =
+        await response.json();
+
+        actualizarEstadisticas();
+
+        renderizarTabla(
+            archivos
+        );
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+    }
+
+}
+
+function actualizarEstadisticas(){
+
+    document.getElementById(
+        'totalArchivos'
+    ).innerText =
+    archivos.length;
+
+    document.getElementById(
+        'totalMusica'
+    ).innerText =
+    archivos.filter(
+        a => a.tipo === 'musica'
+    ).length;
+
+    document.getElementById(
+        'totalProgramas'
+    ).innerText =
+    archivos.filter(
+        a => a.tipo === 'programa'
+    ).length;
+
+}
+
+function renderizarTabla(datos){
+
+    const tabla =
+    document.getElementById(
+        'tablaArchivos'
+    );
+
+    if(datos.length === 0){
+
+        tabla.innerHTML = `
+        <tr>
+        <td colspan="6"
+        class="text-center">
+        Sin registros
+        </td>
+        </tr>
+        `;
+
+        return;
+
+    }
+
+    tabla.innerHTML =
+    datos.map(item => `
+    <tr>
+
+    <td>${item.id_archivo}</td>
+
+    <td>
+    ${item.tipo}
+    </td>
+
+    <td>
+    ${item.nombre_archivo}
+    </td>
+
+    <td>
+    ${item.categoria || ''}
+    </td>
+
+    <td>
+    ${new Date(
+        item.fecha_subida
+    ).toLocaleString()}
+    </td>
+
+    <td class="acciones">
+
+    <button
+    class="btn btn-danger btn-sm"
+    onclick="eliminarArchivo(
+        ${item.id_archivo}
+    )">
+
+    🗑 Eliminar
+
+    </button>
+
+    </td>
+
+    </tr>
+    `).join('');
+
+}
+
+async function eliminarArchivo(id){
+
+    if(
+        !confirm(
+            '¿Eliminar registro?'
+        )
+    ){
+        return;
+    }
+
+    try{
+
+        await fetch(
+            '/api/radio_archivos/' + id,
+            {
+                method:'DELETE'
+            }
+        );
+
+        cargarArchivos();
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+    }
+
+}
+
+document.getElementById(
+    'btnActualizar'
+).addEventListener(
+    'click',
+    cargarArchivos
+);
+
+document.getElementById(
+    'buscar'
+).addEventListener(
+    'input',
+    e => {
+
+        const texto = e.target.value
+        .toLowerCase();
+
+        const filtrados =
+        archivos.filter(
+            a =>
+            a.nombre_archivo
+            .toLowerCase()
+            .includes(texto)
+        );
+
+        renderizarTabla(
+            filtrados
+        );
+
+    }
+);
+
+cargarArchivos();
+
+</script>
+
+</body>
+</html>
