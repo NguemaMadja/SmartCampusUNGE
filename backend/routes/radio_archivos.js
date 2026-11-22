@@ -78,8 +78,7 @@ router.post('/', async (req, res) => {
     ) {
 
       return res.status(400).json({
-        error:
-          'Faltan datos obligatorios'
+        error: 'Faltan datos obligatorios'
       });
 
     }
@@ -89,55 +88,44 @@ router.post('/', async (req, res) => {
       `
       INSERT INTO radio_archivos
       (
-          nombre_archivo,
-          nombre_original,
-          tipo,
-          categoria,
-          descripcion,
-          ruta_archivo,
-          extension,
-          tamano_bytes,
-          duracion_segundos,
-          usuario_subida
+        nombre_archivo,
+        nombre_original,
+        tipo,
+        categoria,
+        descripcion,
+        ruta_archivo,
+        extension,
+        tamano_bytes,
+        duracion_segundos,
+        usuario_subida
       )
       VALUES
       (
-          :nombre_archivo,
-          :nombre_original,
-          :tipo,
-          :categoria,
-          :descripcion,
-          :ruta_archivo,
-          :extension,
-          :tamano_bytes,
-          :duracion_segundos,
-          :usuario_subida
+        :nombre_archivo,
+        :nombre_original,
+        :tipo,
+        :categoria,
+        :descripcion,
+        :ruta_archivo,
+        :extension,
+        :tamano_bytes,
+        :duracion_segundos,
+        :usuario_subida
       )
       `,
 
       {
         replacements: {
-
           nombre_archivo,
-
           nombre_original,
-
           tipo,
-
           categoria,
-
           descripcion,
-
           ruta_archivo,
-
           extension,
-
           tamano_bytes,
-
           duracion_segundos,
-
           usuario_subida
-
         }
       }
 
@@ -166,10 +154,105 @@ router.post('/', async (req, res) => {
     );
 
     res.status(500).json({
+      error: 'Error interno del servidor'
+    });
 
-      error:
-        'Error interno del servidor'
+  }
 
+});
+
+
+// =====================================
+// MODIFICAR ARCHIVO
+// =====================================
+
+router.put('/:id', async (req, res) => {
+
+  try {
+
+    const { id } = req.params;
+
+    const {
+      nombre_archivo,
+      tipo,
+      categoria,
+      descripcion
+    } = req.body;
+
+    const existe = await sequelize.query(
+
+      `
+      SELECT *
+      FROM radio_archivos
+      WHERE id_archivo = :id
+      `,
+
+      {
+        replacements: {
+          id
+        },
+        type: QueryTypes.SELECT
+      }
+
+    );
+
+    if (!existe.length) {
+
+      return res.status(404).json({
+        error: 'Archivo no encontrado'
+      });
+
+    }
+
+    await sequelize.query(
+
+      `
+      UPDATE radio_archivos
+      SET
+          nombre_archivo = :nombre_archivo,
+          tipo = :tipo,
+          categoria = :categoria,
+          descripcion = :descripcion,
+          fecha_actualizacion = CURRENT_TIMESTAMP
+      WHERE id_archivo = :id
+      `,
+
+      {
+        replacements: {
+          id,
+          nombre_archivo,
+          tipo,
+          categoria,
+          descripcion
+        }
+      }
+
+    );
+
+    console.log(
+      `[RADIO ARCHIVOS] Archivo actualizado ID ${id}`
+    );
+
+    res.json({
+
+      success: true,
+
+      mensaje:
+        'Archivo actualizado correctamente'
+
+    });
+
+  }
+
+  catch (error) {
+
+    console.error(
+      'Error actualizando archivo:',
+      error
+    );
+
+    res.status(500).json({
+      error: 'Error interno del servidor'
     });
 
   }
@@ -207,10 +290,7 @@ router.delete('/:id', async (req, res) => {
     if (!existe.length) {
 
       return res.status(404).json({
-
-        error:
-          'Archivo no encontrado'
-
+        error: 'Archivo no encontrado'
       });
 
     }
@@ -221,8 +301,7 @@ router.delete('/:id', async (req, res) => {
       UPDATE radio_archivos
       SET
         activo = FALSE,
-        fecha_actualizacion =
-        CURRENT_TIMESTAMP
+        fecha_actualizacion = CURRENT_TIMESTAMP
       WHERE id_archivo = :id
       `,
 
@@ -257,10 +336,7 @@ router.delete('/:id', async (req, res) => {
     );
 
     res.status(500).json({
-
-      error:
-        'Error interno del servidor'
-
+      error: 'Error interno del servidor'
     });
 
   }
