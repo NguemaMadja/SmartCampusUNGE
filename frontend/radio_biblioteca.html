@@ -8,86 +8,147 @@
 <title>Biblioteca Multimedia Radio UNGE</title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
 <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
 
 <style>
 
 body {
-  background: linear-gradient(135deg, #003366, #004080);
+
+  background: linear-gradient(
+      135deg,
+      #003366,
+      #004080
+  );
+
   color: white;
+
   min-height: 100vh;
+
   display: flex;
+
   flex-direction: column;
+
 }
 
 .navbar {
+
   background-color: #004080;
+
   height: 60px;
+
   display: flex;
+
   align-items: center;
+
 }
 
 .scroll-msg {
+
   background-color: #008000;
-  color: #fff;
+
+  color: white;
+
   font-weight: bold;
+
   padding: 5px;
+
   flex: 1;
+
   margin: 0 60px;
+
 }
 
 .scroll-msg marquee {
+
   font-size: 1.1em;
+
 }
 
 .container-main {
+
   flex: 1;
+
   padding: 20px;
+
 }
 
 footer {
+
   background-color: #004080;
+
   color: white;
+
   padding: 15px;
+
   text-align: center;
+
   margin-top: auto;
+
 }
 
 .social-buttons .btn {
+
   margin: 5px;
+
   border-radius: 50%;
+
   width: 40px;
+
   height: 40px;
+
   display: inline-flex;
+
   align-items: center;
+
   justify-content: center;
+
 }
 
 .btn-nav {
+
   background-color: #006400;
-  color: #fff;
+
+  color: white;
+
   border-radius: 8px;
+
   padding: 8px 20px;
+
   margin: 5px;
+
   transition: 0.3s;
+
   text-decoration: none;
+
   display: inline-block;
+
   border: none;
+
 }
 
 .btn-nav:hover {
-  background-color: #004d26;
-  color: #fff;
-  transform: scale(1.05);
-}
 
-.estado-card {
-  text-align: center;
+  background-color: #004d26;
+
+  color: white;
+
+  transform: scale(1.05);
+
 }
 
 .card-dashboard {
+
   border-radius: 10px;
+
+}
+
+.preview-card {
+
+  border-radius: 10px;
+
 }
 
 </style>
@@ -96,13 +157,11 @@ footer {
 
 <body>
 
-<!-- CABECERA -->
-
 <nav class="navbar navbar-dark">
 
   <a
-    class="navbar-brand d-flex align-items-center ms-3"
-    href="index.html">
+  class="navbar-brand d-flex align-items-center ms-3"
+  href="index.html">
 
     <img
       src="logo/LOGO-UNGE-1.png"
@@ -111,7 +170,9 @@ footer {
       style="max-height:50px;">
 
     <span>
+
       SmartCampusUNGE
+
     </span>
 
   </a>
@@ -123,8 +184,11 @@ footer {
       direction="left"
       scrollamount="6">
 
-      Biblioteca Multimedia Radio UNGE:
-      gestión de música, programas grabados y anuncios institucionales
+      📚 Biblioteca Multimedia Radio UNGE ·
+      Gestión de música ·
+      Programas grabados ·
+      Anuncios institucionales ·
+      Automatización radiofónica universitaria
 
     </marquee>
 
@@ -138,38 +202,22 @@ footer {
 
   <div class="row text-center">
 
-    <div class="col-md-4">
+    <div class="col-md-3">
 
       <div class="card bg-success text-white card-dashboard">
 
-        <div class="card-body estado-card">
+        <div class="card-body">
 
           <h5>
-            Archivos Totales
-          </h5>
 
-          <h2 id="totalArchivos">
-            0
-          </h2>
+            🎵 Música
 
-        </div>
-
-      </div>
-
-    </div>
-
-    <div class="col-md-4">
-
-      <div class="card bg-info text-white card-dashboard">
-
-        <div class="card-body estado-card">
-
-          <h5>
-            Música Registrada
           </h5>
 
           <h2 id="totalMusica">
+
             0
+
           </h2>
 
         </div>
@@ -178,18 +226,70 @@ footer {
 
     </div>
 
-    <div class="col-md-4">
+    <div class="col-md-3">
 
-      <div class="card bg-warning text-dark card-dashboard">
+      <div class="card bg-primary text-white card-dashboard">
 
-        <div class="card-body estado-card">
+        <div class="card-body">
 
           <h5>
-            Programas y Anuncios
+
+            🎙 Programas
+
           </h5>
 
           <h2 id="totalProgramas">
+
             0
+
+          </h2>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+      <div class="card bg-warning text-dark card-dashboard">
+
+        <div class="card-body">
+
+          <h5>
+
+            📢 Anuncios
+
+          </h5>
+
+          <h2 id="totalAnuncios">
+
+            0
+
+          </h2>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+      <div class="card bg-secondary text-white card-dashboard">
+
+        <div class="card-body">
+
+          <h5>
+
+            💾 Total Biblioteca
+
+          </h5>
+
+          <h2 id="totalArchivos">
+
+            0
+
           </h2>
 
         </div>
@@ -202,7 +302,7 @@ footer {
 
 </div>
 
-<!-- CONTENIDO PRINCIPAL -->
+  <!-- CONTENIDO PRINCIPAL -->
 
 <div class="container-main container">
 
@@ -226,8 +326,6 @@ footer {
       Volver al Panel
 
     </a>
-
-    
 
     <button
       class="btn-nav"
@@ -279,61 +377,140 @@ footer {
 
   </div>
 
-    <!-- TABLA MULTIMEDIA -->
+  <!-- VISTA PREVIA -->
 
-<div
-  class="card bg-white mt-4"
-  style="border-radius:8px;">
+  <div class="card bg-white mb-4 preview-card">
 
-  <div class="card-header bg-primary text-white fw-bold">
+    <div class="card-header bg-success text-white fw-bold">
 
-    Biblioteca Multimedia Radio UNGE
+      🎧 Escuchar antes de emitir
 
-  </div>
+    </div>
 
-  <div class="card-body p-3">
+    <div class="card-body text-dark">
 
-    <div class="table-responsive">
+      <div class="row">
 
-      <table
-        class="table table-striped table-hover text-dark w-100"
-        id="tablaBiblioteca">
+        <div class="col-md-8">
 
-        <thead class="table-dark">
+          <h5 id="nombrePreview">
 
-          <tr>
+            Ningún archivo seleccionado
 
-            <th>ID</th>
+          </h5>
 
-            <th>Tipo</th>
+          <p class="text-muted">
 
-            <th>Archivo</th>
+            Seleccione un contenido para escucharlo antes de enviarlo al aire.
 
-            <th>Categoría</th>
+          </p>
 
-            <th>Descripción</th>
+        </div>
 
-            <th>Usuario</th>
+        <div class="col-md-4 text-end">
 
-            <th>Fecha</th>
+          <span
+            id="tipoPreview"
+            class="badge bg-secondary">
 
-            <th>Acciones</th>
+            Sin selección
 
-          </tr>
+          </span>
 
-        </thead>
+        </div>
 
-        <tbody></tbody>
+      </div>
 
-      </table>
+      <audio
+        id="audioPreview"
+        controls
+        class="w-100 mt-3">
+
+      </audio>
 
     </div>
 
   </div>
 
-</div>
+  <!-- TABLA MULTIMEDIA -->
 
-<!-- MODAL NUEVO ARCHIVO -->
+  <div
+    class="card bg-white mt-4"
+    style="border-radius:8px;">
+
+    <div class="card-header bg-primary text-white fw-bold">
+
+      Biblioteca Multimedia Radio UNGE
+
+    </div>
+
+    <div class="card-body p-3">
+
+      <div class="table-responsive">
+
+        <table
+          class="table table-striped table-hover text-dark w-100"
+          id="tablaBiblioteca">
+
+          <thead class="table-dark">
+
+            <tr>
+
+              <th>ID</th>
+
+              <th>Tipo</th>
+
+              <th>Archivo</th>
+
+              <th>Categoría</th>
+
+              <th>Descripción</th>
+
+              <th>Usuario</th>
+
+              <th>Fecha</th>
+
+              <th>Acciones</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- GRAFICO -->
+
+  <div class="card bg-white mt-4">
+
+    <div class="card-header bg-dark text-white fw-bold">
+
+      📊 Distribución Multimedia Radio UNGE
+
+    </div>
+
+    <div class="card-body">
+
+      <canvas
+        id="graficaBiblioteca"
+        height="120">
+
+      </canvas>
+
+    </div>
+
+  </div>
+
+  <!-- MODAL NUEVO ARCHIVO -->
 
 <div
   class="modal fade"
@@ -368,7 +545,9 @@ footer {
           <div class="mb-3">
 
             <label class="form-label">
+
               Nombre del archivo
+
             </label>
 
             <input
@@ -382,7 +561,9 @@ footer {
           <div class="mb-3">
 
             <label class="form-label">
+
               Tipo
+
             </label>
 
             <select
@@ -390,9 +571,7 @@ footer {
               id="tipo_archivo"
               required>
 
-              <option value="">
-                Seleccione
-              </option>
+              <option value="">Seleccione</option>
 
               <option value="musica">
                 Música
@@ -413,7 +592,9 @@ footer {
           <div class="mb-3">
 
             <label class="form-label">
+
               Categoría
+
             </label>
 
             <input
@@ -426,12 +607,14 @@ footer {
           <div class="mb-3">
 
             <label class="form-label">
+
               Descripción
+
             </label>
 
             <textarea
-              id="descripcion_archivo"
               class="form-control"
+              id="descripcion_archivo"
               rows="3">
             </textarea>
 
@@ -494,13 +677,15 @@ footer {
           <div class="mb-3">
 
             <label class="form-label">
+
               Nombre
+
             </label>
 
             <input
               type="text"
-              id="edit_nombre_archivo"
               class="form-control"
+              id="edit_nombre_archivo"
               required>
 
           </div>
@@ -508,13 +693,14 @@ footer {
           <div class="mb-3">
 
             <label class="form-label">
+
               Tipo
+
             </label>
 
             <select
-              id="edit_tipo_archivo"
               class="form-select"
-              required>
+              id="edit_tipo_archivo">
 
               <option value="musica">
                 Música
@@ -535,25 +721,29 @@ footer {
           <div class="mb-3">
 
             <label class="form-label">
+
               Categoría
+
             </label>
 
             <input
               type="text"
-              id="edit_categoria_archivo"
-              class="form-control">
+              class="form-control"
+              id="edit_categoria_archivo">
 
           </div>
 
           <div class="mb-3">
 
             <label class="form-label">
+
               Descripción
+
             </label>
 
             <textarea
-              id="edit_descripcion_archivo"
               class="form-control"
+              id="edit_descripcion_archivo"
               rows="3">
             </textarea>
 
@@ -577,6 +767,7 @@ footer {
 
 </div>
 
+<!-- LIBRERÍAS -->
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -586,6 +777,7 @@ footer {
 
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
 
@@ -593,14 +785,76 @@ const API_BASE =
 "https://smartcampusunge.onrender.com";
 
 let tablaBiblioteca;
+let graficaBiblioteca;
+
+document.addEventListener(
+'DOMContentLoaded',
+() => {
+
+    const ctx =
+    document
+    .getElementById(
+        'graficaBiblioteca'
+    )
+    .getContext('2d');
+
+    graficaBiblioteca =
+    new Chart(ctx, {
+
+        type: 'bar',
+
+        data: {
+
+            labels: [
+
+                'Música',
+
+                'Programas',
+
+                'Anuncios'
+
+            ],
+
+            datasets: [
+
+                {
+
+                    label:
+                    'Cantidad',
+
+                    data:[0,0,0],
+
+                    backgroundColor:[
+
+                        '#198754',
+
+                        '#0d6efd',
+
+                        '#ffc107'
+
+                    ]
+
+                }
+
+            ]
+
+        }
+
+    });
+
+});
 
 $(document).ready(function () {
 
-    tablaBiblioteca = $('#tablaBiblioteca').DataTable({
+    tablaBiblioteca =
+    $('#tablaBiblioteca')
+    .DataTable({
 
         language: {
+
             url:
             '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+
         },
 
         scrollX: true,
@@ -615,21 +869,21 @@ $(document).ready(function () {
 
 
 
-// =====================================
+// ================================
 // CARGAR ARCHIVOS
-// =====================================
+// ================================
 
 async function cargarArchivos() {
 
     try {
 
-        const res =
+        const respuesta =
         await fetch(
             `${API_BASE}/api/radio_archivos`
         );
 
         const datos =
-        await res.json();
+        await respuesta.json();
 
         actualizarDashboard(
             datos
@@ -639,11 +893,34 @@ async function cargarArchivos() {
 
         datos.forEach(item => {
 
+            let badge = '';
+
+            if(item.tipo === 'musica'){
+
+                badge =
+                '<span class="badge bg-success">🎵 Música</span>';
+
+            }
+
+            else if(item.tipo === 'programa'){
+
+                badge =
+                '<span class="badge bg-primary">🎙 Programa</span>';
+
+            }
+
+            else{
+
+                badge =
+                '<span class="badge bg-warning text-dark">📢 Anuncio</span>';
+
+            }
+
             tablaBiblioteca.row.add([
 
                 item.id_archivo,
 
-                item.tipo,
+                badge,
 
                 item.nombre_archivo,
 
@@ -658,6 +935,16 @@ async function cargarArchivos() {
                 ),
 
                 `
+                <button
+                class="btn btn-info btn-sm"
+                onclick='escucharArchivo(
+                    ${JSON.stringify(item)}
+                )'>
+
+                🎧
+
+                </button>
+
                 <button
                 class="btn btn-success btn-sm"
                 onclick="emitirArchivo(
@@ -687,6 +974,7 @@ async function cargarArchivos() {
                 🗑
 
                 </button>
+
                 `
 
             ]);
@@ -697,14 +985,9 @@ async function cargarArchivos() {
 
     }
 
-    catch(error) {
+    catch(error){
 
         console.error(error);
-
-        document.getElementById(
-            'estadoBiblioteca'
-        ).innerHTML =
-        '❌ Error cargando biblioteca';
 
     }
 
@@ -712,148 +995,200 @@ async function cargarArchivos() {
 
 
 
-// =====================================
+// ================================
 // DASHBOARD
-// =====================================
+// ================================
 
 function actualizarDashboard(datos) {
+
+    const musica =
+    datos.filter(
+        d => d.tipo === 'musica'
+    ).length;
+
+    const programas =
+    datos.filter(
+        d => d.tipo === 'programa'
+    ).length;
+
+    const anuncios =
+    datos.filter(
+        d => d.tipo === 'anuncio'
+    ).length;
+
+    document.getElementById(
+        'totalMusica'
+    ).textContent =
+    musica;
+
+    document.getElementById(
+        'totalProgramas'
+    ).textContent =
+    programas;
+
+    document.getElementById(
+        'totalAnuncios'
+    ).textContent =
+    anuncios;
 
     document.getElementById(
         'totalArchivos'
     ).textContent =
     datos.length;
 
-    document.getElementById(
-        'totalMusica'
-    ).textContent =
-    datos.filter(
-        d => d.tipo === 'musica'
-    ).length;
+    graficaBiblioteca
+    .data
+    .datasets[0]
+    .data = [
 
-    document.getElementById(
-        'totalProgramas'
-    ).textContent =
-    datos.filter(
-        d =>
-        d.tipo === 'programa' ||
-        d.tipo === 'anuncio'
-    ).length;
+        musica,
+
+        programas,
+
+        anuncios
+
+    ];
+
+    graficaBiblioteca.update();
 
 }
 
 
 
-// =====================================
-// FORMATEAR FECHA
-// =====================================
+// ================================
+// FECHA
+// ================================
 
 function formatearFecha(fecha) {
 
     return new Date(
         fecha
-    ).toLocaleString(
-        'es-ES'
-    );
+    ).toLocaleString('es-ES');
 
 }
 
 
 
-// =====================================
-// NUEVO ARCHIVO
-// =====================================
+// ================================
+// PREVISUALIZAR
+// ================================
+
+function escucharArchivo(item){
+
+    document.getElementById(
+        'nombrePreview'
+    ).innerHTML =
+    item.nombre_archivo;
+
+    document.getElementById(
+        'tipoPreview'
+    ).innerHTML =
+    item.tipo;
+
+    const audio =
+    document.getElementById(
+        'audioPreview'
+    );
+
+    audio.pause();
+
+    audio.removeAttribute(
+        'src'
+    );
+
+    audio.load();
+
+    // mañana conectaremos
+    // aquí los MP3 reales
+
+}
+
+
+
+// ================================
+// ALTA
+// ================================
 
 document.getElementById(
     'formNuevoArchivo'
 ).addEventListener(
     'submit',
-    async (e) => {
+    async (e)=>{
 
         e.preventDefault();
 
-        try {
+        await fetch(
 
-            await fetch(
+            `${API_BASE}/api/radio_archivos`,
 
-                `${API_BASE}/api/radio_archivos`,
+            {
 
-                {
+                method:'POST',
 
-                    method:'POST',
+                headers:{
+                    'Content-Type':
+                    'application/json'
+                },
 
-                    headers:{
-                        'Content-Type':
-                        'application/json'
-                    },
+                body:JSON.stringify({
 
-                    body: JSON.stringify({
+                    nombre_archivo:
+                    document.getElementById(
+                        'nombre_archivo'
+                    ).value,
 
-                        nombre_archivo:
-                        document.getElementById(
-                            'nombre_archivo'
-                        ).value,
+                    nombre_original:
+                    document.getElementById(
+                        'nombre_archivo'
+                    ).value,
 
-                        nombre_original:
-                        document.getElementById(
-                            'nombre_archivo'
-                        ).value,
+                    tipo:
+                    document.getElementById(
+                        'tipo_archivo'
+                    ).value,
 
-                        tipo:
-                        document.getElementById(
-                            'tipo_archivo'
-                        ).value,
+                    categoria:
+                    document.getElementById(
+                        'categoria_archivo'
+                    ).value,
 
-                        categoria:
-                        document.getElementById(
-                            'categoria_archivo'
-                        ).value,
+                    descripcion:
+                    document.getElementById(
+                        'descripcion_archivo'
+                    ).value,
 
-                        descripcion:
-                        document.getElementById(
-                            'descripcion_archivo'
-                        ).value,
+                    ruta_archivo:
+                    '/pendiente',
 
-                        ruta_archivo:
-                        '/pendiente',
+                    usuario_subida:
+                    'Sistema'
 
-                        usuario_subida:
-                        'Sistema'
+                })
 
-                    })
+            }
 
-                }
+        );
 
-            );
-
-            bootstrap.Modal
-            .getInstance(
-                document.getElementById(
-                    'modalNuevoArchivo'
-                )
+        bootstrap.Modal
+        .getInstance(
+            document.getElementById(
+                'modalNuevoArchivo'
             )
-            .hide();
+        )
+        .hide();
 
-            cargarArchivos();
-
-        }
-
-        catch(error) {
-
-            console.error(error);
-
-        }
+        cargarArchivos();
 
     }
-
 );
 
 
 
-// =====================================
+// ================================
 // EDITAR
-// =====================================
+// ================================
 
-function editarArchivo(item) {
+function editarArchivo(item){
 
     document.getElementById(
         'edit_id_archivo'
@@ -891,86 +1226,84 @@ function editarArchivo(item) {
 
 
 document.getElementById(
-    'formEditarArchivo'
+'formEditarArchivo'
 ).addEventListener(
-    'submit',
-    async (e) => {
+'submit',
+async (e)=>{
 
-        e.preventDefault();
+    e.preventDefault();
 
-        const id =
+    const id =
+    document.getElementById(
+        'edit_id_archivo'
+    ).value;
+
+    await fetch(
+
+        `${API_BASE}/api/radio_archivos/${id}`,
+
+        {
+
+            method:'PUT',
+
+            headers:{
+                'Content-Type':
+                'application/json'
+            },
+
+            body:JSON.stringify({
+
+                nombre_archivo:
+                document.getElementById(
+                    'edit_nombre_archivo'
+                ).value,
+
+                tipo:
+                document.getElementById(
+                    'edit_tipo_archivo'
+                ).value,
+
+                categoria:
+                document.getElementById(
+                    'edit_categoria_archivo'
+                ).value,
+
+                descripcion:
+                document.getElementById(
+                    'edit_descripcion_archivo'
+                ).value
+
+            })
+
+        }
+
+    );
+
+    bootstrap.Modal
+    .getInstance(
         document.getElementById(
-            'edit_id_archivo'
-        ).value;
-
-        await fetch(
-
-            `${API_BASE}/api/radio_archivos/${id}`,
-
-            {
-
-                method:'PUT',
-
-                headers:{
-                    'Content-Type':
-                    'application/json'
-                },
-
-                body: JSON.stringify({
-
-                    nombre_archivo:
-                    document.getElementById(
-                        'edit_nombre_archivo'
-                    ).value,
-
-                    tipo:
-                    document.getElementById(
-                        'edit_tipo_archivo'
-                    ).value,
-
-                    categoria:
-                    document.getElementById(
-                        'edit_categoria_archivo'
-                    ).value,
-
-                    descripcion:
-                    document.getElementById(
-                        'edit_descripcion_archivo'
-                    ).value
-
-                })
-
-            }
-
-        );
-
-        bootstrap.Modal
-        .getInstance(
-            document.getElementById(
-                'modalEditarArchivo'
-            )
+            'modalEditarArchivo'
         )
-        .hide();
+    )
+    .hide();
 
-        cargarArchivos();
+    cargarArchivos();
 
-    }
-
-);
-
+});
 
 
-// =====================================
+
+// ================================
 // ELIMINAR
-// =====================================
+// ================================
 
-async function eliminarArchivo(id) {
+async function eliminarArchivo(id){
 
-    if (
+    if(
         !confirm(
-            '¿Deseas eliminar este registro?'
+            '¿Eliminar registro?'
         )
-    ) {
+    ){
         return;
     }
 
@@ -990,133 +1323,120 @@ async function eliminarArchivo(id) {
 
 
 
-// =====================================
+// ================================
 // EMITIR
-// =====================================
+// ================================
 
-function emitirArchivo(id) {
+function emitirArchivo(id){
 
     alert(
-        'Funcionalidad preparada para mañana cuando integremos la Raspberry.\n\nArchivo ID: ' + id
+
+      `Función Emitir preparada.\n\nID Archivo: ${id}\n\nMañana la conectaremos con Raspberry.`
+
     );
 
 }
 
 
 
-// =====================================
+// ================================
 // BOTONERA
-// =====================================
+// ================================
 
 document.getElementById(
-    'btnActualizarBiblioteca'
+'btnActualizarBiblioteca'
 ).addEventListener(
-    'click',
-    cargarArchivos
+'click',
+cargarArchivos
 );
 
-
-
 document.getElementById(
-    'btnNuevaMusica'
+'btnNuevaMusica'
 ).addEventListener(
-    'click',
-    () => {
+'click',
+()=>{
 
+    document.getElementById(
+        'tipo_archivo'
+    ).value='musica';
+
+    new bootstrap.Modal(
         document.getElementById(
-            'tipo_archivo'
-        ).value =
-        'musica';
+            'modalNuevoArchivo'
+        )
+    ).show();
 
-        new bootstrap.Modal(
-            document.getElementById(
-                'modalNuevoArchivo'
-            )
-        ).show();
-
-    }
-);
-
-
+});
 
 document.getElementById(
-    'btnNuevoPrograma'
+'btnNuevoPrograma'
 ).addEventListener(
-    'click',
-    () => {
+'click',
+()=>{
 
+    document.getElementById(
+        'tipo_archivo'
+    ).value='programa';
+
+    new bootstrap.Modal(
         document.getElementById(
-            'tipo_archivo'
-        ).value =
-        'programa';
+            'modalNuevoArchivo'
+        )
+    ).show();
 
-        new bootstrap.Modal(
-            document.getElementById(
-                'modalNuevoArchivo'
-            )
-        ).show();
-
-    }
-);
-
-
+});
 
 document.getElementById(
-    'btnNuevoAnuncio'
+'btnNuevoAnuncio'
 ).addEventListener(
-    'click',
-    () => {
+'click',
+()=>{
 
+    document.getElementById(
+        'tipo_archivo'
+    ).value='anuncio';
+
+    new bootstrap.Modal(
         document.getElementById(
-            'tipo_archivo'
-        ).value =
-        'anuncio';
+            'modalNuevoArchivo'
+        )
+    ).show();
 
-        new bootstrap.Modal(
-            document.getElementById(
-                'modalNuevoArchivo'
-            )
-        ).show();
-
-    }
-);
+});
 
 </script>
 
-
-<!-- FOOTER INSTITUCIONAL -->
+<!-- FOOTER -->
 
 <footer>
 
   <p>
+
     TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026
+
   </p>
 
   <div class="social-buttons">
 
-    <a href="#"
-       class="btn btn-outline-light">
+    <a href="#" class="btn btn-outline-light">
 
       <i class="bi bi-twitter"></i>
 
     </a>
 
-    <a href="#"
-       class="btn btn-outline-light">
+    <a href="#" class="btn btn-outline-light">
 
       <i class="bi bi-facebook"></i>
 
     </a>
 
-    <a href="#"
-       class="btn btn-outline-light">
+    <a href="#" class="btn btn-outline-light">
 
       <i class="bi bi-instagram"></i>
 
     </a>
 
-    <a href="#"
-       class="btn btn-outline-light">
+    <a href="#" class="btn btn-outline-light">
 
       <i class="bi bi-youtube"></i>
 
@@ -1125,6 +1445,8 @@ document.getElementById(
   </div>
 
 </footer>
+
+</div>
 
 </body>
 
