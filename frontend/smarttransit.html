@@ -6,13 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Bootstrap 5 -->
-  <link href="https://jsdelivr.net" rel="stylesheet">
+  <link href="//cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com"/>
+  <link rel="stylesheet" href="//://unpkg.com"/>
   <!-- Chart.js -->
-  <script src="https://jsdelivr.net"></script>
+  <script src="//cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Bootstrap Icons -->
-  <link href="https://jsdelivr.net" rel="stylesheet">
+  <link href="//cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
   <style>
     body { background: linear-gradient(135deg, #003366, #004080); color: white; min-height: 100vh; display: flex; flex-direction: column; }
@@ -130,18 +130,21 @@
   </footer>
 
   <!-- Scripts -->
-  <script src="https://jsdelivr.net"></script>
-  <script src="https://unpkg.com"></script>
+  <!-- Scripts -->
+  <script src="//cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="//://unpkg.com"></script>
   <script>
+    const HOST_RENDER = "smartcampusunge" + ".onrender.com";
     const API_BASE = window.location.hostname.includes("onrender.com")
       ? ""
-      : "https://onrender.com";
+      : "https://" + HOST_RENDER;
 
     // Inicializar mapa centrado en Malabo (UNGE)
     const map = L.map("map").setView([3.7468, 8.7752], 13);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    L.tileLayer("//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "© OpenStreetMap contributors"
     }).addTo(map);
+
 
     const capaParadas = L.layerGroup().addTo(map);
     const capaBuses = L.layerGroup().addTo(map);
