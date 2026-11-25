@@ -1,5 +1,4 @@
 // backend/routes/lecturas_sensores.js
-
 const express = require('express');
 const router = express.Router();
 const sequelize = require('../db');
@@ -13,7 +12,8 @@ router.post('/', async (req, res) => {
       humedad,
       co2,
       ruido,
-      luz_detectada
+      luz_detectada,
+      pir_detectado
     } = req.body;
 
     // Validar parámetros del ESP32
@@ -45,15 +45,17 @@ router.post('/', async (req, res) => {
 
     const id_aula = sensorInfo[0].aula_sensor_id;
 
-    // 2. Algoritmo de Presencia (Fusión por umbrales)
+    // 2. Algoritmo de Presencia (Fusión por umbrales + PIR)
     const UMBRAL_CO2 = 650;
     const UMBRAL_RUIDO = 45;
 
     const ruidoDetectado = (ruido || 0) > UMBRAL_RUIDO;
+    const pirDetectado = !!pir_detectado;
 
     const tienePresencia =
       (co2 > UMBRAL_CO2) ||
-      ruidoDetectado;
+      ruidoDetectado ||
+      pirDetectado;
 
     const cruce_global = tienePresencia
       ? "Presencia Detectada"
@@ -61,7 +63,6 @@ router.post('/', async (req, res) => {
 
     // Máquina de estados para las luces
     let accion_automatica = "NINGUNA";
-
     const estado_luz = !!luz_detectada;
 
     if (tienePresencia && !estado_luz) {
@@ -70,7 +71,7 @@ router.post('/', async (req, res) => {
       accion_automatica = "APAGAR_LUCES";
     }
 
-    // 3. Insertar en el historial
+    // 3. Insertar en el historial (Dataset completo para futura IA)
     const [nuevaLectura] = await sequelize.query(
       `INSERT INTO lecturas_sensores
        (
@@ -80,9 +81,11 @@ router.post('/', async (req, res) => {
          co2,
          ruido,
          luz_detectada,
+         pir_detectado,
+         cruce_global,
          fecha_hora
        )
-       VALUES ($1, $2, $3, $4, $5, $6, NOW())
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
        RETURNING *`,
       {
         bind: [
@@ -91,7 +94,9 @@ router.post('/', async (req, res) => {
           humedad,
           co2,
           ruido || 0,
-          estado_luz
+          estado_luz,
+          pirDetectado,
+          cruce_global
         ]
       }
     );
@@ -106,7 +111,6 @@ router.post('/', async (req, res) => {
     );
 
     if (existeEstado.length > 0) {
-
       await sequelize.query(
         `UPDATE estado_aulas_sensores
          SET
@@ -115,10 +119,11 @@ router.post('/', async (req, res) => {
            co2 = $3,
            ruido_detectado = $4,
            luz_detectada = $5,
-           cruce_global = $6,
-           accion = $7,
+           pir_detectado = $6,
+           cruce_global = $7,
+           accion = $8,
            fecha_hora = NOW()
-         WHERE aula_sensor_id = $8`,
+         WHERE aula_sensor_id = $9`,
         {
           bind: [
             temperatura,
@@ -126,15 +131,14 @@ router.post('/', async (req, res) => {
             co2,
             ruidoDetectado,
             estado_luz,
+            pirDetectado,
             cruce_global,
             accion_automatica,
             id_aula
           ]
         }
       );
-
     } else {
-
       await sequelize.query(
         `INSERT INTO estado_aulas_sensores
         (
@@ -158,9 +162,9 @@ router.post('/', async (req, res) => {
           $4,
           $5,
           $6,
-          false,
           $7,
           $8,
+          $9,
           'Sincronizado vía ESP32',
           NOW()
         )`,
@@ -172,42 +176,40 @@ router.post('/', async (req, res) => {
             co2,
             ruidoDetectado,
             estado_luz,
+            pirDetectado,
             cruce_global,
             accion_automatica
           ]
         }
       );
-
     }
 
     // 5. Si hay cambio de estado eléctrico, guardar evento
-   if (accion_automatica !== "NINGUNA") {
-
-  await sequelize.query(
-    `INSERT INTO eventos_energia_sensores
-     (
-       aula_sensor_id,
-       accion,
-       motivo,
-       fecha_hora
-     )
-     VALUES
-     (
-       $1,
-       $2,
-       $3,
-       NOW()
-     )`,
-     {
-       bind: [
-         id_aula,
-         accion_automatica,
-         `Cambio automático por motor IoT [${cruce_global}].`
-       ]
-     }
-  );
-
-}
+    if (accion_automatica !== "NINGUNA") {
+      await sequelize.query(
+        `INSERT INTO eventos_energia_sensores
+         (
+           aula_sensor_id,
+           accion,
+           motivo,
+           fecha_hora
+         )
+         VALUES
+         (
+           $1,
+           $2,
+           $3,
+           NOW()
+         )`,
+        {
+          bind: [
+            id_aula,
+            accion_automatica,
+            `Cambio automático por motor IoT [${cruce_global}].`
+          ]
+        }
+      );
+    }
 
     // Responder al ESP32
     res.json({
@@ -218,7 +220,6 @@ router.post('/', async (req, res) => {
 
   } catch (err) {
     console.error("Error en procesador IoT:", err);
-
     res.status(500).json({
       error: err.message
     });
