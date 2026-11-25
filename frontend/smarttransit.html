@@ -131,82 +131,125 @@
     </div>
   </footer>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    // Inicializar mapa
+    // Inicializar mapa centrado en Malabo (UNGE)
     const map = L.map('map').setView([3.7468, 8.7752], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Capas separadas para limpiar dinámicamente sin borrar el mapa base
+    const capaParadas = L.layerGroup().addTo(map);
+    const capaBuses = L.layerGroup().addTo(map);
 
     // Detectar rol
     const rol = localStorage.getItem("rol");
     const restringido = (rol === "profesor" || rol === "estudiante" || rol === "radio");
 
-    // Cargar vehículos para el select
-    async function cargarVehiculos() {
-      const res = await fetch("/api/vehiculos");
-      const vehiculos = (await res.json()).data;
-      const select = document.getElementById("idVehiculo");
-      select.innerHTML = "";
-      vehiculos.forEach(v => {
-        select.innerHTML += `<option value="${v.id_vehiculo}">${v.ruta}</option>`;
-      });
+    if (restringido) {
+      document.getElementById("btnAddParada").style.display = "none";
     }
 
-    // Cargar paradas (tabla + marcadores + polilínea)
-    async function cargarParadas() {
-      const res = await fetch("/api/paradas");
-      const paradas = (await res.json()).data;
-      const tabla = document.getElementById("tablaParadas");
-      tabla.innerHTML = "";
-      paradas.forEach(p => {
-        tabla.innerHTML += `
-          <tr>
-            <td>${p.id_parada}</td>
-            <td>${p.id_vehiculo}</td>
-            <td>${p.nombre_parada}</td>
-            <td>${p.latitud}</td>
-            <td>${p.longitud}</td>
-            <td>${p.orden}</td>
-            <td class="acciones">
-              ${!restringido ? `
-                <button class="btn btn-sm btn-primary" onclick="editarParada(${p.id_parada})">Editar</button>
-                <button class="btn btn-sm btn-danger" onclick="eliminarParada(${p.id_parada})">Eliminar</button>
-              ` : ''}
-            </td>
-          </tr>`;
-      });
+    // Limpiar modal al pulsar "Añadir Parada"
+    document.getElementById("btnAddParada").addEventListener("click", () => {
+      document.getElementById("idParada").value = "";
+      document.getElementById("formParada").reset();
+      document.querySelector("#modalParada .modal-title").textContent = "Nueva Parada";
+    });
 
-      // Limpiar marcadores y polilíneas previas
-      map.eachLayer(layer => {
-        if (layer instanceof L.Marker || layer instanceof L.Polyline) {
-          if (!layer._url) {
-            map.removeLayer(layer);
+    // 1. Cargar vehículos y actualizar tarjetas Activos / Fuera de Servicio
+    async function cargarVehiculos() {
+      try {
+        const res = await fetch("/api/vehiculos");
+        const vehiculos = (await res.json()).data || [];
+        
+        const select = document.getElementById("idVehiculo");
+        select.innerHTML = "";
+        
+        let activos = 0;
+        let inactivos = 0;
+
+        vehiculos.forEach(v => {
+          select.innerHTML += `<option value="${v.id_vehiculo}">${v.ruta} (${v.placa})</option>`;
+          if (v.estado && v.estado.toLowerCase() === "activo") {
+            activos++;
+          } else {
+            inactivos++;
           }
-        }
-      });
+        });
 
-      // Dibujar marcadores y polilínea
-      const coords = [];
-      paradas.forEach(p => {
-        if (p.latitud && p.longitud) {
-          const lat = parseFloat(p.latitud);
-          const lng = parseFloat(p.longitud);
-          coords.push([lat, lng]);
-          L.marker([lat, lng]).addTo(map)
-            .bindPopup(`Parada: ${p.nombre_parada} – Bus ${p.id_vehiculo}`);
-        }
-      });
-      if (coords.length > 1) {
-        L.polyline(coords, { color: 'blue', weight: 4 }).addTo(map);
+        document.getElementById("busesActivos").textContent = activos;
+        document.getElementById("busesInactivos").textContent = inactivos;
+      } catch (err) {
+        console.error("Error cargando vehículos:", err);
       }
     }
 
-    // Guardar nueva parada
+    // 2. Cargar paradas dinámicamente (tabla + marcadores + rutas separadas por bus y orden)
+    async function cargarParadas() {
+      try {
+        const res = await fetch("/api/paradas");
+        const paradas = (await res.json()).data || [];
+        
+        const tabla = document.getElementById("tablaParadas");
+        tabla.innerHTML = "";
+        capaParadas.clearLayers();
+
+        // Agrupar paradas por vehículo para dibujar cada ruta por separado
+        const rutasPorBus = {};
+
+        paradas
+          .sort((a, b) => a.orden - b.orden)
+          .forEach(p => {
+            tabla.innerHTML += `
+              <tr>
+                <td>${p.id_parada}</td>
+                <td>Bus #${p.id_vehiculo}</td>
+                <td>${p.nombre_parada}</td>
+                <td>${p.latitud}</td>
+                <td>${p.longitud}</td>
+                <td>${p.orden}</td>
+                <td class="acciones">
+                  ${!restringido ? `
+                    <button class="btn btn-sm btn-primary" onclick="editarParada(${p.id_parada})">Editar</button>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarParada(${p.id_parada})">Eliminar</button>
+                  ` : ''}
+                </td>
+              </tr>`;
+
+            if (p.latitud && p.longitud) {
+              const lat = parseFloat(p.latitud);
+              const lng = parseFloat(p.longitud);
+              if (!isNaN(lat) && !isNaN(lng)) {
+                if (!rutasPorBus[p.id_vehiculo]) rutasPorBus[p.id_vehiculo] = [];
+                rutasPorBus[p.id_vehiculo].push([lat, lng]);
+
+                L.marker([lat, lng])
+                  .addTo(capaParadas)
+                  .bindPopup(`<b>Parada ${p.orden}:</b> ${p.nombre_parada}<br>Bus #${p.id_vehiculo}`);
+              }
+            }
+          });
+
+        // Dibujar polilínea independiente por cada ruta/bus
+        const colores = ['#0d6efd', '#198754', '#dc3545', '#fd7e14', '#6f42c1'];
+        Object.keys(rutasPorBus).forEach((busId, idx) => {
+          const coords = rutasPorBus[busId];
+          if (coords.length > 1) {
+            L.polyline(coords, { color: colores[idx % colores.length], weight: 4 }).addTo(capaParadas);
+          }
+        });
+      } catch (err) {
+        console.error("Error cargando paradas:", err);
+      }
+    }
+
+    // 3. Guardar o Actualizar parada (POST si es nueva, PUT si tiene ID)
     document.getElementById("formParada").addEventListener("submit", async e => {
       e.preventDefault();
-      if (restringido) return; // 🔹 Bloquear guardado si es profesor/estudiante/radio
+      if (restringido) return;
+
+      const idParada = document.getElementById("idParada").value;
       const parada = {
         id_vehiculo: document.getElementById("idVehiculo").value,
         nombre_parada: document.getElementById("nombreParada").value,
@@ -214,18 +257,23 @@
         longitud: document.getElementById("longitudParada").value,
         orden: document.getElementById("ordenParada").value
       };
-      await fetch("/api/paradas", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
+
+      const url = idParada ? `/api/paradas/${idParada}` : "/api/paradas";
+      const method = idParada ? "PUT" : "POST";
+
+      await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(parada)
       });
-      cargarParadas();
+
+      await cargarParadas();
       bootstrap.Modal.getInstance(document.getElementById("modalParada")).hide();
     });
 
     // Editar parada
     async function editarParada(id) {
-      if (restringido) return; // 🔹 Bloquear edición
+      if (restringido) return;
       const res = await fetch(`/api/paradas/${id}`);
       const parada = (await res.json()).data;
       document.getElementById("idParada").value = parada.id_parada;
@@ -234,50 +282,85 @@
       document.getElementById("latitudParada").value = parada.latitud;
       document.getElementById("longitudParada").value = parada.longitud;
       document.getElementById("ordenParada").value = parada.orden;
+      document.querySelector("#modalParada .modal-title").textContent = "Editar Parada";
       new bootstrap.Modal(document.getElementById("modalParada")).show();
     }
 
     // Eliminar parada
     async function eliminarParada(id) {
-      if (restringido) return; // 🔹 Bloquear eliminación
+      if (restringido) return;
       if (!confirm("¿Seguro que deseas eliminar esta parada?")) return;
       await fetch(`/api/paradas/${id}`, { method: "DELETE" });
-      cargarParadas();
+      await cargarParadas();
     }
 
-    // Cargar posiciones dinámicas
+    // 4. Cargar posiciones dinámicas y actualizar ETA Promedio
     async function cargarPosiciones() {
-      const res = await fetch("/api/posiciones");
-      const posiciones = (await res.json()).data;
-      const tabla = document.getElementById("tablaPosiciones");
-      tabla.innerHTML = "";
-      posiciones.forEach(p => {
-        tabla.innerHTML += `
-          <tr>
-            <td>${p.id_posicion}</td>
-            <td>${p.id_vehiculo}</td>
-            <td>${p.ruta || ''}</td>
-            <td>${p.latitud}</td>
-            <td>${p.longitud}</td>
-            <td>${p.velocidad || '--'}</td>
-            <td>${p.direccion || '--'}</td>
-            <td>${p.eta_minutos || '--'} min</td>
-            <td>${p.timestamp}</td>
-          </tr>`;
-        L.marker([p.latitud, p.longitud]).addTo(map).bindPopup(`Bus ${p.id_vehiculo} – ${p.ruta || ''}`);
-      });
+      try {
+        const res = await fetch("/api/posiciones");
+        const posiciones = (await res.json()).data || [];
+        
+        const tabla = document.getElementById("tablaPosiciones");
+        tabla.innerHTML = "";
+        capaBuses.clearLayers();
+
+        const ultimaPosicionPorBus = {};
+        let sumaEta = 0;
+        let conteoEta = 0;
+
+        posiciones.forEach(p => {
+          tabla.innerHTML += `
+            <tr>
+              <td>${p.id_posicion}</td>
+              <td>Bus #${p.id_vehiculo}</td>
+              <td>${p.ruta || ''}</td>
+              <td>${p.latitud}</td>
+              <td>${p.longitud}</td>
+              <td>${p.velocidad !== null ? `${p.velocidad} km/h` : '--'}</td>
+              <td>${p.direccion || '--'}</td>
+              <td>${p.eta_minutos !== null ? `${p.eta_minutos} min` : '--'}</td>
+              <td>${p.timestamp}</td>
+            </tr>`;
+
+          // Guardar solo la posición más reciente de cada bus para el mapa
+          if (!ultimaPosicionPorBus[p.id_vehiculo]) {
+            ultimaPosicionPorBus[p.id_vehiculo] = p;
+            if (p.eta_minutos !== null && !isNaN(p.eta_minutos)) {
+              sumaEta += Number(p.eta_minutos);
+              conteoEta++;
+            }
+          }
+        });
+
+        // Dibujar solo la ubicación actual de cada bus en el mapa
+        Object.values(ultimaPosicionPorBus).forEach(bus => {
+          const lat = parseFloat(bus.latitud);
+          const lng = parseFloat(bus.longitud);
+          if (!isNaN(lat) && !isNaN(lng)) {
+            L.marker([lat, lng])
+              .addTo(capaBuses)
+              .bindPopup(`<b>Bus #${bus.id_vehiculo}</b> (${bus.ruta || ''})<br>Velocidad: ${bus.velocidad || 0} km/h<br>ETA: ${bus.eta_minutos || '--'} min`);
+          }
+        });
+
+        // Actualizar tarjeta de ETA Promedio
+        document.getElementById("etaPromedio").textContent = conteoEta > 0
+          ? `${Math.round(sumaEta / conteoEta)} min`
+          : "-- min";
+
+      } catch (err) {
+        console.error("Error cargando posiciones:", err);
+      }
     }
 
-    // Inicializar carga
+    // Inicializar todo
     cargarVehiculos();
     cargarParadas();
     cargarPosiciones();
-    setInterval(cargarPosiciones, 60000);
-
-    // 🔹 Ocultar botón Añadir Parada si rol restringido
-    if (restringido) {
-      document.getElementById("btnAddParada").style.display = "none";
-    }
+    setInterval(() => {
+      cargarVehiculos();
+      cargarPosiciones();
+    }, 30000);
   </script>
 </body>
 </html>
