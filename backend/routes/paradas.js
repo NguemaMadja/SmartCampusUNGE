@@ -7,7 +7,7 @@ const sequelize = require('../db'); // conexión Sequelize
 router.get('/', async (req, res) => {
   try {
     const [rows] = await sequelize.query(
-      'SELECT id_parada, id_vehiculo, nombre_parada, latitud, longitud, orden FROM paradas ORDER BY id_parada'
+      'SELECT id_parada, id_vehiculo, nombre_parada, latitud, longitud, orden FROM paradas ORDER BY orden ASC, id_parada ASC'
     );
     res.json({ success: true, data: rows });
   } catch (err) {
@@ -34,7 +34,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// 🔹 Crear nueva parada (usando id_vehiculo y nombre_parada)
+// 🔹 Crear nueva parada (sincronizando nombre y nombre_parada)
 router.post('/', async (req, res) => {
   try {
     const { id_vehiculo, nombre_parada, latitud, longitud, orden } = req.body;
@@ -44,8 +44,8 @@ router.post('/', async (req, res) => {
     }
 
     const [rows] = await sequelize.query(
-      `INSERT INTO paradas (id_vehiculo, nombre_parada, latitud, longitud, orden)
-       VALUES ($1,$2,$3,$4,$5) RETURNING id_parada, id_vehiculo, nombre_parada, latitud, longitud, orden`,
+      `INSERT INTO paradas (id_vehiculo, nombre, nombre_parada, latitud, longitud, orden)
+       VALUES ($1,$2,$2,$3,$4,$5) RETURNING id_parada, id_vehiculo, nombre_parada, latitud, longitud, orden`,
       { bind: [id_vehiculo, nombre_parada, latitud, longitud, orden] }
     );
     res.json({ success: true, data: rows[0] });
@@ -63,7 +63,7 @@ router.put('/:id', async (req, res) => {
 
     const [rows] = await sequelize.query(
       `UPDATE paradas 
-       SET id_vehiculo=$1, nombre_parada=$2, latitud=$3, longitud=$4, orden=$5
+       SET id_vehiculo=$1, nombre=$2, nombre_parada=$2, latitud=$3, longitud=$4, orden=$5
        WHERE id_parada=$6 RETURNING id_parada, id_vehiculo, nombre_parada, latitud, longitud, orden`,
       { bind: [id_vehiculo, nombre_parada, latitud, longitud, orden, id] }
     );
