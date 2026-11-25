@@ -120,6 +120,7 @@
                   <th>CO₂</th>
                   <th>Ruido</th>
                   <th>Luz</th>
+                  <th>Movimiento (PIR)</th>
                   <th>Estado</th>
                   <th>Acción Apagar</th>
                   <th>Acción Encender</th>
@@ -234,6 +235,7 @@
               l.co2 !== null && l.co2 !== undefined ? `${l.co2} ppm` : "-",
               l.ruido_detectado ? "Sí" : "No",
               l.luz_detectada ? "Sí" : "No",
+              l.pir_detectado ? "Sí" : "No",
               l.cruce_global || "Sin datos",
               esApagar ? "Apagar" : "",
               esEncender ? "Encender" : "",
