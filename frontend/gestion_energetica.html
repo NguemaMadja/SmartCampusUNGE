@@ -217,44 +217,54 @@
 
         tabla.clear();
         const accionesApagar = {}, accionesEncender = {}, ocupacionPorAula = {};
+        let totalAccionesRecientes = 0;
 
         if (Array.isArray(data.data)) {
           data.data.forEach(l => {
+            const nombreAula = l.nombre_aula || `Aula #${l.aula_sensor_id}`;
+            const esApagar = l.accion === "APAGAR_LUCES" || l.accion === "Apagar";
+            const esEncender = l.accion === "ENCENDER_LUCES" || l.accion === "Encender";
+            const estaOcupado = l.cruce_global === "Presencia Detectada" || l.cruce_global === "Ocupado";
+
             tabla.row.add([
               l.aula_sensor_id,
-              l.nombre_aula,
-              l.temperatura,
-              l.humedad,
-              l.co2,
-              l.ruido_detectado,
+              nombreAula,
+              l.temperatura !== null && l.temperatura !== undefined ? `${l.temperatura} °C` : "-",
+              l.humedad !== null && l.humedad !== undefined ? `${l.humedad} %` : "-",
+              l.co2 !== null && l.co2 !== undefined ? `${l.co2} ppm` : "-",
+              l.ruido_detectado ? "Sí" : "No",
               l.luz_detectada ? "Sí" : "No",
-              l.cruce_global,
-              
-              l.accion === "APAGAR_LUCES" || l.accion === "Apagar"
-              ? "Apagar"
-              : "",
-
-              l.accion === "ENCENDER_LUCES" || l.accion === "Encender"
-             ? "Encender"
-            : "",
-              
+              l.cruce_global || "Sin datos",
+              esApagar ? "Apagar" : "",
+              esEncender ? "Encender" : "",
               l.fecha_hora
             ]);
 
-            if (!accionesApagar[l.nombre_aula]) accionesApagar[l.nombre_aula] = 0;
-            if (!accionesEncender[l.nombre_aula]) accionesEncender[l.nombre_aula] = 0;
-            if (!ocupacionPorAula[l.nombre_aula]) ocupacionPorAula[l.nombre_aula] = 0;
+            if (!accionesApagar[nombreAula]) accionesApagar[nombreAula] = 0;
+            if (!accionesEncender[nombreAula]) accionesEncender[nombreAula] = 0;
+            if (!ocupacionPorAula[nombreAula]) ocupacionPorAula[nombreAula] = 0;
 
-            if (l.accion === "Apagar") accionesApagar[l.nombre_aula]++;
-            if (l.accion === "Encender") accionesEncender[l.nombre_aula]++;
-            if (l.cruce_global === "Ocupado") ocupacionPorAula[l.nombre_aula]++;
+            if (esApagar) {
+              accionesApagar[nombreAula]++;
+              totalAccionesRecientes++;
+            }
+            if (esEncender) {
+              accionesEncender[nombreAula]++;
+              totalAccionesRecientes++;
+            }
+            if (estaOcupado) {
+              ocupacionPorAula[nombreAula]++;
+            }
           });
         }
         tabla.draw();
 
         document.getElementById('totalAulas').textContent = Array.isArray(data.data) ? data.data.length : 0;
+        document.getElementById('accionesRecientes').textContent = totalAccionesRecientes;
+
+        // Como el backend ordena por fecha_hora DESC, el primer elemento [0] es el más reciente
         if (Array.isArray(data.data) && data.data.length > 0) {
-          document.getElementById('ultimaLectura').textContent = data.data[data.data.length - 1].fecha_hora;
+          document.getElementById('ultimaLectura').textContent = data.data[0].fecha_hora;
         }
 
         graficaAcciones.data.labels = Object.keys(accionesApagar);
