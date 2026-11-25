@@ -90,12 +90,13 @@ router.post('/', async (req, res) => {
       );
       result = updateResult;
     } else {
-      // 3. Si es la primera vez que el aula reporta, hacemos el INSERT inicial
+          // 3. Si es la primera vez que el aula reporta, hacemos el INSERT inicial
       const [insertResult] = await sequelize.query(
         `INSERT INTO estado_aulas_sensores
-         (aula_sensor_id, temperatura, humidity/humedad, co2, ruido_detectado, luz_detectada, pir_detectado, cruce_global, accion, mensaje, fecha_hora)
+         (aula_sensor_id, temperatura, humedad, co2, ruido_detectado, luz_detectada, pir_detectado, cruce_global, accion, mensaje, fecha_hora)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW()) RETURNING *`,
-        { 
+        {
+
           bind: [
             aula_sensor_id, 
             temperatura, 
