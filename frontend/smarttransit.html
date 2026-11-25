@@ -8,7 +8,7 @@
   <!-- Bootstrap 5 -->
   <link href="//cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Leaflet -->
-  <link rel="stylesheet" href="//://unpkg.com"/>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
   <!-- Chart.js -->
   <script src="//cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Bootstrap Icons -->
@@ -22,6 +22,7 @@
     footer { margin-top: auto; }
   </style>
 </head>
+
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container-fluid">
@@ -129,10 +130,10 @@
     </div>
   </footer>
 
-  <!-- Scripts -->
+
   <!-- Scripts -->
   <script src="//cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="//://unpkg.com"></script>
+  <script src="//cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     const HOST_RENDER = "smartcampusunge" + ".onrender.com";
     const API_BASE = window.location.hostname.includes("onrender.com")
@@ -144,7 +145,6 @@
     L.tileLayer("//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "© OpenStreetMap contributors"
     }).addTo(map);
-
 
     const capaParadas = L.layerGroup().addTo(map);
     const capaBuses = L.layerGroup().addTo(map);
@@ -182,7 +182,6 @@
           }
         });
 
-
         document.getElementById("busesActivos").textContent = activos;
         document.getElementById("busesInactivos").textContent = inactivos;
       } catch (err) {
@@ -190,7 +189,7 @@
       }
     }
 
-      // Cargar paradas (tabla + marcadores + polilínea por bus)
+    // Cargar paradas (tabla + marcadores + polilínea por bus)
     async function cargarParadas() {
       try {
         const res = await fetch(`${API_BASE}/api/paradas`);
@@ -283,6 +282,9 @@
       document.querySelector("#modalParada .modal-title").textContent = "Editar Parada";
       new bootstrap.Modal(document.getElementById("modalParada")).show();
     }
+
+
+  
 
     // Eliminar parada
     async function eliminarParada(id) {
