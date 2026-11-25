@@ -6,19 +6,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Bootstrap 5 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://jsdelivr.net" rel="stylesheet">
   <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://unpkg.com"/>
   <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://jsdelivr.net"></script>
   <!-- Bootstrap Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://jsdelivr.net" rel="stylesheet">
 
   <style>
-    body { background: linear-gradient(135deg, #003366, #004080); color: white; }
+    body { background: linear-gradient(135deg, #003366, #004080); color: white; min-height: 100vh; display: flex; flex-direction: column; }
     nav, header, footer { background-color: #004080; color: white; }
     #map { height: 400px; border-radius: 10px; overflow: hidden; }
     .card { color: black; }
+    footer { margin-top: auto; }
   </style>
 </head>
 <body>
@@ -42,10 +43,6 @@
 
   <header class="p-3 d-flex justify-content-between align-items-center">
     <h4 class="mb-0">Movilidad Inteligente en Tiempo Real</h4>
-
-
-
-    
   </header>
 
   <div class="scroll-msg text-center bg-success text-white py-2">
@@ -61,6 +58,7 @@
       <div class="col-md-3"><div class="card text-center"><div class="card-header bg-primary text-white">ETA Promedio</div><div class="card-body"><h3 id="etaPromedio">-- min</h3></div></div></div>
       <div class="col-md-3"><div class="card text-center"><div class="card-header bg-primary text-white">Alertas</div><div class="card-body"><h3 id="alertas">0</h3></div></div></div>
     </div>
+
     <div class="card mb-4">
       <div class="card-header bg-primary text-white">Mapa Interactivo</div>
       <div class="card-body"><div id="map"></div></div>
@@ -96,10 +94,10 @@
               <label class="form-label">Ruta (selecciona el bus)</label>
               <select id="idVehiculo" class="form-select"></select>
             </div>
-            <div class="mb-3"><label class="form-label">Nombre de la Parada</label><input type="text" id="nombreParada" class="form-control"></div>
-            <div class="mb-3"><label class="form-label">Latitud</label><input type="text" id="latitudParada" class="form-control"></div>
-            <div class="mb-3"><label class="form-label">Longitud</label><input type="text" id="longitudParada" class="form-control"></div>
-            <div class="mb-3"><label class="form-label">Orden</label><input type="number" id="ordenParada" class="form-control"></div>
+            <div class="mb-3"><label class="form-label">Nombre de la Parada</label><input type="text" id="nombreParada" class="form-control" required></div>
+            <div class="mb-3"><label class="form-label">Latitud</label><input type="text" id="latitudParada" class="form-control" required></div>
+            <div class="mb-3"><label class="form-label">Longitud</label><input type="text" id="longitudParada" class="form-control" required></div>
+            <div class="mb-3"><label class="form-label">Orden</label><input type="number" id="ordenParada" class="form-control" required></div>
           </div>
           <div class="modal-footer"><button type="submit" class="btn btn-success">Guardar</button></div>
         </form>
@@ -121,7 +119,7 @@
     </div>
   </main>
 
-     <footer class="text-center py-3">
+  <footer class="text-center py-3">
     <p>© 2026 Universidad Nacional de Guinea Ecuatorial – SmartTransit UNGE</p>
     <div class="social-buttons">
       <a href="#" class="btn btn-outline-light"><i class="bi bi-facebook"></i></a>
@@ -131,14 +129,20 @@
     </div>
   </footer>
 
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
+    const API_BASE = window.location.hostname.includes("onrender.com")
+      ? ""
+      : "https://onrender.com";
+
     // Inicializar mapa centrado en Malabo (UNGE)
-    const map = L.map('map').setView([3.7468, 8.7752], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
+    const map = L.map("map").setView([3.7468, 8.7752], 13);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap contributors"
     }).addTo(map);
 
-    // Capas separadas para limpiar dinámicamente sin borrar el mapa base
     const capaParadas = L.layerGroup().addTo(map);
     const capaBuses = L.layerGroup().addTo(map);
 
@@ -150,27 +154,24 @@
       document.getElementById("btnAddParada").style.display = "none";
     }
 
-    // Limpiar modal al pulsar "Añadir Parada"
     document.getElementById("btnAddParada").addEventListener("click", () => {
       document.getElementById("idParada").value = "";
       document.getElementById("formParada").reset();
       document.querySelector("#modalParada .modal-title").textContent = "Nueva Parada";
     });
 
-    // 1. Cargar vehículos y actualizar tarjetas Activos / Fuera de Servicio
+    // Cargar vehículos para el select y tarjetas superiores
     async function cargarVehiculos() {
       try {
-        const res = await fetch("/api/vehiculos");
+        const res = await fetch(`${API_BASE}/api/vehiculos`);
         const vehiculos = (await res.json()).data || [];
-        
         const select = document.getElementById("idVehiculo");
         select.innerHTML = "";
-        
         let activos = 0;
         let inactivos = 0;
 
         vehiculos.forEach(v => {
-          select.innerHTML += `<option value="${v.id_vehiculo}">${v.ruta} (${v.placa})</option>`;
+          select.innerHTML += `<option value="${v.id_vehiculo}">${v.ruta}</option>`;
           if (v.estado && v.estado.toLowerCase() === "activo") {
             activos++;
           } else {
@@ -185,26 +186,24 @@
       }
     }
 
-    // 2. Cargar paradas dinámicamente (tabla + marcadores + rutas separadas por bus y orden)
+      // Cargar paradas (tabla + marcadores + polilínea por bus)
     async function cargarParadas() {
       try {
-        const res = await fetch("/api/paradas");
+        const res = await fetch(`${API_BASE}/api/paradas`);
         const paradas = (await res.json()).data || [];
-        
         const tabla = document.getElementById("tablaParadas");
         tabla.innerHTML = "";
         capaParadas.clearLayers();
 
-        // Agrupar paradas por vehículo para dibujar cada ruta por separado
         const rutasPorBus = {};
 
         paradas
-          .sort((a, b) => a.orden - b.orden)
+          .sort((a, b) => Number(a.orden) - Number(b.orden))
           .forEach(p => {
             tabla.innerHTML += `
               <tr>
                 <td>${p.id_parada}</td>
-                <td>Bus #${p.id_vehiculo}</td>
+                <td>${p.id_vehiculo}</td>
                 <td>${p.nombre_parada}</td>
                 <td>${p.latitud}</td>
                 <td>${p.longitud}</td>
@@ -223,16 +222,13 @@
               if (!isNaN(lat) && !isNaN(lng)) {
                 if (!rutasPorBus[p.id_vehiculo]) rutasPorBus[p.id_vehiculo] = [];
                 rutasPorBus[p.id_vehiculo].push([lat, lng]);
-
-                L.marker([lat, lng])
-                  .addTo(capaParadas)
-                  .bindPopup(`<b>Parada ${p.orden}:</b> ${p.nombre_parada}<br>Bus #${p.id_vehiculo}`);
+                L.marker([lat, lng]).addTo(capaParadas)
+                  .bindPopup(`Parada ${p.orden}: ${p.nombre_parada} – Bus ${p.id_vehiculo}`);
               }
             }
           });
 
-        // Dibujar polilínea independiente por cada ruta/bus
-        const colores = ['#0d6efd', '#198754', '#dc3545', '#fd7e14', '#6f42c1'];
+        const colores = ['blue', 'green', 'red', 'orange', 'purple'];
         Object.keys(rutasPorBus).forEach((busId, idx) => {
           const coords = rutasPorBus[busId];
           if (coords.length > 1) {
@@ -244,11 +240,10 @@
       }
     }
 
-    // 3. Guardar o Actualizar parada (POST si es nueva, PUT si tiene ID)
+    // Guardar o actualizar parada
     document.getElementById("formParada").addEventListener("submit", async e => {
       e.preventDefault();
       if (restringido) return;
-
       const idParada = document.getElementById("idParada").value;
       const parada = {
         id_vehiculo: document.getElementById("idVehiculo").value,
@@ -258,15 +253,14 @@
         orden: document.getElementById("ordenParada").value
       };
 
-      const url = idParada ? `/api/paradas/${idParada}` : "/api/paradas";
+      const url = idParada ? `${API_BASE}/api/paradas/${idParada}` : `${API_BASE}/api/paradas`;
       const method = idParada ? "PUT" : "POST";
 
       await fetch(url, {
-        method,
+        method: method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(parada)
       });
-
       await cargarParadas();
       bootstrap.Modal.getInstance(document.getElementById("modalParada")).hide();
     });
@@ -274,7 +268,7 @@
     // Editar parada
     async function editarParada(id) {
       if (restringido) return;
-      const res = await fetch(`/api/paradas/${id}`);
+      const res = await fetch(`${API_BASE}/api/paradas/${id}`);
       const parada = (await res.json()).data;
       document.getElementById("idParada").value = parada.id_parada;
       document.getElementById("idVehiculo").value = parada.id_vehiculo;
@@ -290,16 +284,14 @@
     async function eliminarParada(id) {
       if (restringido) return;
       if (!confirm("¿Seguro que deseas eliminar esta parada?")) return;
-      await fetch(`/api/paradas/${id}`, { method: "DELETE" });
+      await fetch(`${API_BASE}/api/paradas/${id}`, { method: "DELETE" });
       await cargarParadas();
     }
-
-    // 4. Cargar posiciones dinámicas y actualizar ETA Promedio
+    // Cargar posiciones dinámicas
     async function cargarPosiciones() {
       try {
-        const res = await fetch("/api/posiciones");
+        const res = await fetch(`${API_BASE}/api/posiciones`);
         const posiciones = (await res.json()).data || [];
-        
         const tabla = document.getElementById("tablaPosiciones");
         tabla.innerHTML = "";
         capaBuses.clearLayers();
@@ -312,17 +304,16 @@
           tabla.innerHTML += `
             <tr>
               <td>${p.id_posicion}</td>
-              <td>Bus #${p.id_vehiculo}</td>
+              <td>${p.id_vehiculo}</td>
               <td>${p.ruta || ''}</td>
               <td>${p.latitud}</td>
               <td>${p.longitud}</td>
-              <td>${p.velocidad !== null ? `${p.velocidad} km/h` : '--'}</td>
+              <td>${p.velocidad !== null && p.velocidad !== undefined ? `${p.velocidad} km/h` : '--'}</td>
               <td>${p.direccion || '--'}</td>
-              <td>${p.eta_minutos !== null ? `${p.eta_minutos} min` : '--'}</td>
+              <td>${p.eta_minutos !== null && p.eta_minutos !== undefined ? `${p.eta_minutos} min` : '--'}</td>
               <td>${p.timestamp}</td>
             </tr>`;
 
-          // Guardar solo la posición más reciente de cada bus para el mapa
           if (!ultimaPosicionPorBus[p.id_vehiculo]) {
             ultimaPosicionPorBus[p.id_vehiculo] = p;
             if (p.eta_minutos !== null && !isNaN(p.eta_minutos)) {
@@ -332,28 +323,25 @@
           }
         });
 
-        // Dibujar solo la ubicación actual de cada bus en el mapa
         Object.values(ultimaPosicionPorBus).forEach(bus => {
           const lat = parseFloat(bus.latitud);
           const lng = parseFloat(bus.longitud);
           if (!isNaN(lat) && !isNaN(lng)) {
             L.marker([lat, lng])
               .addTo(capaBuses)
-              .bindPopup(`<b>Bus #${bus.id_vehiculo}</b> (${bus.ruta || ''})<br>Velocidad: ${bus.velocidad || 0} km/h<br>ETA: ${bus.eta_minutos || '--'} min`);
+              .bindPopup(`Bus ${bus.id_vehiculo} – ${bus.ruta || ''} | ETA: ${bus.eta_minutos || '--'} min`);
           }
         });
 
-        // Actualizar tarjeta de ETA Promedio
         document.getElementById("etaPromedio").textContent = conteoEta > 0
           ? `${Math.round(sumaEta / conteoEta)} min`
           : "-- min";
-
       } catch (err) {
         console.error("Error cargando posiciones:", err);
       }
     }
 
-    // Inicializar todo
+    // Inicializar carga
     cargarVehiculos();
     cargarParadas();
     cargarPosiciones();
