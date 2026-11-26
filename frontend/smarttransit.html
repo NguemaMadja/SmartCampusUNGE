@@ -188,7 +188,9 @@
       }
     }
 
-         // Cargar paradas (tabla + marcadores + polilínea por calles reales)
+   
+
+        // Cargar paradas (tabla + marcadores + polilínea desde Base UNGE)
     async function cargarParadas() {
       try {
         const res = await fetch(`${API_BASE}/api/paradas`);
@@ -197,6 +199,8 @@
         tabla.innerHTML = "";
         capaParadas.clearLayers();
 
+        // Punto de partida fijo (Campus Central UNGE - Malabo)
+        const ORIGEN_UNGE = L.latLng(3.7468, 8.7752);
         const rutasPorBus = {};
 
         paradas
@@ -223,7 +227,10 @@
               const lng = parseFloat(String(p.longitud).replace(',', '.').trim());
 
               if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-                if (!rutasPorBus[p.id_vehiculo]) rutasPorBus[p.id_vehiculo] = [];
+                // Si es la primera parada de este bus, arrancamos la ruta desde la UNGE
+                if (!rutasPorBus[p.id_vehiculo]) {
+                  rutasPorBus[p.id_vehiculo] = [ORIGEN_UNGE];
+                }
                 rutasPorBus[p.id_vehiculo].push(L.latLng(lat, lng));
 
                 L.marker([lat, lng]).addTo(capaParadas)
@@ -234,9 +241,20 @@
             }
           });
 
+        // Dibujar marcador fijo de salida en UNGE si hay paradas registradas
+        const busIds = Object.keys(rutasPorBus);
+        if (busIds.length > 0) {
+          L.circleMarker(ORIGEN_UNGE, {
+            radius: 8,
+            fillColor: "#ffc107",
+            color: "#003366",
+            weight: 3,
+            fillOpacity: 1
+          }).addTo(capaParadas).bindPopup("<b>Terminal Central UNGE</b> (Punto de salida)");
+        }
+
         // Dibujar ruta real por calles para cada bus (OSRM)
         const colores = ['#0d6efd', '#198754', '#dc3545', '#fd7e14', '#6f42c1'];
-        const busIds = Object.keys(rutasPorBus);
 
         for (let idx = 0; idx < busIds.length; idx++) {
           const busId = busIds[idx];
@@ -263,10 +281,10 @@
           }
         }
 
-        // Centrar automáticamente el mapa para mostrar todas las paradas
-        const marcadores = capaParadas.getLayers();
-        if (marcadores.length > 0) {
-          const grupo = L.featureGroup(marcadores);
+        // Centrar automáticamente el mapa para mostrar terminal y paradas
+        const elementos = capaParadas.getLayers();
+        if (elementos.length > 0) {
+          const grupo = L.featureGroup(elementos);
           map.fitBounds(grupo.getBounds(), { paddingTopLeft: L.point(40, 40), paddingBottomRight: L.point(40, 40), maxZoom: 15 });
         }
       } catch (err) {
