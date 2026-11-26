@@ -141,6 +141,7 @@
   
 <script>
   const TIEMPO_MAXIMO_INACTIVIDAD = 30 * 60 * 1000; 
+  const baseURL = window.location.origin;
 
   (function () {
     window.history.pushState(null, null, window.location.href);
@@ -182,70 +183,63 @@
     });
   });
 
-  document.getElementById("menuToggle").addEventListener("click", () => {
+  document.getElementById("menuToggle")?.addEventListener("click", () => {
     document.getElementById("sidebar").classList.toggle("active");
   });
 
+  async function cargarPerfil() {
+    const token = localStorage.getItem("token");
+    try {
+      // Nota: Si tu backend usa /api/usuarios/perfil, cambia la ruta aquí abajo
+      const res = await fetch(`${baseURL}/usuarios/perfil`, {
+        method: "GET",
+        headers: { "Authorization": "Bearer " + token }
+      });
+      const data = await res.json();
+      if (data.usuario) {
+        document.getElementById("userId").textContent = "ID: " + data.usuario.id;
+        document.getElementById("userRole").textContent = "Rol: " + data.usuario.rol;
+        document.getElementById("userMenu").textContent = data.usuario.rol;
 
-  
- async function cargarPerfil() {
-  const token = localStorage.getItem("token");
-  try {
-    const res = await fetch("http://10.70.200.112:4000/usuarios/perfil", {
-      method: "GET",
-      headers: { "Authorization": "Bearer " + token }
-    });
-    const data = await res.json();
-    if (data.usuario) {
-      // 🔹 Mostrar automáticamente ID y Rol en la interfaz
-      document.getElementById("userId").textContent = "ID: " + data.usuario.id;
-      document.getElementById("userRole").textContent = "Rol: " + data.usuario.rol;
-      document.getElementById("userMenu").textContent = data.usuario.rol;
-
-      // Aplicar filtros según rol
-      aplicarFiltrosPorRol(data.usuario.rol);
+        // Actualizar rol en localStorage por si cambió en el servidor
+        localStorage.setItem("rol", data.usuario.rol);
+        aplicarFiltrosPorRol(data.usuario.rol);
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      alert("Error de conexión con el servidor de autenticación");
     }
-  } catch (err) {
-    console.error("Error:", err);
-    alert("Error de conexión con el servidor de autenticación");
   }
-}
-
-// 🔹 Ejecutar automáticamente al cargar la página
-window.addEventListener("DOMContentLoaded", cargarPerfil);
-
 
   function aplicarFiltrosPorRol(rol) {
+    // Función segura: solo oculta el elemento si realmente existe en el HTML
+    const ocultar = id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = "none";
+    };
+
     if (rol === "superadmin") {
       // ve todo
-    } else if (rol === "profesor") {
-      // 🔹 Profesor ve Radio, Transporte, Mapa y Gestión Energética
-      document.getElementById("linkUsuarios").style.display = "none";
-      document.getElementById("linkProfesores").style.display = "none";
-      document.getElementById("linkEstudiantes").style.display = "none";
-      document.getElementById("linkAsistencia").style.display = "none";
-      document.getElementById("linkConfig").style.display = "none";
-    } else if (rol === "estudiante") {
-      // 🔹 Estudiante ve Radio, Transporte, Mapa y Gestión Energética
-      document.getElementById("linkUsuarios").style.display = "none";
-      document.getElementById("linkProfesores").style.display = "none";
-      document.getElementById("linkEstudiantes").style.display = "none";
-      document.getElementById("linkConfig").style.display = "none";
-      document.getElementById("linkAsistencia").style.display = "none";
+    } else if (rol === "profesor" || rol === "estudiante") {
+      // 🔹 Profesor y Estudiante ven Radio, Transporte, Mapa y Gestión Energética
+      ocultar("linkUsuarios");
+      ocultar("linkProfesores");
+      ocultar("linkEstudiantes");
+      ocultar("linkAsistencia");
+      ocultar("linkConfig");
     } else if (rol === "radio") {
-      document.getElementById("linkUsuarios").style.display = "none";
-      document.getElementById("linkProfesores").style.display = "none";
-      document.getElementById("linkEstudiantes").style.display = "none";
-      document.getElementById("linkConfig").style.display = "none";
-      document.getElementById("linkEnergia").style.display = "none";
-      document.getElementById("linkAsistencia").style.display = "none";
-      document.getElementById("linkTransporte").style.display = "none";
-      document.getElementById("linkMapa").style.display = "none";
+      ocultar("linkUsuarios");
+      ocultar("linkProfesores");
+      ocultar("linkEstudiantes");
+      ocultar("linkConfig");
+      ocultar("linkEnergia");
+      ocultar("linkAsistencia");
+      ocultar("linkTransporte");
+      ocultar("linkMapa");
     }
 
     // 🔹 Restricciones dentro del módulo escuchar_radio
     if (rol === "profesor" || rol === "estudiante") {
-      const ocultar = id => { const el = document.getElementById(id); if (el) el.style.display = "none"; };
       ocultar("btnEncenderRadio");
       ocultar("btnApagarRadio");
       ocultar("btnMusica");
@@ -263,7 +257,8 @@ window.addEventListener("DOMContentLoaded", cargarPerfil);
     localStorage.removeItem("ultimaActividad");
   }
 
-  document.getElementById("logoutBtn").addEventListener("click", () => {
+  document.getElementById("logoutBtn")?.addEventListener("click", (e) => {
+    e.preventDefault();
     cerrarSesionLimpio();
     alert("Sesión cerrada correctamente");
     window.location.href = "index.html"; 
@@ -275,6 +270,7 @@ window.addEventListener("DOMContentLoaded", cargarPerfil);
     aplicarFiltrosPorRol(rolLocal);
   }
 
+  // Cargar datos del perfil una sola vez
   cargarPerfil();
 </script>
 </body>
