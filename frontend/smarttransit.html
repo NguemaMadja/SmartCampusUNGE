@@ -190,7 +190,7 @@
 
    
 
-        // Cargar paradas (tabla + marcadores + polilínea desde Base UNGE)
+         // Cargar paradas (tabla + marcadores numerados + ruta real por calles desde Base UNGE)
     async function cargarParadas() {
       try {
         const res = await fetch(`${API_BASE}/api/paradas`);
@@ -202,6 +202,9 @@
         // Punto de partida fijo (Campus Central UNGE - Malabo)
         const ORIGEN_UNGE = L.latLng(3.7468, 8.7752);
         const rutasPorBus = {};
+        const colores = ['#0d6efd', '#198754', '#dc3545', '#fd7e14', '#6f42c1'];
+        const mapaColoresBus = {};
+        let colorIndex = 0;
 
         paradas
           .sort((a, b) => Number(a.orden) - Number(b.orden))
@@ -227,14 +230,23 @@
               const lng = parseFloat(String(p.longitud).replace(',', '.').trim());
 
               if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-                // Si es la primera parada de este bus, arrancamos la ruta desde la UNGE
                 if (!rutasPorBus[p.id_vehiculo]) {
                   rutasPorBus[p.id_vehiculo] = [ORIGEN_UNGE];
+                  mapaColoresBus[p.id_vehiculo] = colores[colorIndex % colores.length];
+                  colorIndex++;
                 }
                 rutasPorBus[p.id_vehiculo].push(L.latLng(lat, lng));
 
-                L.marker([lat, lng]).addTo(capaParadas)
-                  .bindPopup(`Parada ${p.orden}: ${p.nombre_parada} – Bus ${p.id_vehiculo}`);
+                const colorParada = mapaColoresBus[p.id_vehiculo];
+                const iconoParada = L.divIcon({
+                  className: 'custom-parada-icon',
+                  html: `<div style="background:${colorParada}; color:white; border:2px solid white; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px; box-shadow:0 2px 5px rgba(0,0,0,0.4);">${p.orden}</div>`,
+                  iconSize: L.point(26, 26),
+                  iconAnchor: L.point(13, 13)
+                });
+
+                L.marker([lat, lng], { icon: iconoParada }).addTo(capaParadas)
+                  .bindPopup(`<b>Parada ${p.orden}:</b> ${p.nombre_parada}<br>Bus ID: ${p.id_vehiculo}`);
               } else {
                 console.warn(`Coordenadas inválidas en parada ID ${p.id_parada}:`, p.latitud, p.longitud);
               }
@@ -245,7 +257,7 @@
         const busIds = Object.keys(rutasPorBus);
         if (busIds.length > 0) {
           L.circleMarker(ORIGEN_UNGE, {
-            radius: 8,
+            radius: 9,
             fillColor: "#ffc107",
             color: "#003366",
             weight: 3,
@@ -254,17 +266,15 @@
         }
 
         // Dibujar ruta real por calles para cada bus (OSRM)
-        const colores = ['#0d6efd', '#198754', '#dc3545', '#fd7e14', '#6f42c1'];
-
         for (let idx = 0; idx < busIds.length; idx++) {
           const busId = busIds[idx];
           const puntos = rutasPorBus[busId];
-          const color = colores[idx % colores.length];
+          const color = mapaColoresBus[busId];
 
           if (puntos.length > 1) {
             try {
               const waypoints = puntos.map(pt => `${pt.lng},${pt.lat}`).join(';');
-              const osrmUrl = `https://project-osrm.org{waypoints}?overview=full&geometries=geojson`;
+              const osrmUrl = "https://project-osrm.org" + waypoints + "?overview=full&geometries=geojson";
               const rutaRes = await fetch(osrmUrl);
               const rutaData = await rutaRes.json();
 
@@ -291,7 +301,6 @@
         console.error("Error cargando paradas:", err);
       }
     }
-
 
 
     // Guardar o actualizar parada
@@ -354,7 +363,7 @@
       await fetch(`${API_BASE}/api/paradas/${id}`, { method: "DELETE" });
       await cargarParadas();
     }
-    // Cargar posiciones dinámicas
+        // Cargar posiciones dinámicas con icono de autobús
     async function cargarPosiciones() {
       try {
         const res = await fetch(`${API_BASE}/api/posiciones`);
@@ -391,12 +400,19 @@
         });
 
         Object.values(ultimaPosicionPorBus).forEach(bus => {
-          const lat = parseFloat(bus.latitud);
-          const lng = parseFloat(bus.longitud);
+          const lat = parseFloat(String(bus.latitud).replace(',', '.').trim());
+          const lng = parseFloat(String(bus.longitud).replace(',', '.').trim());
           if (!isNaN(lat) && !isNaN(lng)) {
-            L.marker([lat, lng])
+            const iconoBus = L.divIcon({
+              className: 'custom-bus-icon',
+              html: `<div style="background:#198754; color:white; border:2px solid #ffc107; border-radius:6px; padding:2px 6px; font-weight:bold; font-size:12px; white-space:nowrap; box-shadow:0 3px 6px rgba(0,0,0,0.5);">🚌 Bus ${bus.id_vehiculo}</div>`,
+              iconSize: L.point(75, 24),
+              iconAnchor: L.point(37, 12)
+            });
+
+            L.marker([lat, lng], { icon: iconoBus })
               .addTo(capaBuses)
-              .bindPopup(`Bus ${bus.id_vehiculo} – ${bus.ruta || ''} | ETA: ${bus.eta_minutos || '--'} min`);
+              .bindPopup(`<b>Bus ${bus.id_vehiculo}</b> – ${bus.ruta || ''}<br>Velocidad: ${bus.velocidad ?? '--'} km/h<br>ETA: ${bus.eta_minutos ?? '--'} min`);
           }
         });
 
