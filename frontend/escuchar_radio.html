@@ -972,81 +972,7 @@
 
 
 
-      // ==========================
-      // ACTUALIZAR DASHBOARD RADIO
-      // ==========================
-
-      const estadoRadio =
-        document.getElementById("estadoRadio");
-
-      const modoRadio =
-        document.getElementById("modoRadio");
-
-      document.getElementById("oyentesActuales").textContent =
-        data.oyentes_actuales || 0;
-
-      document.getElementById("programaActual").textContent =
-        data.programa_actual || "Ninguno";
-
-      estadoRadio.textContent =
-        data.estado || "Apagada";
-
-
-
-      if (
-        (data.estado || "").toLowerCase()
-        === "encendida"
-      ) {
-
-        estadoRadio.className =
-          "estado-on";
-
-      } else {
-
-        estadoRadio.className =
-          "estado-off";
-
-      }
-
-
-
-      if (
-        (data.modo || "").toLowerCase()
-        === "musica"
-      ) {
-
-        modoRadio.textContent =
-          "Música";
-
-        modoRadio.className =
-          "badge modo-musica fs-6";
-
-      }
-
-      else if (
-        (data.modo || "").toLowerCase()
-        === "programa"
-      ) {
-
-        modoRadio.textContent =
-          "Programa";
-
-        modoRadio.className =
-          "badge modo-programa fs-6";
-
-      }
-
-      else {
-
-        modoRadio.textContent =
-          "Sin transmisión";
-
-        modoRadio.className =
-          "badge modo-inactivo fs-6";
-
-      }
-
-    } catch (err) {
+         } catch (err) {
 
       console.error(
         "Error cargando programación:",
@@ -1056,6 +982,7 @@
     }
 
   }
+
 
 
 
@@ -1675,8 +1602,6 @@ document.getElementById("formMensaje")
     }
   );
 
-
-
 // RECIBIR MENSAJES
 
 socket.on(
@@ -1849,6 +1774,70 @@ document.getElementById(
   "click",
   cargarMensajes
 );
+
+
+
+// ========================================
+// SINCRONIZACIÓN EN TIEMPO REAL (ESTADO Y OYENTES)
+// ========================================
+
+function actualizarTarjetasRadio(datos) {
+  if (!datos) return;
+
+  const estadoRadio = document.getElementById("estadoRadio");
+  const modoRadio = document.getElementById("modoRadio");
+  const oyentesEl = document.getElementById("oyentesActuales");
+  const programaEl = document.getElementById("programaActual");
+
+  if (datos.oyentes !== undefined || datos.oyentes_actuales !== undefined) {
+    oyentesEl.textContent = datos.oyentes ?? datos.oyentes_actuales ?? 0;
+  }
+
+  if (datos.programa_actual) {
+    programaEl.textContent = datos.programa_actual;
+  }
+
+  if (datos.estado) {
+    const encendida = datos.estado.toLowerCase() === "encendida" || datos.estado === true;
+    estadoRadio.textContent = encendida ? "Encendida" : "Apagada";
+    estadoRadio.className = encendida ? "estado-on" : "estado-off";
+  }
+
+  if (datos.modo) {
+    const modo = datos.modo.toLowerCase();
+    if (modo === "musica") {
+      modoRadio.textContent = "Música";
+      modoRadio.className = "badge modo-musica fs-6";
+    } else if (modo === "programa") {
+      modoRadio.textContent = "Programa";
+      modoRadio.className = "badge modo-programa fs-6";
+    } else {
+      modoRadio.textContent = "Sin transmisión";
+      modoRadio.className = "badge modo-inactivo fs-6";
+    }
+  }
+}
+
+// 1. Avisar al servidor que este usuario entró al módulo de radio
+socket.emit("oyenteConectado", {
+  rol: localStorage.getItem("rol") || "invitado"
+});
+
+// 2. Escuchar actualización de número de oyentes desde el backend
+socket.on("oyentesActuales", (cantidad) => {
+  document.getElementById("oyentesActuales").textContent = cantidad;
+});
+
+// 3. Escuchar cambios de estado/modo en tiempo real desde el backend
+socket.on("estadoRadio", (datos) => {
+  actualizarTarjetasRadio(datos);
+});
+
+// 4. Consultar estado inicial al cargar la página
+fetch(`${API_BASE}/api/estado_radio`)
+  .then(res => res.ok ? res.json() : null)
+  .then(data => actualizarTarjetasRadio(data))
+  .catch(() => {});
 
 </script>
 
