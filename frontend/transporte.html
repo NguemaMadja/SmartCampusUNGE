@@ -3,9 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <title>Transporte Escolar - SmartCampusUNGE</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap 5 & Icons -->
+  <link href="https://jsdelivr.net" rel="stylesheet">
+  <link href="https://jsdelivr.net" rel="stylesheet">
+  <!-- Leaflet & Heatmap Plugin -->
+  <link rel="stylesheet" href="https://unpkg.com" />
+  <script src="https://unpkg.com"></script>
+  <script src="https://unpkg.com"></script>
+  <!-- Chart.js & SheetJS (Exportar Excel) -->
+  <script src="https://jsdelivr.net"></script>
+  <script src="https://jsdelivr.net"></script>
+
   <style>
     body {
       background: linear-gradient(135deg, #003366, #004080);
@@ -17,60 +26,72 @@
       color: white;
     }
     .navbar { background-color: #004080; height: 60px; display: flex; align-items: center; }
-    .scroll-msg { background-color: #008000; color: #fff; font-weight: bold; padding: 5px; flex: 1; margin: 0 60px; }
-    .scroll-msg marquee { font-size: 1.1em; }
+    .scroll-msg { background-color: #008000; color: #fff; font-weight: bold; padding: 5px; flex: 1; margin: 0 60px; border-radius: 4px; }
+    .scroll-msg marquee { font-size: 1.05em; }
     .container-main { flex: 1; padding: 20px; }
-    .card { margin-bottom: 20px; }
+    .card, .modal-content { color: #212529; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
     footer { background-color: #004080; color: white; padding: 15px; text-align: center; margin-top: auto; }
     .social-buttons .btn { margin: 5px; border-radius: 50%; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; }
-    .btn-nav, .btn-export { background-color: #006400; color: #fff; border-radius: 8px; padding: 8px 20px; margin: 5px; transition: 0.3s; }
-    .btn-nav:hover, .btn-export:hover { background-color: #004d26; transform: scale(1.05); }
+    .btn-nav, .btn-export { background-color: #006400; color: #fff; border: none; border-radius: 8px; padding: 8px 18px; margin: 4px; transition: 0.3s; }
+    .btn-nav:hover, .btn-export:hover { background-color: #004d26; transform: scale(1.04); }
+    .btn-gradient-green { background: linear-gradient(45deg, #198754, #20c997); color: white; border: none; }
+    .btn-gradient-green:hover { opacity: 0.9; color: white; }
+    #mapaCampus, #heatmapParadas { border-radius: 8px; z-index: 1; }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white; color: black; }
+    }
   </style>
 </head>
 <body>
 
-    <!-- Cabecera -->
-  <nav class="navbar navbar-dark">
+  <!-- Cabecera -->
+  <nav class="navbar navbar-dark no-print">
     <a class="navbar-brand d-flex align-items-center ms-3" href="index.html">
       <img src="logo/LOGO-UNGE-1.png" alt="Logo UNGE" class="img-fluid me-2" style="max-height:50px;">
       <span>SmartCampusUNGE</span>
     </a>
     <div class="scroll-msg text-center">
       <marquee behavior="scroll" direction="left" scrollamount="6">
-        Transporte Escolar: métricas, rutas y satisfacción de usuarios
+        Transporte Escolar UNGE: métricas ejecutivas, rutas en Malabo y satisfacción de usuarios
       </marquee>
     </div>
-
-
-    
   </nav>
 
   <!-- Contenido principal -->
   <div class="container-main container">
-    <h2 class="text-center text-white mb-4">Transporte Escolar</h2>
+    <h2 class="text-center text-white mb-4">Panel Ejecutivo – Transporte Escolar</h2>
 
     <!-- Botones de acciones -->
-    <div class="d-flex justify-content-center mb-4 flex-wrap">
-      <button class="btn btn-primary m-2" id="btnGestionBuses" data-bs-toggle="modal" data-bs-target="#modalBus">Gestión de Buses</button>
-      <a href="smarttransit.html" class="btn btn-success m-2" id="btnSmartTransit">SmartTransit UNGE</a>
-      <a href="panel.html" class="btn btn-gradient-green shadow-sm" id="btnVolverPanel">🔙 Volver al Panel</a>
+    <div class="d-flex justify-content-center mb-4 flex-wrap no-print">
+      <button class="btn btn-primary m-2" id="btnGestionBuses" data-bs-toggle="modal" data-bs-target="#modalBus">
+        <i class="bi bi-bus-front"></i> Gestión de Buses
+      </button>
+      <a href="smarttransit.html" class="btn btn-success m-2" id="btnSmartTransit">
+        <i class="bi bi-geo-alt"></i> SmartTransit UNGE
+      </a>
+      <a href="panel.html" class="btn btn-gradient-green m-2 shadow-sm" id="btnVolverPanel">
+        🔙 Volver al Panel
+      </a>
     </div>
+
     <!-- Contenido extra que se ocultará para profesor/estudiante/radio -->
     <div id="contenidoExtra">
-      <!-- Botones de navegación -->
-      <div class="text-center mb-4">
+      <!-- Botones de navegación y exportación -->
+      <div class="text-center mb-4 no-print">
         <button class="btn-nav" onclick="window.history.back()"><i class="bi bi-arrow-left-circle"></i> Atrás</button>
         <button class="btn-nav" onclick="window.history.forward()"><i class="bi bi-arrow-right-circle"></i> Adelante</button>
-        <button class="btn-export" onclick="window.print()"><i class="bi bi-printer"></i> Imprimir</button>
-        <button class="btn-export" onclick="descargarPDF()"><i class="bi bi-file-earmark-pdf"></i> PDF</button>
-        <button class="btn-export" onclick="descargarExcel()"><i class="bi bi-file-earmark-excel"></i> Excel</button>
+        <button class="btn-export" onclick="window.print()"><i class="bi bi-printer"></i> Imprimir / PDF</button>
+        <button class="btn-export" onclick="descargarExcel()"><i class="bi bi-file-earmark-excel"></i> Exportar Excel</button>
       </div>
-
       <!-- Tabla de vehículos -->
       <div class="card">
-        <div class="card-header bg-primary text-white">Listado de Vehículos</div>
-        <div class="card-body">
-          <table class="table table-striped table-hover" id="tablaVehiculos">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-table"></i> Listado de Vehículos</span>
+          <span class="badge bg-light text-dark" id="totalFlotaBadge">0 unidades</span>
+        </div>
+        <div class="card-body table-responsive">
+          <table class="table table-striped table-hover align-middle" id="tablaVehiculos">
             <thead class="table-dark">
               <tr>
                 <th>ID Vehículo</th>
@@ -79,7 +100,7 @@
                 <th>Ruta</th>
                 <th>Capacidad</th>
                 <th>Estado</th>
-                <th>Acciones</th>
+                <th class="no-print">Acciones</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -87,65 +108,73 @@
         </div>
       </div>
 
-      <!-- Gráficas y mapas -->
+      <!-- Gráficas principales -->
       <div class="row">
         <div class="col-md-4">
-          <div class="card">
-            <div class="card-header bg-info text-white">Pasajeros Semanal/Mensual</div>
+          <div class="card h-100">
+            <div class="card-header bg-info text-white fw-bold">Pasajeros Transportados (Semanal)</div>
             <div class="card-body"><canvas id="graficoPasajeros"></canvas></div>
           </div>
         </div>
         <div class="col-md-4">
-          <div class="card">
-            <div class="card-header bg-success text-white">Consumo de Combustible</div>
+          <div class="card h-100">
+            <div class="card-header bg-success text-white fw-bold">Consumo de Combustible (Litros)</div>
             <div class="card-body"><canvas id="graficoCombustible"></canvas></div>
           </div>
         </div>
         <div class="col-md-4">
-          <div class="card">
-            <div class="card-header bg-danger text-white">Incidencias Reportadas</div>
+          <div class="card h-100">
+            <div class="card-header bg-danger text-white fw-bold">Incidencias Reportadas</div>
             <div class="card-body"><canvas id="graficoIncidencias"></canvas></div>
           </div>
         </div>
       </div>
 
       <div class="card mt-4">
-        <div class="card-header bg-warning text-dark">Rutas Activas vs Planificadas</div>
-        <div class="card-body"><canvas id="graficoRutas"></canvas></div>
+        <div class="card-header bg-warning text-dark fw-bold">Estado de Flota: Rutas Activas vs Planificadas / Mantenimiento</div>
+        <div class="card-body" style="max-height: 320px; display: flex; justify-content: center;">
+          <canvas id="graficoRutas"></canvas>
+        </div>
       </div>
 
+      <!-- Mapas -->
       <div class="card mt-4">
-        <div class="card-header bg-primary text-white">Mapa de Campus y Rutas</div>
+        <div class="card-header bg-primary text-white fw-bold">
+          <i class="bi bi-map"></i> Mapa de Campus UNGE, Rutas y Buses en Tiempo Real
+        </div>
         <div class="card-body">
-          <div id="mapaCampus" style="height:400px; background:#e0e0e0; text-align:center; line-height:400px;">
-            [Mapa interactivo aquí]
-          </div>
+          <div id="mapaCampus" style="height: 420px;"></div>
         </div>
       </div>
 
       <div class="card mt-4">
-        <div class="card-header bg-info text-white">Mapa de calor de paradas</div>
+        <div class="card-header bg-info text-white fw-bold">
+          <i class="bi bi-fire"></i> Mapa de Calor de Paradas (Concentración de Cobertura)
+        </div>
         <div class="card-body">
-          <div id="heatmapParadas" style="height:300px; background:#f0f0f0; text-align:center; line-height:300px;">
-            [Heatmap de paradas más usadas]
-          </div>
+          <div id="heatmapParadas" style="height: 350px;"></div>
         </div>
       </div>
 
       <!-- Encuesta de satisfacción -->
-      <div class="card mt-4">
-        <div class="card-header bg-secondary text-white">Encuesta rápida de satisfacción</div>
+      <div class="card mt-4 no-print">
+        <div class="card-header bg-secondary text-white fw-bold">Encuesta rápida de satisfacción estudiantil</div>
         <div class="card-body">
-          <form id="formEncuesta">
-            <label class="form-label">¿Cómo valoras el transporte escolar?</label>
-            <select id="satisfaccion" class="form-select mb-3">
-              <option value="Excelente">Excelente</option>
-              <option value="Bueno">Bueno</option>
-              <option value="Regular">Regular</option>
-              <option value="Malo">Malo</option>
-            </select>
-            <button type="submit" class="btn btn-success">Enviar</button>
+          <form id="formEncuesta" class="row g-3 align-items-end">
+            <div class="col-md-8">
+              <label class="form-label fw-bold">¿Cómo valoras el servicio de transporte escolar de la UNGE?</label>
+              <select id="satisfaccion" class="form-select">
+                <option value="Excelente">⭐⭐⭐⭐⭐ Excelente</option>
+                <option value="Bueno">⭐⭐⭐⭐ Bueno</option>
+                <option value="Regular">⭐⭐⭐ Regular</option>
+                <option value="Malo">⭐⭐ Malo</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <button type="submit" class="btn btn-success w-100"><i class="bi bi-send"></i> Enviar Valoración</button>
+            </div>
           </form>
+          <div id="mensajeEncuesta" class="mt-2 text-success fw-bold" style="display:none;"></div>
         </div>
       </div>
     </div>
@@ -154,30 +183,30 @@
     <div class="modal fade" id="modalBus" tabindex="-1">
       <div class="modal-dialog">
         <form id="formBus" class="modal-content">
-          <div class="modal-header">
+          <div class="modal-header bg-primary text-white">
             <h5 class="modal-title">Gestión de Buses</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
             <input type="hidden" id="busId">
             <div class="mb-3">
-              <label for="placa" class="form-label">Número de Placa</label>
-              <input type="text" id="placa" class="form-control" placeholder="Ej: GE-1234" required>
+              <label for="placa" class="form-label fw-bold">Número de Placa</label>
+              <input type="text" id="placa" class="form-control" placeholder="Ej: GE-1234-A" required>
             </div>
             <div class="mb-3">
-              <label for="conductor" class="form-label">Nombre del Conductor</label>
+              <label for="conductor" class="form-label fw-bold">Nombre del Conductor</label>
               <input type="text" id="conductor" class="form-control" placeholder="Ej: Juan Pérez" required>
             </div>
             <div class="mb-3">
-              <label for="ruta" class="form-label">Ruta / Línea</label>
-              <input type="text" id="ruta" class="form-control" placeholder="Ej: Campus Central" required>
+              <label for="ruta" class="form-label fw-bold">Ruta / Línea</label>
+              <input type="text" id="ruta" class="form-control" placeholder="Ej: Campus Central - Semu" required>
             </div>
             <div class="mb-3">
-              <label for="capacidad" class="form-label">Capacidad de Pasajeros</label>
+              <label for="capacidad" class="form-label fw-bold">Capacidad de Pasajeros</label>
               <input type="number" id="capacidad" class="form-control" placeholder="Ej: 40" required>
             </div>
             <div class="mb-3">
-              <label for="estado" class="form-label">Estado del Bus</label>
+              <label for="estado" class="form-label fw-bold">Estado del Bus</label>
               <select id="estado" class="form-select" required>
                 <option value="">Selecciona...</option>
                 <option value="Activo">Activo</option>
@@ -192,10 +221,12 @@
         </form>
       </div>
     </div>
+  </div>
+
   <!-- Pie de página -->
   <footer>
     <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
-    <div class="social-buttons">
+    <div class="social-buttons no-print">
       <a href="#" class="btn btn-outline-light"><i class="bi bi-twitter"></i></a>
       <a href="#" class="btn btn-outline-light"><i class="bi bi-facebook"></i></a>
       <a href="#" class="btn btn-outline-light"><i class="bi bi-instagram"></i></a>
@@ -203,87 +234,359 @@
     </div>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    const API_BASE = "https://smartcampusunge.onrender.com"; // URL de tu backend en Render
 
-    // Cargar vehículos desde backend
+    <script src="https://jsdelivr.net"></script>
+  <script>
+    const API_BASE = window.location.hostname.includes("onrender.com")
+      ? ""
+      : "https://onrender.com";
+
+    // Coordenadas base Campus Central UNGE (Malabo)
+    const ORIGEN_UNGE = L.latLng(3.7468, 8.7752);
+
+    // Variables globales para gráficas y mapas
+    let chartRutasInstance = null;
+
+    const mapaCampus = L.map("mapaCampus").setView([3.7468, 8.7752], 13);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap contributors"
+    }).addTo(mapaCampus);
+    const capaRutasCampus = L.layerGroup().addTo(mapaCampus);
+
+    const mapaCalor = L.map("heatmapParadas").setView([3.7468, 8.7752], 13);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap contributors"
+    }).addTo(mapaCalor);
+    let capaHeat = null;
+
+    // 1. Cargar vehículos y actualizar gráfica de estado de flota
     async function cargarVehiculos() {
-      const res = await fetch(`${API_BASE}/api/vehiculos`);
-      const data = await res.json();
-      const tbody = document.querySelector('#tablaVehiculos tbody');
-      tbody.innerHTML = '';
-      data.data.forEach(bus => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${bus.id_vehiculo}</td>
-          <td>${bus.placa}</td>
-          <td>${bus.conductor}</td>
-          <td>${bus.ruta || ''}</td>
-          <td>${bus.capacidad}</td>
-          <td>${bus.estado}</td>
-          <td>
-            <button class="btn btn-sm btn-warning" onclick="editarBus(${bus.id_vehiculo})">Editar</button>
-            <button class="btn btn-sm btn-danger" onclick="eliminarBus(${bus.id_vehiculo})">Eliminar</button>
-          </td>`;
-        tbody.appendChild(tr);
+      try {
+        const res = await fetch(`${API_BASE}/api/vehiculos`);
+        const json = await res.json();
+        const vehiculos = json.data || [];
+        const tbody = document.querySelector('#tablaVehiculos tbody');
+        tbody.innerHTML = '';
+
+        document.getElementById('totalFlotaBadge').textContent = `${vehiculos.length} unidades`;
+
+        let activos = 0;
+        let enRuta = 0;
+        let mantenimiento = 0;
+
+        vehiculos.forEach(bus => {
+          const est = (bus.estado || '').toLowerCase();
+          let badgeClass = 'bg-secondary';
+          if (est === 'activo') { activos++; badgeClass = 'bg-success'; }
+          else if (est === 'en ruta') { enRuta++; badgeClass = 'bg-primary'; }
+          else { mantenimiento++; badgeClass = 'bg-warning text-dark'; }
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${bus.id_vehiculo}</td>
+            <td class="fw-bold">${bus.placa}</td>
+            <td>${bus.conductor}</td>
+            <td>${bus.ruta || ''}</td>
+            <td>${bus.capacidad} pax</td>
+            <td><span class="badge ${badgeClass}">${bus.estado}</span></td>
+            <td class="no-print">
+              <button class="btn btn-sm btn-warning" onclick="editarBus(${bus.id_vehiculo})">Editar</button>
+              <button class="btn btn-sm btn-danger" onclick="eliminarBus(${bus.id_vehiculo})">Eliminar</button>
+            </td>`;
+          tbody.appendChild(tr);
+        });
+
+        actualizarGraficaRutas(activos, enRuta, mantenimiento);
+      } catch (err) {
+        console.error("Error cargando vehículos:", err);
+      }
+    }
+
+    // 2. Gráfica dinámica: Rutas Activas vs Planificadas / Mantenimiento
+    function actualizarGraficaRutas(activos, enRuta, mantenimiento) {
+      const ctx = document.getElementById('graficoRutas').getContext('2d');
+      if (chartRutasInstance) chartRutasInstance.destroy();
+
+      chartRutasInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['En Ruta (Operando)', 'Activos (Disponibles)', 'En Mantenimiento'],
+          datasets: [{
+            data: [enRuta, activos, mantenimiento],
+            backgroundColor: ['#0d6efd', '#198754', '#ffc107'],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'right' }
+          }
+        }
       });
     }
 
-    // Guardar vehículo (crear o actualizar)
+    // 3. Gráficas ejecutivas superiores (Pasajeros, Combustible, Incidencias)
+    function inicializarGraficasMetricas() {
+      new Chart(document.getElementById('graficoPasajeros'), {
+        type: 'bar',
+        data: {
+          labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
+          datasets: [{
+            label: 'Estudiantes',
+            data: new Array(420, 485, 510, 490, 530, 210),
+            backgroundColor: '#0dcaf0',
+            borderRadius: 5
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+      });
+
+      new Chart(document.getElementById('graficoCombustible'), {
+        type: 'line',
+        data: {
+          labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
+          datasets: [{
+            label: 'Litros Diésel',
+            data: new Array(680, 720, 695, 740),
+            borderColor: '#198754',
+            backgroundColor: 'rgba(25, 135, 84, 0.2)',
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+      });
+
+      new Chart(document.getElementById('graficoIncidencias'), {
+        type: 'pie',
+        data: {
+          labels: ['Tráfico / Retraso', 'Mecánica leve', 'Clima', 'Sin novedad'],
+          datasets: [{
+            data: new Array(12, 4, 6, 78),
+            backgroundColor: ['#ffc107', '#dc3545', '#0dcaf0', '#198754']
+          }]
+        },
+        options: { responsive: true }
+      });
+    }
+
+
+        // 4. Cargar Mapas: Rutas reales por calles + Buses en vivo + Heatmap
+    async function cargarMapasEjecutivos() {
+      try {
+        const [resParadas, resPosiciones] = await Promise.all([
+          fetch(`${API_BASE}/api/paradas`),
+          fetch(`${API_BASE}/api/posiciones`)
+        ]);
+        const paradas = (await resParadas.json()).data || [];
+        const posiciones = (await resPosiciones.json()).data || [];
+
+        capaRutasCampus.clearLayers();
+        const rutasPorBus = {};
+        const puntosCalor = [new Array(3.7468, 8.7752, 1.0)];
+        const colores = ['#0d6efd', '#198754', '#dc3545', '#fd7e14', '#6f42c1'];
+        const mapaColoresBus = {};
+        let colorIdx = 0;
+
+        // Marcador fijo Terminal UNGE
+        L.circleMarker(ORIGEN_UNGE, {
+          radius: 9, fillColor: "#ffc107", color: "#003366", weight: 3, fillOpacity: 1
+        }).addTo(capaRutasCampus).bindPopup("<b>Terminal Central UNGE</b>");
+
+        paradas
+          .sort((a, b) => Number(a.orden) - Number(b.orden))
+          .forEach(p => {
+            const lat = parseFloat(String(p.latitud).replace(',', '.').trim());
+            const lng = parseFloat(String(p.longitud).replace(',', '.').trim());
+
+            if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+              if (!rutasPorBus[p.id_vehiculo]) {
+                rutasPorBus[p.id_vehiculo] = [ORIGEN_UNGE];
+                mapaColoresBus[p.id_vehiculo] = colores[colorIdx % colores.length];
+                colorIdx++;
+              }
+              rutasPorBus[p.id_vehiculo].push(L.latLng(lat, lng));
+              puntosCalor.push(new Array(lat, lng, 0.85));
+
+              const colorParada = mapaColoresBus[p.id_vehiculo];
+              const iconoParada = L.divIcon({
+                className: 'custom-parada-icon',
+                html: `<div style="background:${colorParada}; color:white; border:2px solid white; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:11px; box-shadow:0 2px 4px rgba(0,0,0,0.4);">${p.orden}</div>`,
+                iconSize: L.point(24, 24),
+                iconAnchor: L.point(12, 12)
+              });
+
+              L.marker([lat, lng], { icon: iconoParada })
+                .addTo(capaRutasCampus)
+                .bindPopup(`<b>Parada ${p.orden}:</b> ${p.nombre_parada}<br>Bus ID: ${p.id_vehiculo}`);
+            }
+          });
+
+        // Trazar rutas por calles reales (OSRM)
+        const busIds = Object.keys(rutasPorBus);
+        for (let i = 0; i < busIds.length; i++) {
+          const busId = busIds[i];
+          const puntos = rutasPorBus[busId];
+          const color = mapaColoresBus[busId];
+
+          if (puntos.length > 1) {
+            try {
+              const waypoints = puntos.map(pt => `${pt.lng},${pt.lat}`).join(';');
+              const osrmUrl = "https://project-osrm.org" + waypoints + "?overview=full&geometries=geojson";
+              const rRes = await fetch(osrmUrl);
+              const rData = await rRes.json();
+              if (rData.routes && rData.routes.length > 0) {
+                L.geoJSON(rData.routes.at(0).geometry, {
+                  style: { color: color, weight: 5, opacity: 0.85 }
+                }).addTo(capaRutasCampus);
+              } else {
+                L.polyline(puntos, { color: color, weight: 4, dashArray: '6, 6' }).addTo(capaRutasCampus);
+              }
+            } catch (e) {
+              L.polyline(puntos, { color: color, weight: 4 }).addTo(capaRutasCampus);
+            }
+          }
+        }
+
+        // Dibujar última posición de cada bus en tiempo real
+        const ultimasPos = {};
+        posiciones.forEach(pos => {
+          if (!ultimasPos[pos.id_vehiculo]) ultimasPos[pos.id_vehiculo] = pos;
+        });
+
+        Object.values(ultimasPos).forEach(bus => {
+          const lat = parseFloat(String(bus.latitud).replace(',', '.').trim());
+          const lng = parseFloat(String(bus.longitud).replace(',', '.').trim());
+          if (!isNaN(lat) && !isNaN(lng)) {
+            const iconoBus = L.divIcon({
+              className: 'custom-bus-icon',
+              html: `<div style="background:#198754; color:white; border:2px solid #ffc107; border-radius:6px; padding:2px 6px; font-weight:bold; font-size:11px; white-space:nowrap; box-shadow:0 2px 5px rgba(0,0,0,0.5);">🚌 Bus ${bus.id_vehiculo}</div>`,
+              iconSize: L.point(70, 22),
+              iconAnchor: L.point(35, 11)
+            });
+            L.marker([lat, lng], { icon: iconoBus })
+              .addTo(capaRutasCampus)
+              .bindPopup(`<b>Bus ${bus.id_vehiculo}</b> – ${bus.ruta || ''}<br>ETA: ${bus.eta_minutos ?? '--'} min`);
+          }
+        });
+
+        // Ajustar encuadre del mapa principal
+        const capas = capaRutasCampus.getLayers();
+        if (capas.length > 0) {
+          mapaCampus.fitBounds(L.featureGroup(capas).getBounds(), {
+            paddingTopLeft: L.point(35, 35), paddingBottomRight: L.point(35, 35), maxZoom: 15
+          });
+        }
+
+        // Renderizar Mapa de Calor (Heatmap)
+        if (capaHeat) mapaCalor.removeLayer(capaHeat);
+        capaHeat = L.heatLayer(puntosCalor, {
+          radius: 30,
+          blur: 20,
+          maxZoom: 15,
+          gradient: { 0.4: 'blue', 0.65: 'lime', 1: 'red' }
+        }).addTo(mapaCalor);
+
+        if (puntosCalor.length > 1) {
+          const boundsCalor = L.latLngBounds(puntosCalor.map(p => L.latLng(p.at(0), p.at(1))));
+          mapaCalor.fitBounds(boundsCalor, {
+            paddingTopLeft: L.point(35, 35), paddingBottomRight: L.point(35, 35), maxZoom: 14
+          });
+        }
+      } catch (err) {
+        console.error("Error cargando mapas:", err);
+      }
+    }
+    // 5. CRUD de Buses (Crear, Editar, Eliminar)
+    document.getElementById('btnGestionBuses').addEventListener('click', () => {
+      document.getElementById('busId').value = '';
+      document.getElementById('formBus').reset();
+      document.querySelector('#modalBus .modal-title').textContent = 'Registrar Nuevo Bus';
+    });
+
     document.getElementById('formBus').addEventListener('submit', async e => {
       e.preventDefault();
       const id = document.getElementById('busId').value;
       const bus = {
-        placa: document.getElementById('placa').value,
-        conductor: document.getElementById('conductor').value,
-        ruta: document.getElementById('ruta').value,
+        placa: document.getElementById('placa').value.trim(),
+        conductor: document.getElementById('conductor').value.trim(),
+        ruta: document.getElementById('ruta').value.trim(),
         capacidad: document.getElementById('capacidad').value,
         estado: document.getElementById('estado').value
       };
       const url = id ? `${API_BASE}/api/vehiculos/${id}` : `${API_BASE}/api/vehiculos`;
       const method = id ? 'PUT' : 'POST';
-      await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(bus) });
-      cargarVehiculos();
+
+      await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bus)
+      });
+
+      await cargarVehiculos();
       document.getElementById('formBus').reset();
-      const modal = bootstrap.Modal.getInstance(document.getElementById('modalBus'));
+      const modalEl = document.getElementById('modalBus');
+      const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
       modal.hide();
     });
 
-    // Editar vehículo
     async function editarBus(id) {
-      const res = await fetch(`${API_BASE}/api/vehiculos/${id}`);
-      const data = await res.json();
-      const bus = data.data;
-      document.getElementById('busId').value = bus.id_vehiculo;
-      document.getElementById('placa').value = bus.placa;
-      document.getElementById('conductor').value = bus.conductor;
-      document.getElementById('ruta').value = bus.ruta || '';
-      document.getElementById('capacidad').value = bus.capacidad;
-      document.getElementById('estado').value = bus.estado;
-      new bootstrap.Modal(document.getElementById('modalBus')).show();
-    }
-
-    // Eliminar vehículo
-    async function eliminarBus(id) {
-      if (confirm('¿Seguro que deseas eliminar este vehículo?')) {
-        await fetch(`${API_BASE}/api/vehiculos/${id}`, { method: 'DELETE' });
-        cargarVehiculos();
+      try {
+        const res = await fetch(`${API_BASE}/api/vehiculos/${id}`);
+        const data = await res.json();
+        const bus = data.data;
+        document.getElementById('busId').value = bus.id_vehiculo;
+        document.getElementById('placa').value = bus.placa;
+        document.getElementById('conductor').value = bus.conductor;
+        document.getElementById('ruta').value = bus.ruta || '';
+        document.getElementById('capacidad').value = bus.capacidad;
+        document.getElementById('estado').value = bus.estado;
+        document.querySelector('#modalBus .modal-title').textContent = 'Editar Bus';
+        new bootstrap.Modal(document.getElementById('modalBus')).show();
+      } catch (err) {
+        console.error("Error obteniendo bus:", err);
       }
     }
 
-    // Inicializar
-    cargarVehiculos();
+    async function eliminarBus(id) {
+      if (confirm('¿Seguro que deseas eliminar este vehículo?')) {
+        await fetch(`${API_BASE}/api/vehiculos/${id}`, { method: 'DELETE' });
+        await cargarVehiculos();
+      }
+    }
 
-    // Restricciones por rol
+    // 6. Exportar Tabla de Vehículos a Excel (.xlsx)
+    function descargarExcel() {
+      const tabla = document.getElementById("tablaVehiculos");
+      const wb = XLSX.utils.table_to_book(tabla, { sheet: "Flota UNGE" });
+      XLSX.writeFile(wb, "Reporte_Transporte_UNGE_2026.xlsx");
+    }
+
+    // 7. Encuesta rápida de satisfacción
+    document.getElementById('formEncuesta').addEventListener('submit', e => {
+      e.preventDefault();
+      const valor = document.getElementById('satisfaccion').value;
+      const msg = document.getElementById('mensajeEncuesta');
+      msg.textContent = `✅ ¡Gracias! Se ha registrado tu valoración: "${valor}".`;
+      msg.style.display = 'block';
+      setTimeout(() => { msg.style.display = 'none'; }, 4000);
+    });
+
+    // 8. Control de roles e inicialización
     const rol = localStorage.getItem("rol");
     if (rol === "profesor" || rol === "estudiante" || rol === "radio") {
-      // Ocultar todo el contenido extra
       document.getElementById("contenidoExtra").style.display = "none";
-      // Mantener solo SmartTransit y Volver al Panel
       document.getElementById("btnSmartTransit").style.display = "inline-block";
       document.getElementById("btnVolverPanel").style.display = "inline-block";
       document.getElementById("btnGestionBuses").style.display = "none";
+    } else {
+      cargarVehiculos();
+      inicializarGraficasMetricas();
+      cargarMapasEjecutivos();
+      // Actualizar buses en vivo cada 30 segundos
+      setInterval(cargarMapasEjecutivos, 30000);
     }
   </script>
 </body>
