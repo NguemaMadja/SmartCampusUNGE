@@ -8,13 +8,11 @@ const sequelize = require('./db'); // conexión Sequelize
 const app = express();
 
 app.use(cors());
-
 app.use(express.json());
 
 // =====================================
 // ARCHIVOS MULTIMEDIA
 // =====================================
-
 app.use(
   '/uploads',
   express.static(
@@ -26,6 +24,44 @@ app.use(
 sequelize.authenticate()
   .then(() => console.log('Conexión a BD establecida'))
   .catch(err => console.error('Error de conexión:', err));
+
+// 🔹 Estado global de la radio en tiempo real
+let estadoActualRadio = {
+  estado: 'Apagada',
+  modo: 'Sin transmisión',
+  programa_actual: 'Ninguno',
+  oyentes: 0
+};
+
+// 🔹 Endpoint para consultar estado inicial de la radio
+app.get('/api/estado_radio', (req, res) => {
+  res.json(estadoActualRadio);
+});
+
+// 🔹 Interceptor para sincronizar estado cuando se usa /api/control_radio
+app.use('/api/control_radio', (req, res, next) => {
+  if (req.method === 'POST' && req.body && req.body.accion) {
+    const accion = req.body.accion;
+    if (accion === 'encender') {
+      estadoActualRadio.estado = 'Encendida';
+    } else if (accion === 'apagar') {
+      estadoActualRadio.estado = 'Apagada';
+      estadoActualRadio.modo = 'Sin transmisión';
+      estadoActualRadio.programa_actual = 'Ninguno';
+    } else if (accion === 'musica') {
+      estadoActualRadio.estado = 'Encendida';
+      estadoActualRadio.modo = 'musica';
+      estadoActualRadio.programa_actual = 'Música';
+    } else if (accion === 'programa') {
+      estadoActualRadio.estado = 'Encendida';
+      estadoActualRadio.modo = 'programa';
+      estadoActualRadio.programa_actual = 'Programa en vivo';
+    }
+    const io = req.app.get('io');
+    if (io) io.emit('estadoRadio', estadoActualRadio);
+  }
+  next();
+}, require('./routes/control_radio'));
 
 // 🔹 Rutas API (académicas y generales)
 app.use('/api/usuarios', require('./routes/usuarios'));
@@ -58,7 +94,6 @@ app.use('/api/eventos_energia_sensores', require('./routes/eventos_energia_senso
 app.use('/api/aulas_medicion', require('./routes/aulas_medicion'));
 app.use('/api/sensores_medicion', require('./routes/sensores_medicion'));
 
-app.use('/api/control_radio', require('./routes/control_radio'));
 app.use('/api/programas_radio', require('./routes/programas_radio'));
 
 // NUEVA RUTA
@@ -93,15 +128,30 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor corriendo en http://0.0.0.0:${PORT}`);
 });
 
-// 🔹 Configuración de Socket.io para chat en tiempo real
+// 🔹 Configuración de Socket.io para chat y radio en tiempo real
 const { Server } = require('socket.io');
 const io = new Server(server, {
   cors: { origin: "*" }
 });
 
-// 🔹 Chat en tiempo real con políticas de rol
+app.set('io', io);
+
+// 🔹 Chat y estado en tiempo real con políticas de rol
 io.on('connection', (socket) => {
   console.log('Nuevo cliente conectado:', socket.id);
+
+  // Enviar estado actual y oyentes apenas se conecta
+  socket.emit('estadoRadio', estadoActualRadio);
+  socket.emit('oyentesActuales', estadoActualRadio.oyentes);
+
+  // Registrar oyente cuando entra al módulo de radio
+  socket.on('oyenteConectado', () => {
+    if (!socket.esOyenteRadio) {
+      socket.esOyenteRadio = true;
+      estadoActualRadio.oyentes++;
+      io.emit('oyentesActuales', estadoActualRadio.oyentes);
+    }
+  });
 
   // Mensajes del chat
   socket.on('nuevoMensaje', async (msg) => {
@@ -143,5 +193,9 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('Cliente desconectado:', socket.id);
+    if (socket.esOyenteRadio && estadoActualRadio.oyentes > 0) {
+      estadoActualRadio.oyentes--;
+      io.emit('oyentesActuales', estadoActualRadio.oyentes);
+    }
   });
 });
