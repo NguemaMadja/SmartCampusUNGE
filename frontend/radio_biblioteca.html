@@ -540,95 +540,152 @@ footer {
 
       <div class="modal-body">
 
-        <form id="formNuevoArchivo">
+        
 
-          <div class="mb-3">
+       <form
+  id="formNuevoArchivo"
+  enctype="multipart/form-data">
 
-            <label class="form-label">
+  <div class="mb-3">
 
-              Nombre del archivo
+    <label class="form-label">
 
-            </label>
+      Archivo Multimedia
 
-            <input
-              type="text"
-              class="form-control"
-              id="nombre_archivo"
-              required>
+    </label>
 
-          </div>
+    <input
+      type="file"
+      class="form-control"
+      id="archivo_multimedia"
+      accept=".mp3,.wav,.ogg"
+      required>
 
-          <div class="mb-3">
+    <small class="text-muted">
 
-            <label class="form-label">
+      Formatos permitidos:
+      MP3, WAV, OGG
 
-              Tipo
+    </small>
 
-            </label>
+  </div>
 
-            <select
-              class="form-select"
-              id="tipo_archivo"
-              required>
+  <div class="mb-3">
 
-              <option value="">Seleccione</option>
+    <label class="form-label">
 
-              <option value="musica">
-                Música
-              </option>
+      Tipo
 
-              <option value="programa">
-                Programa Grabado
-              </option>
+    </label>
 
-              <option value="anuncio">
-                Anuncio
-              </option>
+    <select
+      class="form-select"
+      id="tipo_archivo"
+      required>
 
-            </select>
+      <option value="">
 
-          </div>
+        Seleccione
 
-          <div class="mb-3">
+      </option>
 
-            <label class="form-label">
+      <option value="musica">
 
-              Categoría
+        Música
 
-            </label>
+      </option>
 
-            <input
-              type="text"
-              class="form-control"
-              id="categoria_archivo">
+      <option value="programa">
 
-          </div>
+        Programa Grabado
 
-          <div class="mb-3">
+      </option>
 
-            <label class="form-label">
+      <option value="anuncio">
 
-              Descripción
+        Anuncio
 
-            </label>
+      </option>
 
-            <textarea
-              class="form-control"
-              id="descripcion_archivo"
-              rows="3">
-            </textarea>
+    </select>
 
-          </div>
+  </div>
 
-          <button
-            type="submit"
-            class="btn btn-success">
+  <div class="mb-3">
 
-            Guardar Registro
+    <label class="form-label">
 
-          </button>
+      Categoría
 
-        </form>
+    </label>
+
+    <input
+      type="text"
+      class="form-control"
+      id="categoria_archivo">
+
+  </div>
+
+<input
+  type="text"
+  class="form-control"
+  id="categoria_archivo">
+
+</div>
+
+<div class="mb-3">
+
+  <label class="form-label">
+
+    Descripción
+
+  </label>
+
+  <textarea
+    class="form-control"
+    id="descripcion_archivo"
+    rows="3">
+
+  </textarea>
+
+</div>
+
+<div class="alert alert-secondary">
+
+  <strong>Destino automático:</strong>
+
+  <ul class="mb-0">
+
+    <li>
+      Música →
+      uploads/musica
+    </li>
+
+    <li>
+      Programas →
+      uploads/programas
+    </li>
+
+    <li>
+      Anuncios →
+      uploads/anuncios
+    </li>
+
+  </ul>
+
+</div>
+
+<button
+  type="submit"
+  class="btn btn-success">
+
+  <i class="bi bi-cloud-upload-fill"></i>
+
+  Subir Archivo
+
+</button>
+
+</form>
 
       </div>
 
@@ -1053,8 +1110,6 @@ function actualizarDashboard(datos) {
 
 }
 
-
-
 // ================================
 // FECHA
 // ================================
@@ -1066,8 +1121,6 @@ function formatearFecha(fecha) {
     ).toLocaleString('es-ES');
 
 }
-
-
 
 // ================================
 // PREVISUALIZAR
@@ -1103,86 +1156,136 @@ function escucharArchivo(item){
 
 }
 
-
-
 // ================================
-// ALTA
+// ALTA CON SUBIDA REAL
 // ================================
 
 document.getElementById(
     'formNuevoArchivo'
 ).addEventListener(
     'submit',
-    async (e)=>{
+    async (e) => {
 
         e.preventDefault();
 
-        await fetch(
+        try {
 
-            `${API_BASE}/api/radio_archivos`,
+            const archivo =
+            document.getElementById(
+                'archivo_multimedia'
+            ).files[0];
 
-            {
+            if (!archivo) {
 
-                method:'POST',
+                alert(
+                    'Seleccione un archivo'
+                );
 
-                headers:{
-                    'Content-Type':
-                    'application/json'
-                },
-
-                body:JSON.stringify({
-
-                    nombre_archivo:
-                    document.getElementById(
-                        'nombre_archivo'
-                    ).value,
-
-                    nombre_original:
-                    document.getElementById(
-                        'nombre_archivo'
-                    ).value,
-
-                    tipo:
-                    document.getElementById(
-                        'tipo_archivo'
-                    ).value,
-
-                    categoria:
-                    document.getElementById(
-                        'categoria_archivo'
-                    ).value,
-
-                    descripcion:
-                    document.getElementById(
-                        'descripcion_archivo'
-                    ).value,
-
-                    ruta_archivo:
-                    '/pendiente',
-
-                    usuario_subida:
-                    'Sistema'
-
-                })
+                return;
 
             }
 
-        );
+            const formData =
+            new FormData();
 
-        bootstrap.Modal
-        .getInstance(
+            formData.append(
+                'archivo',
+                archivo
+            );
+
+            formData.append(
+                'tipo',
+                document.getElementById(
+                    'tipo_archivo'
+                ).value
+            );
+
+            formData.append(
+                'categoria',
+                document.getElementById(
+                    'categoria_archivo'
+                ).value
+            );
+
+            formData.append(
+                'descripcion',
+                document.getElementById(
+                    'descripcion_archivo'
+                ).value
+            );
+
             document.getElementById(
-                'modalNuevoArchivo'
-            )
-        )
-        .hide();
+                'estadoBiblioteca'
+            ).innerHTML =
+            '⏳ Subiendo archivo...';
 
-        cargarArchivos();
+            const respuesta =
+            await fetch(
+
+                `${API_BASE}/api/radio_archivos/upload`,
+
+                {
+
+                    method: 'POST',
+
+                    body: formData
+
+                }
+
+            );
+
+            const resultado =
+            await respuesta.json();
+
+            if (!respuesta.ok) {
+
+                throw new Error(
+
+                    resultado.error ||
+                    'Error subiendo archivo'
+
+                );
+
+            }
+
+            document.getElementById(
+                'estadoBiblioteca'
+            ).innerHTML =
+            '✅ Archivo subido correctamente';
+
+            document.getElementById(
+                'formNuevoArchivo'
+            ).reset();
+
+            bootstrap.Modal
+            .getInstance(
+
+                document.getElementById(
+                    'modalNuevoArchivo'
+                )
+
+            )
+            .hide();
+
+            cargarArchivos();
+
+        }
+
+        catch (error) {
+
+            console.error(error);
+
+            document.getElementById(
+                'estadoBiblioteca'
+            ).innerHTML =
+
+            `❌ ${error.message}`;
+
+        }
 
     }
+
 );
-
-
 
 // ================================
 // EDITAR
@@ -1320,8 +1423,6 @@ async function eliminarArchivo(id){
     cargarArchivos();
 
 }
-
-
 
 // ================================
 // EMITIR
