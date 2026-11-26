@@ -6,8 +6,21 @@ require('dotenv').config();
 const sequelize = require('./db'); // conexión Sequelize
 
 const app = express();
+
 app.use(cors());
+
 app.use(express.json());
+
+// =====================================
+// ARCHIVOS MULTIMEDIA
+// =====================================
+
+app.use(
+  '/uploads',
+  express.static(
+    path.join(__dirname, '../uploads')
+  )
+);
 
 // 🔹 Conexión a BD
 sequelize.authenticate()
