@@ -188,7 +188,7 @@
       }
     }
 
-       // Cargar paradas (tabla + marcadores + polilínea por bus)
+         // Cargar paradas (tabla + marcadores + polilínea por calles reales)
     async function cargarParadas() {
       try {
         const res = await fetch(`${API_BASE}/api/paradas`);
@@ -224,7 +224,7 @@
 
               if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
                 if (!rutasPorBus[p.id_vehiculo]) rutasPorBus[p.id_vehiculo] = [];
-                rutasPorBus[p.id_vehiculo].push([lat, lng]);
+                rutasPorBus[p.id_vehiculo].push(L.latLng(lat, lng));
 
                 L.marker([lat, lng]).addTo(capaParadas)
                   .bindPopup(`Parada ${p.orden}: ${p.nombre_parada} – Bus ${p.id_vehiculo}`);
@@ -234,15 +234,36 @@
             }
           });
 
-        const colores = ['blue', 'green', 'red', 'orange', 'purple'];
-        Object.keys(rutasPorBus).forEach((busId, idx) => {
-          const coords = rutasPorBus[busId];
-          if (coords.length > 1) {
-            L.polyline(coords, { color: colores[idx % colores.length], weight: 4 }).addTo(capaParadas);
-          }
-        });
+        // Dibujar ruta real por calles para cada bus (OSRM)
+        const colores = ['#0d6efd', '#198754', '#dc3545', '#fd7e14', '#6f42c1'];
+        const busIds = Object.keys(rutasPorBus);
 
-              // Centrar automáticamente el mapa para mostrar todas las paradas
+        for (let idx = 0; idx < busIds.length; idx++) {
+          const busId = busIds[idx];
+          const puntos = rutasPorBus[busId];
+          const color = colores[idx % colores.length];
+
+          if (puntos.length > 1) {
+            try {
+              const waypoints = puntos.map(pt => `${pt.lng},${pt.lat}`).join(';');
+              const osrmUrl = `https://project-osrm.org{waypoints}?overview=full&geometries=geojson`;
+              const rutaRes = await fetch(osrmUrl);
+              const rutaData = await rutaRes.json();
+
+              if (rutaData.routes && rutaData.routes.length > 0) {
+                L.geoJSON(rutaData.routes.at(0).geometry, {
+                  style: { color: color, weight: 5, opacity: 0.85 }
+                }).addTo(capaParadas);
+              } else {
+                L.polyline(puntos, { color: color, weight: 4, dashArray: '6, 6' }).addTo(capaParadas);
+              }
+            } catch (e) {
+              L.polyline(puntos, { color: color, weight: 4 }).addTo(capaParadas);
+            }
+          }
+        }
+
+        // Centrar automáticamente el mapa para mostrar todas las paradas
         const marcadores = capaParadas.getLayers();
         if (marcadores.length > 0) {
           const grupo = L.featureGroup(marcadores);
@@ -252,6 +273,7 @@
         console.error("Error cargando paradas:", err);
       }
     }
+
 
 
     // Guardar o actualizar parada
@@ -306,9 +328,6 @@
       document.querySelector("#modalParada .modal-title").textContent = "Editar Parada";
       new bootstrap.Modal(document.getElementById("modalParada")).show();
     }
-
-
-  
 
     // Eliminar parada
     async function eliminarParada(id) {
