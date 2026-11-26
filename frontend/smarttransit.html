@@ -189,7 +189,7 @@
       }
     }
 
-    // Cargar paradas (tabla + marcadores + polilínea por bus)
+       // Cargar paradas (tabla + marcadores + polilínea por bus)
     async function cargarParadas() {
       try {
         const res = await fetch(`${API_BASE}/api/paradas`);
@@ -219,14 +219,18 @@
                 </td>
               </tr>`;
 
-            if (p.latitud && p.longitud) {
-              const lat = parseFloat(p.latitud);
-              const lng = parseFloat(p.longitud);
-              if (!isNaN(lat) && !isNaN(lng)) {
+            if (p.latitud !== null && p.latitud !== undefined && p.longitud !== null && p.longitud !== undefined) {
+              const lat = parseFloat(String(p.latitud).replace(',', '.').trim());
+              const lng = parseFloat(String(p.longitud).replace(',', '.').trim());
+
+              if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
                 if (!rutasPorBus[p.id_vehiculo]) rutasPorBus[p.id_vehiculo] = [];
                 rutasPorBus[p.id_vehiculo].push([lat, lng]);
+
                 L.marker([lat, lng]).addTo(capaParadas)
                   .bindPopup(`Parada ${p.orden}: ${p.nombre_parada} – Bus ${p.id_vehiculo}`);
+              } else {
+                console.warn(`Coordenadas inválidas en parada ID ${p.id_parada}:`, p.latitud, p.longitud);
               }
             }
           });
@@ -238,6 +242,13 @@
             L.polyline(coords, { color: colores[idx % colores.length], weight: 4 }).addTo(capaParadas);
           }
         });
+
+        // Centrar automáticamente el mapa para mostrar todas las paradas
+        const marcadores = capaParadas.getLayers();
+        if (marcadores.length > 0) {
+          const grupo = L.featureGroup(marcadores);
+          map.fitBounds(grupo.getBounds(), { padding:, maxZoom: 15 });
+        }
       } catch (err) {
         console.error("Error cargando paradas:", err);
       }
@@ -248,11 +259,21 @@
       e.preventDefault();
       if (restringido) return;
       const idParada = document.getElementById("idParada").value;
+      
+      // Normalizar comas y espacios antes de enviar a la base de datos
+      const latLimpia = parseFloat(document.getElementById("latitudParada").value.replace(',', '.').trim());
+      const lngLimpia = parseFloat(document.getElementById("longitudParada").value.replace(',', '.').trim());
+
+      if (isNaN(latLimpia) || isNaN(lngLimpia)) {
+        alert("Por favor, introduce una latitud y longitud numéricas válidas (ej. 3.7468 y 8.7752).");
+        return;
+      }
+
       const parada = {
         id_vehiculo: document.getElementById("idVehiculo").value,
-        nombre_parada: document.getElementById("nombreParada").value,
-        latitud: document.getElementById("latitudParada").value,
-        longitud: document.getElementById("longitudParada").value,
+        nombre_parada: document.getElementById("nombreParada").value.trim(),
+        latitud: latLimpia,
+        longitud: lngLimpia,
         orden: document.getElementById("ordenParada").value
       };
 
@@ -265,8 +286,11 @@
         body: JSON.stringify(parada)
       });
       await cargarParadas();
-      bootstrap.Modal.getInstance(document.getElementById("modalParada")).hide();
+      const modalEl = document.getElementById("modalParada");
+      const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+      modalInstance.hide();
     });
+
 
     // Editar parada
     async function editarParada(id) {
