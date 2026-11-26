@@ -100,8 +100,6 @@
       </div>
     </nav>
 
-
-  
     <header class="text-center mt-3">
       <h2>UNGE - Panel Principal</h2>
       <p>Administración y acceso a módulos según rol</p>
@@ -126,7 +124,6 @@
       </button>
     </div>
   </div>
-
 
   <footer>
     <p>TODOS LOS DERECHOS RESERVADOS © IoT A NUESTRO ALCANCE - UNGE 2026</p>
@@ -187,14 +184,18 @@
     document.getElementById("sidebar").classList.toggle("active");
   });
 
-  async function cargarPerfil() {
+   async function cargarPerfil() {
     const token = localStorage.getItem("token");
     try {
-      // Nota: Si tu backend usa /api/usuarios/perfil, cambia la ruta aquí abajo
-      const res = await fetch(`${baseURL}/usuarios/perfil`, {
+      const res = await fetch(`${baseURL}/api/usuarios/perfil`, {
         method: "GET",
         headers: { "Authorization": "Bearer " + token }
       });
+
+      if (!res.ok) {
+        throw new Error(`Error HTTP: ${res.status}`);
+      }
+
       const data = await res.json();
       if (data.usuario) {
         document.getElementById("userId").textContent = "ID: " + data.usuario.id;
@@ -210,6 +211,7 @@
       alert("Error de conexión con el servidor de autenticación");
     }
   }
+
 
   function aplicarFiltrosPorRol(rol) {
     // Función segura: solo oculta el elemento si realmente existe en el HTML
