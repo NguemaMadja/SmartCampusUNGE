@@ -104,45 +104,32 @@
 </head>
 <body>
 
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
-    <div class="container-fluid">
-      <a class="navbar-brand d-flex align-items-center" href="panel.html">
-        <img src="logo/LOGO-UNGE-1.png" alt="Logo UNGE" height="42" class="me-2">
-        <span class="fw-bold">SmartCampus UNGE</span>
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-        <ul class="navbar-nav d-flex gap-2">
-          <li class="nav-item">
-            <a href="panel.html" class="btn btn-gradient-green shadow-sm">
-              <i class="bi bi-speedometer2 me-1"></i> Volver al Panel
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="transporte.html" class="btn btn-gradient-orange shadow-sm">
-              <i class="bi bi-bus-front me-1"></i> Transporte
-            </a>
-          </li>
-        </ul>
-      </div>
+  <!-- Navbar con banda verde integrada (identidad SmartCampusUNGE) -->
+  <nav class="navbar navbar-dark px-3 shadow-sm" style="height: 60px; display: flex; align-items: center;">
+    <a class="navbar-brand d-flex align-items-center" href="panel.html">
+      <img src="logo/LOGO-UNGE-1.png" alt="Logo UNGE" class="img-fluid me-2" style="max-height: 45px;">
+      <span class="fw-bold">SmartCampusUNGE</span>
+    </a>
+    <div class="scroll-msg text-center rounded" style="background-color: #008000; color: #fff; font-weight: bold; padding: 5px; flex: 1; margin: 0 20px;">
+      <marquee behavior="scroll" direction="left" scrollamount="6">
+        Bienvenido al SmartCampus UNGE – Localiza edificios y traza rutas en tiempo real dentro del campus
+      </marquee>
     </div>
   </nav>
 
-  <!-- Header limpio -->
-  <header class="py-3 px-4 text-center border-bottom border-primary">
-    <h3 class="mb-1 fw-bold">Mapa Interactivo del Campus UNGE</h3>
-    <p class="mb-0 text-light opacity-75">Localiza edificios, aulas, facultades y traza rutas hacia tu destino</p>
+  <!-- Header centrado con los botones debajo (igual que en Radio) -->
+  <header class="text-center py-3 px-3">
+    <h2 class="fw-bold mb-1">Mapa Interactivo del Campus UNGE</h2>
+    <p class="mb-3 text-light opacity-75">Localiza edificios, aulas, facultades y traza rutas hacia tu destino</p>
+    <div class="d-flex justify-content-center flex-wrap gap-2">
+      <a href="panel.html" class="btn btn-gradient-green shadow-sm px-3 py-2">
+        <i class="bi bi-speedometer2 me-1"></i> Volver al Panel
+      </a>
+      <a href="transporte.html" class="btn btn-gradient-orange shadow-sm px-3 py-2">
+        <i class="bi bi-bus-front me-1"></i> Transporte
+      </a>
+    </div>
   </header>
-
-  <!-- Scroll message -->
-  <div class="scroll-msg text-center py-2">
-    <marquee behavior="scroll" direction="left" scrollamount="6">
-      Bienvenido al SmartCampus UNGE – Localiza edificios y traza rutas en tiempo real dentro del campus
-    </marquee>
-  </div>
 
   <!-- Main -->
   <main class="container my-4 flex-grow-1">
@@ -345,8 +332,8 @@
       if (btnAdd) btnAdd.style.display = "none";
     }
 
-    // ============================
-    // 📌 Cargar edificios
+       // ============================
+    // 📌 Cargar edificios con iconos personalizados
     // ============================
     async function cargarEdificios() {
       try {
@@ -354,6 +341,18 @@
         const edificios = (await res.json()).data;
         const tabla = document.getElementById("tablaEdificios");
         tabla.innerHTML = "";
+
+        // Crear icono personalizado de edificio
+        const iconoEdificio = L.divIcon({
+          className: 'custom-building-icon',
+          html: `<div style="background-color: #004080; color: white; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #ffffff; box-shadow: 0 3px 8px rgba(0,0,0,0.45);">
+                   <i class="bi bi-building-fill" style="font-size: 16px;"></i>
+                 </div>`,
+          iconSize:,
+          iconAnchor:,
+          popupAnchor: [0, -18]
+        });
+
         edificios.forEach(e => {
           tabla.innerHTML += `
             <tr>
@@ -368,8 +367,9 @@
                 ` : ''}
               </td>
             </tr>`;
-          const marker = L.marker([e.latitud, e.longitud]).addTo(map)
-            .bindPopup(`<b>${e.nombre_lugar}</b>`);
+
+          const marker = L.marker([e.latitud, e.longitud], { icon: iconoEdificio }).addTo(map)
+            .bindPopup(`<div class="text-dark"><strong><i class="bi bi-building text-primary me-1"></i>${e.nombre_lugar}</strong></div>`);
           markers[e.nombre_lugar.toLowerCase()] = { marker, data: e };
         });
       } catch (err) {
