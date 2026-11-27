@@ -282,7 +282,6 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 
   <script>
     // Inicializar mapa Leaflet
@@ -342,15 +341,15 @@
         const tabla = document.getElementById("tablaEdificios");
         tabla.innerHTML = "";
 
-        // Crear icono personalizado de edificio
+               // Crear icono personalizado de edificio
         const iconoEdificio = L.divIcon({
           className: 'custom-building-icon',
           html: `<div style="background-color: #004080; color: white; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #ffffff; box-shadow: 0 3px 8px rgba(0,0,0,0.45);">
                    <i class="bi bi-building-fill" style="font-size: 16px;"></i>
                  </div>`,
-          iconSize:,
-          iconAnchor:,
-          popupAnchor: [0, -18]
+          iconSize: new L.Point(34, 34),
+          iconAnchor: new L.Point(17, 17),
+          popupAnchor: new L.Point(0, -18)
         });
 
         edificios.forEach(e => {
