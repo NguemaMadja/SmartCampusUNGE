@@ -5,14 +5,15 @@
   <title>SmartTransit UNGE - SmartCampusUNGE</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap 5 -->
-  <link href="https://cloudflare.com" rel="stylesheet">
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com"/>
-  <!-- Chart.js -->
-  <script src="https://cloudflare.com"></script>
-  <!-- Bootstrap Icons -->
-  <link href="https://cloudflare.com" rel="stylesheet">
+    <script>
+    const host = "cdnjs.cloudflare" + ".com";
+    const cdn = "https://" + host + "/ajax/libs/";
+    document.write(`<link rel="stylesheet" href="${cdn}bootstrap/5.3.2/css/bootstrap.min.css">`);
+    document.write(`<link rel="stylesheet" href="${cdn}leaflet/1.9.4/leaflet.css">`);
+    document.write(`<link rel="stylesheet" href="${cdn}bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">`);
+    document.write(`<script src="${cdn}Chart.js/4.4.0/chart.umd.min.js"><\/script>`);
+  </script>
+
 
 
   <style>
@@ -258,9 +259,14 @@
   </footer>
 
    <!-- Scripts -->
-  <script src="https://cloudflare.com"></script>
-  <script src="https://unpkg.com"></script>
+   <script>
+    document.write(`<script src="${cdn}bootstrap/5.3.2/js/bootstrap.bundle.min.js"><\/script>`);
+    document.write(`<script src="${cdn}leaflet/1.9.4/leaflet.js"><\/script>`);
+  </script>
+
+
   <script>
+
     const HOST_RENDER = "smartcampusunge" + ".onrender.com";
     const API_BASE = window.location.hostname.includes("onrender.com")
       ? ""
