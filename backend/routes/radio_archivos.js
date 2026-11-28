@@ -69,14 +69,21 @@ const storage = multer.diskStorage({
 
   },
 
-  filename: (req, file, cb) => {
+ filename: (req, file, cb) => {
+
+    const nombreLimpio =
+    file.originalname
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9._-]/g, '_')
+        .replace(/_+/g, '_');
 
     const nombreArchivo =
-      `${Date.now()}-${file.originalname}`;
+    `${Date.now()}-${nombreLimpio}`;
 
     cb(null, nombreArchivo);
 
-  }
+}
 
 });
 
