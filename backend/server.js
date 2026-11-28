@@ -98,6 +98,7 @@ app.use('/api/programas_radio', require('./routes/programas_radio'));
 
 // NUEVA RUTA
 app.use('/api/radio_archivos', require('./routes/radio_archivos'));
+app.use('/api/radio_emisiones', require('./routes/radio_emisiones'));
 
 // 🔹 Nueva ruta para chat (REST)
 app.use('/api/mensajes_radio', require('./routes/mensajes_radio'));
