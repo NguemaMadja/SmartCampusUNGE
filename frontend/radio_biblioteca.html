@@ -1428,18 +1428,71 @@ async function eliminarArchivo(id){
 // EMITIR
 // ================================
 
-function emitirArchivo(id){
+  async function emitirArchivo(id){
 
-    alert(
+    try {
 
-      `Función Emitir preparada.\n\nID Archivo: ${id}\n\nMañana la conectaremos con Raspberry.`
+        const respuesta =
+        await fetch(
 
-    );
+            `${API_BASE}/api/radio_emisiones`,
+
+            {
+
+                method:'POST',
+
+                headers:{
+                    'Content-Type':
+                    'application/json'
+                },
+
+                body:JSON.stringify({
+
+                    id_archivo:id
+
+                })
+
+            }
+
+        );
+
+        const resultado =
+        await respuesta.json();
+
+        if(!respuesta.ok){
+
+            throw new Error(
+
+                resultado.error ||
+                'Error registrando emisión'
+
+            );
+
+        }
+
+        document.getElementById(
+            'estadoBiblioteca'
+        ).innerHTML =
+
+        `📻 Solicitud de emisión enviada (ID ${id})`;
+
+        alert(
+            'Solicitud de emisión enviada correctamente'
+        );
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        alert(
+            'Error enviando solicitud de emisión'
+        );
+
+    }
 
 }
-
-
-
 // ================================
 // BOTONERA
 // ================================
